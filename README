@@ -1,0 +1,6 @@
+This package contains analysis code for the R&D TPCs being built at
+UCLA by Alden Fan and Yixiong Meng. Executables are generated with
+the Makefile simply via 'make'. As of 2014-01-21, there are two
+executables: tpcanalysis and eventviewer. 
+
+I will continue adding details to this README file as the code develops.
