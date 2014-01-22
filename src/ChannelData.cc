@@ -25,9 +25,11 @@ TGraph* ChannelData::GetTGraph() const
     
   TGraph* graph = new TGraph(nsamps, &x[0], &y[0]);
   char name[30];
-  sprintf(name, "event%i_ch%i", event_id, channel_id);
+  sprintf(name, "e%ich%i", event_id, channel_id);
   graph->SetName(name);
   graph->SetTitle(name);
+  graph->GetXaxis()->SetTitle("time [us]");
+  graph->GetYaxis()->SetTitle("amp [counts]");
   return graph;
 }
 

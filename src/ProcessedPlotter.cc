@@ -1,5 +1,4 @@
 #include "ProcessedPlotter.hh"
-
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TGraph.h"
@@ -13,15 +12,17 @@ int ncolors = sizeof(colors)/sizeof(int);
 
 ProcessedPlotter::ProcessedPlotter():
   module_name("ProcessedPlotter"),
-  _canvas(0)
+  _canvas(0),
+  _graphix(0)
 { }
 
-void ProcessedPlotter::Initialize(CfgReader cfg, TCanvas* canvas)
+void ProcessedPlotter::Initialize(CfgReader cfg, TCanvas* canvas, RootGraphix* graphix)
 {
   enabled = cfg.getParam<bool>(module_name, "enabled", 0);
   chans_per_pad = cfg.getParam<int>(module_name, "chans_per_pad", 1);
-
+  //darkart::LockGuard glock = gr->AcquireLock();
   _canvas = canvas;
+  _graphix = graphix;
 }
 
 
@@ -29,7 +30,8 @@ int ProcessedPlotter::Process(EventData* event)
 {
   if (!enabled)
     return 1;
-  
+  //darkart::LockGuard glock = gr->AcquireLock();
+  RootGraphix::Lock glock = _graphix->AcquireLock();
   _canvas->Clear();
   char title[30];
   sprintf(title, "Run %d - Event %d", event->run_id, event->event_id);

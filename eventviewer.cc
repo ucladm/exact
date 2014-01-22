@@ -29,6 +29,7 @@
 #include "TBranch.h"
 #include "TSystem.h"
 #include "TTimer.h"
+#include "TRootCanvas.h"
 
 #include "DAQheader.hh"
 #include "CfgReader.hh"
@@ -38,6 +39,8 @@
 #include "Converter.hh"
 #include "BaselineFinder.hh"
 #include "ProcessedPlotter.hh"
+//#include "RootGraphics.hh"
+#include "RootGraphix.hh"
 
 #include <string>
 
@@ -65,14 +68,69 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   // --------- INSTANTIATE AND INITIALIZE ALL MODULES ------------  
   Converter converter;
   //BaselineFinder baselineFinder("BaselineFinder");
+  //darkart::RootGraphics* gr = new darkart::RootGraphics();
+  RootGraphix* graphix = new RootGraphix;
   ProcessedPlotter plotter;
 
-  converter.Initialize(cfg);
+  converter.Initialize(cfg); 
   //baselineFinder.Initialize(cfg);
-  plotter.Initialize(cfg, c);
+
+  graphix->Initialize();
+  plotter.Initialize(cfg, c, graphix);
+
+  /*
+  c = graphix->GetCanvas();
+  RootGraphix::Lock glock = graphix->AcquireLock();
+  c->Divide(2,2);
+  c->cd(1);
+  
+  std::string test;
+  std::cin >> test;
+  */
+  
+  
+
+  int evt = 1;
+  std::string line;
+  while (line!="q") {
+    
+    event->Clear();
+    event->run_id = 0;
+    event->event_id = evt;
+
+    // Run all the modules
+    converter.Process(event, DAQ_header);
+    //baselineFinder.Process(event);
+    plotter.Process(event);
+    gPad->Modified();
+    gPad->Update();
 
 
+    // Decide what to do next
+    cout << "Enter option: " << endl
+         << "  <enter> for next event" << endl
+         << "  b for prev event" << endl
+         << "  # for event_id #" << endl
+         << "  q to quit" << endl;
+    
+    getline(std::cin, line);
 
+    // read and interpret command line input
+    if (line=="")
+      evt++;
+    else if (line=="b")
+      evt--;
+    else if (line=="q"||line=="Q")
+      break;
+    else
+      evt = atoi(line.c_str());
+
+  }
+
+
+  
+  
+  /*
   // ------------ PLOT AN EVENT WITH SOME ANALYSIS ---------------
   int evt = 1;
   // Use of TTimer allows TApplication to respond to mouse clicks while
@@ -117,7 +175,8 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
 
     timer->TurnOff();      
   }
-
+  */
+  graphix->Finalize();
   if (c) delete c;
   return 1;
 }

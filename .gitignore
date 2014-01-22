@@ -4,3 +4,5 @@
 *.old
 *.so
 *.orig
+libDict.cxx
+libDict.h

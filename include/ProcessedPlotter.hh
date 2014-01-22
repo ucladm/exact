@@ -14,6 +14,7 @@
 
 #include "EventData.hh"
 #include "CfgReader.hh"
+#include "RootGraphix.hh"
 #include <string>
 #include <iostream>
 
@@ -25,7 +26,7 @@ class ProcessedPlotter
 {
 public:
   ProcessedPlotter();
-  void Initialize(CfgReader cfg, TCanvas* canvas);
+  void Initialize(CfgReader cfg, TCanvas* canvas, RootGraphix* graphix);
   int Process(EventData* event);
   void Finalize();
   
@@ -40,6 +41,8 @@ private:
   
   TCanvas* _canvas;
   std::vector<TLegend*> _legends;
+
+  RootGraphix* _graphix;
 
 };
 
