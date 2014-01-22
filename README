@@ -4,3 +4,36 @@ the Makefile simply via 'make'. As of 2014-01-21, there are two
 executables: tpcanalysis and eventviewer. 
 
 I will continue adding details to this README file as the code develops.
+
+
+************************************************************************
+**                        GETTING STARTED                             **
+************************************************************************
+Instructions for getting set up to edit and run the UCLA-DM TPC analysis 
+code.
+
+0. Make sure git is available on your machine. PS: It's REALLY easy to 
+install on a Mac.
+
+1. If you don't have one already, make an account at github.com. Don't 
+worry about actually making a github repository. You just need the 
+account to be able to push to the official repository, which is hosted 
+on github. 
+
+2. Once you have an account, let me (Alden) know your username and I'll 
+add you as a collaborator. 
+
+3. On the machine where you will be working, set a couple git config 
+parameters:
+	git config --global user.name "Your Name"
+	git config --global user.email username@email.com
+NOTE: the email MUST be the same one that you used in step 1. As far as 
+github is concerned, your email is your identity. 
+
+4. Checkout the repository. This will create a directory called "exact". 
+Make sure there isn't already something by that name in the directory 
+where you invoke this step:
+	git clone https://github.com/ucladm/exact.git
+
+
+All set!
