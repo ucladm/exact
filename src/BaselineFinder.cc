@@ -1,20 +1,10 @@
 #include "BaselineFinder.hh"
-#include "ChannelData.hh"
 #include <cmath>
 #include <vector>
 
 
 using namespace std;
 
-/*
-BaselineFinder::BaselineFinder():
-  module_name("BaselineFinder")
-{ }
-
-BaselineFinder::BaselineFinder(std::string module_label):
-  module_name(module_label)
-{ }
-*/
 
 BaselineFinder::BaselineFinder(CfgReader const& cfg):
   module_name("BaselineFinder"),
@@ -40,9 +30,7 @@ int BaselineFinder::Process(EventData* event)
 
   // Loop over channels
   for (int idx = 0; idx<event->nchans; ++idx) {
-    ChannelData & chData = event->channels[idx];
-    
-    vector<double> const& raw = chData.raw_waveform;
+    vector<double> const& raw = event->raw_waveform[idx];
     double sum = 0;
     double var = 0;
     int start_samp = event->TimeToSample(_start_time);
@@ -52,18 +40,18 @@ int BaselineFinder::Process(EventData* event)
       var += raw[i]*raw[i];
     }
 
-    chData.baseline_mean = sum / (end_samp - start_samp);
-    chData.baseline_sigma = sqrt(var / (end_samp - start_samp));
+    event->baseline_mean.push_back(sum / (end_samp - start_samp));
+    event->baseline_sigma.push_back(sqrt(var / (end_samp - start_samp)));
 
-    if (chData.baseline_sigma < _threshold) {
-      chData.baseline_valid = true;
+    if (event->baseline_sigma[idx] < _threshold) {
+      event->baseline_valid.push_back(true);
 
       // compute the baseline-subtracted and inverted waveform
       vector<double> bs_wfm;
       bs_wfm.reserve(raw.size());
       for (size_t i=0; i<raw.size(); ++i)
-        bs_wfm.push_back( -(raw[i] - chData.baseline_mean) );
-      chData.baseline_subtracted_waveform = bs_wfm;
+        bs_wfm.push_back( -(raw[i] - event->baseline_mean[idx]) );
+      event->baseline_subtracted_waveform.push_back(bs_wfm);
     }
 
     

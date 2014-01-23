@@ -30,17 +30,13 @@ int ProcessedPlotter::Process(EventData* event)
 {
   if (!_enabled)
     return 1;
-  //darkart::LockGuard glock = gr->AcquireLock();
   RootGraphix::Lock glock = _graphix->AcquireLock();
   _canvas->Clear();
   char title[30];
   sprintf(title, "Run %d - Event %d", event->run_id, event->event_id);
   _canvas->SetTitle(title);
 
-  int nchans = event->channels.size();
-  std::vector<ChannelData*> chans_to_draw;
-  for( size_t ch = 0; ch < event->channels.size(); ch++)
-    chans_to_draw.push_back(&(event->channels[ch]));
+  int nchans = event->nchans;
 
   int cpp = _chans_per_pad;
   if(cpp < 1)
@@ -69,7 +65,7 @@ int ProcessedPlotter::Process(EventData* event)
   for (int pad=0; pad<total_pads; pad++) {
     _canvas->cd( (total_pads == 1 ? 0 : pad+1 ) );
     if( cpp == 1 || nchans == 1 )
-      chans_to_draw[pad]->Draw();
+      event->DrawChannel(pad);
   }
 
   _canvas->cd(0);

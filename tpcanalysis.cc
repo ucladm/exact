@@ -33,7 +33,6 @@
 #include "DAQheader.hh"
 #include "CfgReader.hh"
 #include "EventData.hh"
-#include "ChannelData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
 #include "Integrator.hh"
@@ -63,9 +62,19 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   // Instantiate EventData; will repopulate this object for each
   // event. Create a branch to hold all event data.
   EventData* event = new EventData();
-  tree->Branch("EventData", "EventData", &event);
-
-
+  //tree->Branch("EventData", "EventData", &event);
+  tree->Branch("run_id", &(event->run_id));
+  tree->Branch("event_id", &(event->event_id));
+  tree->Branch("nchans", &(event->nchans));
+  tree->Branch("nsamps", &(event->nsamps));
+  tree->Branch("us_per_samp", &(event->us_per_samp));
+  tree->Branch("trigger_index", &(event->trigger_index));
+  tree->Branch("channel_id", &(event->channel_id));
+  tree->Branch("spe_mean", &(event->spe_mean));
+  tree->Branch("baseline_mean", &(event->baseline_mean));
+  tree->Branch("baseline_sigma", &(event->baseline_sigma));
+  tree->Branch("baseline_valid", &(event->baseline_valid));
+  
   
   // ------------------ INSTANTIATE ALL MODULES -------------------
   Converter converter(cfg);
@@ -91,8 +100,6 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
     converter.Process(event, DAQ_header);
     baselineFinder.Process(event);
     integrator.Process(event);
-
-
 
     
     tree->Fill();

@@ -2,6 +2,7 @@
 
 #include "ChannelData.hh"
 #include <iostream>
+#include <map>
 
 Converter::Converter(CfgReader const& cfg):
   module_name("Converter"),
@@ -30,6 +31,7 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
   // Fill some channel-level info, including instantiating the
   // ChannelData objects
   for (int i=0; i<DAQ_header.getNchans(); ++i) {
+    /*
     ChannelData chData;
     chData.event_id = event->event_id;
     chData.channel_id = DAQ_header.WorkingChannelNbr.at(i);
@@ -37,6 +39,13 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
     chData.trigger_index = event->trigger_index;
     chData.us_per_samp = event->us_per_samp;
     event->channels.push_back(chData);
+    */
+
+    event->channel_id.push_back(DAQ_header.WorkingChannelNbr.at(i));
+    event->channel_index.insert( std::pair<int, int>(event->channel_id[i], i) );
+    event->spe_mean.push_back(1);
+    event->raw_waveform.push_back(DAQ_header.ReadSingleChannel(event->event_id, event->channel_id[i]));
+    
   }
   
   return 1;

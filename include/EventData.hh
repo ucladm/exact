@@ -12,10 +12,12 @@
 #define EventData_hh
 
 #include "Rtypes.h" // has the ClassDef macros
-
-#include "ChannelData.hh"
 #include <vector>
+#include <map>
 
+using namespace std;
+
+class TGraph;
 
 class EventData
 {
@@ -30,7 +32,14 @@ public:
     nsamps = -1;
     us_per_samp = -1.0;
     trigger_index = -1;
-    channels.clear();
+    //channels.clear();
+    channel_id.clear();
+    channel_index.clear();
+    spe_mean.clear();
+    raw_waveform.clear();
+    baseline_mean.clear();
+    baseline_sigma.clear();
+    baseline_valid.clear();
   }
 
   // all the data for a single event  
@@ -40,13 +49,27 @@ public:
   int nsamps;
   double us_per_samp;
   int trigger_index;
-  std::vector<ChannelData> channels;
+
+
+  vector<int> channel_id;
+  map<int, int> channel_index;
+  vector<double> spe_mean;
+  vector< vector<double> > raw_waveform;
+  vector<double> baseline_mean;
+  vector<double> baseline_sigma;
+  vector<bool> baseline_valid;
+  vector< vector<double> > baseline_subtracted_waveform;
+  vector< vector<double> > integral;
+  
 
 
   double SampleToTime(int samp) const;
   int TimeToSample(double time, bool checkrange=true) const;
 
+  void DrawChannel(int ch);
 
+private:
+  TGraph* GetTGraph(int ch);
   
   ClassDef(EventData, 1)
 };

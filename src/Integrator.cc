@@ -13,12 +13,11 @@ int Integrator::Process(EventData* event)
 
   // Loop over channels
   for (int idx = 0; idx<event->nchans; ++idx) {
-    ChannelData& chData = event->channels[idx];
 
-    if (!chData.baseline_valid)
+    if (!event->baseline_valid[idx])
       return 1;
     
-    vector<double> const& bs_wfm = chData.baseline_subtracted_waveform;
+    vector<double> const& bs_wfm = event->baseline_subtracted_waveform[idx];
 
 
     
@@ -37,7 +36,7 @@ int Integrator::Process(EventData* event)
     }
 
     
-    chData.integral = integral;
+    event->integral.push_back(integral);
     
   } // end loop over channels
 
