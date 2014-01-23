@@ -1,6 +1,5 @@
 #include "Converter.hh"
 
-#include "ChannelData.hh"
 #include <iostream>
 #include <map>
 
@@ -22,25 +21,14 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
   }
   
 
-  // Fill some event-level info
+  // Fill event-level info
   event->nchans = DAQ_header.getNchans();
   event->nsamps = DAQ_header.getTotSampleNbr();
   event->us_per_samp = DAQ_header.getTimeInterval_us();
   event->trigger_index = DAQ_header.getTriggerIndex();
 
-  // Fill some channel-level info, including instantiating the
-  // ChannelData objects
+  // Fill channel-level info
   for (int i=0; i<DAQ_header.getNchans(); ++i) {
-    /*
-    ChannelData chData;
-    chData.event_id = event->event_id;
-    chData.channel_id = DAQ_header.WorkingChannelNbr.at(i);
-    chData.raw_waveform = DAQ_header.ReadSingleChannel(event->event_id, chData.channel_id);
-    chData.trigger_index = event->trigger_index;
-    chData.us_per_samp = event->us_per_samp;
-    event->channels.push_back(chData);
-    */
-
     event->channel_id.push_back(DAQ_header.WorkingChannelNbr.at(i));
     event->channel_index.insert( std::pair<int, int>(event->channel_id[i], i) );
     event->spe_mean.push_back(1);

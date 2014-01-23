@@ -32,7 +32,6 @@ public:
     nsamps = -1;
     us_per_samp = -1.0;
     trigger_index = -1;
-    //channels.clear();
     channel_id.clear();
     channel_index.clear();
     spe_mean.clear();
@@ -40,6 +39,9 @@ public:
     baseline_mean.clear();
     baseline_sigma.clear();
     baseline_valid.clear();
+    baseline_subtracted_waveform.clear();
+    integral.clear();
+    
   }
 
   // all the data for a single event  

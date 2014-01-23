@@ -16,7 +16,5 @@
 using namespace std;
 
 #ifdef __MAKECINT__
-#pragma link C++ class ChannelData+;
-#pragma link C++ class vector<ChannelData>+;
 #pragma link C++ class EventData+;
 #endif

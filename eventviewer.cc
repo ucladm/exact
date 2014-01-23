@@ -36,7 +36,6 @@
 #include "DAQheader.hh"
 #include "CfgReader.hh"
 #include "EventData.hh"
-#include "ChannelData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
 #include "ProcessedPlotter.hh"
