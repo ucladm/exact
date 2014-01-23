@@ -3,18 +3,15 @@
 #include "ChannelData.hh"
 #include <iostream>
 
-Converter::Converter():
-  module_name("Converter")
+Converter::Converter(CfgReader const& cfg):
+  module_name("Converter"),
+  _enabled(cfg.getParam<bool>(module_name, "enabled", true))
 { }
 
-void Converter::Initialize(CfgReader cfg)
-{
-  enabled = cfg.getParam<bool>(module_name, "enabled", true);
-}
 
 int Converter::Process(EventData* event, DAQheader & DAQ_header)
 {
-  if (!enabled)
+  if (!_enabled)
     return 0;
   
   // Event ID should already be set

@@ -47,8 +47,8 @@ public:
   double baseline_mean;
   double baseline_sigma;
   bool baseline_valid;
-  vector<double> baseline_subtracted_waveform;
-  vector<double> integral;
+  vector<double> baseline_subtracted_waveform; //! 
+  vector<double> integral; //! 
   
 
   ClassDef(ChannelData, 1)

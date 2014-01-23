@@ -10,17 +10,17 @@ int colors[] = {kBlack, kRed, kGreen, kCyan, kBlue, kMagenta, kYellow, kGray+2,
 		kOrange-3, kGreen+3, kCyan+3, kMagenta-5, kRed-2};
 int ncolors = sizeof(colors)/sizeof(int);
 
-ProcessedPlotter::ProcessedPlotter():
+ProcessedPlotter::ProcessedPlotter(CfgReader const& cfg):
   module_name("ProcessedPlotter"),
-  _canvas(0),
-  _graphix(0)
+  _enabled(cfg.getParam<bool>(module_name, "enabled", 0)),
+  _chans_per_pad(cfg.getParam<int>(module_name, "chans_per_pad", 1)),
+  _graphix(0),
+  _canvas(0)
+
 { }
 
-void ProcessedPlotter::Initialize(CfgReader cfg, TCanvas* canvas, RootGraphix* graphix)
+void ProcessedPlotter::Initialize(TCanvas* canvas, RootGraphix* graphix)
 {
-  enabled = cfg.getParam<bool>(module_name, "enabled", 0);
-  chans_per_pad = cfg.getParam<int>(module_name, "chans_per_pad", 1);
-  //darkart::LockGuard glock = gr->AcquireLock();
   _canvas = canvas;
   _graphix = graphix;
 }
@@ -28,7 +28,7 @@ void ProcessedPlotter::Initialize(CfgReader cfg, TCanvas* canvas, RootGraphix* g
 
 int ProcessedPlotter::Process(EventData* event)
 {
-  if (!enabled)
+  if (!_enabled)
     return 1;
   //darkart::LockGuard glock = gr->AcquireLock();
   RootGraphix::Lock glock = _graphix->AcquireLock();
@@ -42,7 +42,7 @@ int ProcessedPlotter::Process(EventData* event)
   for( size_t ch = 0; ch < event->channels.size(); ch++)
     chans_to_draw.push_back(&(event->channels[ch]));
 
-  int cpp = chans_per_pad;
+  int cpp = _chans_per_pad;
   if(cpp < 1)
     cpp = (nchans > 0 ? nchans : 1);
   int total_pads = (nchans+cpp-1)/cpp;

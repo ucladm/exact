@@ -25,24 +25,24 @@ class TLegend;
 class ProcessedPlotter
 {
 public:
-  ProcessedPlotter();
-  void Initialize(CfgReader cfg, TCanvas* canvas, RootGraphix* graphix);
+  ProcessedPlotter(CfgReader const& cfg);
+  void Initialize(TCanvas* canvas, RootGraphix* graphix);
   int Process(EventData* event);
   void Finalize();
   
   const TCanvas* GetCanvas() { return _canvas; }
 
-  int chans_per_pad;
+  std::string module_name;  
 
 private:
-  std::string module_name;
-  bool enabled;
 
-  
+  bool _enabled;
+  int _chans_per_pad;
+  RootGraphix* _graphix;
   TCanvas* _canvas;
   std::vector<TLegend*> _legends;
 
-  RootGraphix* _graphix;
+
 
 };
 

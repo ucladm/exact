@@ -39,14 +39,14 @@ public:
   Type getParam(string moduleName,
                 string paramName,
                 Type defValue,
-                bool useDefValue);
+                bool useDefValue) const;
 
   
 private:
 
   // convert string to whatever specified type
   template <typename ValueType>
-  ValueType string_to_Type(string name);
+  ValueType string_to_Type(string name) const;
 
 
 };
@@ -55,7 +55,7 @@ private:
 // templated functions must be defined in header
 
 template <typename ValueType> inline
-ValueType CfgReader::string_to_Type(string name)
+ValueType CfgReader::string_to_Type(string name) const
 {
   istringstream input(name);
   ValueType returnVal;
@@ -69,7 +69,7 @@ template <typename Type> inline
 Type CfgReader::getParam(string moduleName,
                          string paramName,
                          Type defValue,
-                         bool useDefValue=false)
+                         bool useDefValue=false) const
 {
   if (!cfgIsInit) {
     cout << "ERROR: CfgReader not initialized!!!" << endl;

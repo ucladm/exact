@@ -18,17 +18,18 @@
 class BaselineFinder
 {
 public:
-  BaselineFinder();
-  BaselineFinder(std::string module_label);
+  //BaselineFinder();
+  //BaselineFinder(std::string module_label);
+  BaselineFinder(CfgReader const& cfg);
   void Initialize(CfgReader cfg);
   int Process(EventData* event);
 
   std::string module_name;
-  bool enabled;
+
 
 
 private:
-  
+  bool   _enabled;  
   double _start_time;
   double _end_time;
   double _threshold;

@@ -33,7 +33,6 @@
 #include "DAQheader.hh"
 #include "CfgReader.hh"
 #include "EventData.hh"
-#include "testAnalysis.hh"
 #include "ChannelData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
@@ -57,7 +56,7 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
 
   // Create TTree to hold all processd info and open a file
   // to hold the TTree.
-  TTree* tree = new TTree("Events", "Event Data");
+  TTree* tree = new TTree("Events", "EventData");
   TFile* rootfile = new TFile("output.root", "RECREATE");
 
 
@@ -67,14 +66,14 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   tree->Branch("EventData", "EventData", &event);
 
 
-  // --------- INSTANTIATE AND INITIALIZE ALL MODULES ------------
-  Converter converter;
-  BaselineFinder baselineFinder("BaselineFinder");
-  Integrator integrator;
   
-  converter.Initialize(cfg);
-  baselineFinder.Initialize(cfg);
-  integrator.Initialize(cfg);
+  // ------------------ INSTANTIATE ALL MODULES -------------------
+  Converter converter(cfg);
+  BaselineFinder baselineFinder(cfg);
+  Integrator integrator(cfg);
+
+  //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
+
   
   // -------------------- LOOP OVER EVENTS ------------------------
   int min_evt = cfg.getParam<int>("tpcanalysis", "min", 1);
@@ -92,6 +91,9 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
     converter.Process(event, DAQ_header);
     baselineFinder.Process(event);
     integrator.Process(event);
+
+
+
     
     tree->Fill();
     
@@ -102,7 +104,8 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
 
 
   // write TTree to file
-  rootfile->Write();
+  tree->Write();
+  rootfile->Close();
 
   return 1;
 }
@@ -142,34 +145,6 @@ int main(int args, char* argv[]) {
 
   
   ProcessEvents(DAQ_header, argv[1]);
-
-
-  double b = 2.;
-  cout << b << " ";
-  analysis::testFunc(b);
-
-
-  
-  
-  /*
-  TCanvas* c1 = new TCanvas("c1","c1");
-  myTH1F->Draw();
-
-  while (true) {
-    
-    theApp->Run(kTRUE);
-    theApp->Delete();
-    char option;
-    cout << "enter q" << endl;
-    cin >> option;
-    
-    break;
-    
-  }
-  //theApp->Run();
-  */
-
-  
   
   return 1;
 }

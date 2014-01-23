@@ -1,17 +1,14 @@
 #include "Integrator.hh"
 
-Integrator::Integrator():
-  module_name("Integrator")
+Integrator::Integrator(CfgReader const& cfg):
+  module_name("Integrator"),
+  _enabled(cfg.getParam<bool>(module_name, "enabled", true))
 { }
 
-void Integrator::Initialize(CfgReader cfg)
-{
-  enabled = cfg.getParam<bool>(module_name, "enabled", true);
-}
 
 int Integrator::Process(EventData* event)
 {
-  if (!enabled)
+  if (!_enabled)
     return 0;
 
   // Loop over channels

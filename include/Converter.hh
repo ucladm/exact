@@ -19,13 +19,15 @@
 class Converter
 {
 public:
-  Converter();
-  void Initialize(CfgReader cfg);
+  Converter(CfgReader const& cfg);
+  //void Initialize(); // Add the Initialize function only if necessary.
   int Process(EventData* event, DAQheader & DAQ_header);
 
 
   std::string module_name;
-  bool enabled;
+
+private:
+  bool _enabled;
   
 };
 

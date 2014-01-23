@@ -6,6 +6,7 @@
 
 using namespace std;
 
+/*
 BaselineFinder::BaselineFinder():
   module_name("BaselineFinder")
 { }
@@ -13,10 +14,19 @@ BaselineFinder::BaselineFinder():
 BaselineFinder::BaselineFinder(std::string module_label):
   module_name(module_label)
 { }
+*/
+
+BaselineFinder::BaselineFinder(CfgReader const& cfg):
+  module_name("BaselineFinder"),
+  _enabled(cfg.getParam<bool>(module_name, "enabled", true)),
+  _start_time(cfg.getParam<double>(module_name, "start_time", -0.1)),
+  _end_time(cfg.getParam<double>(module_name, "end_time", 0.0)),
+  _threshold(cfg.getParam<double>(module_name, "threshold", 1.0))
+{ }
 
 void BaselineFinder::Initialize(CfgReader cfg)
 {
-  enabled = cfg.getParam<bool>(module_name, "enabled", true);
+  _enabled = cfg.getParam<bool>(module_name, "enabled", true);
   _start_time = cfg.getParam<double>(module_name, "start_time", -0.1);
   _end_time = cfg.getParam<double>(module_name, "end_time", 0.0);
   _threshold = cfg.getParam<double>(module_name, "threshold", 1.0);
@@ -24,7 +34,7 @@ void BaselineFinder::Initialize(CfgReader cfg)
 
 int BaselineFinder::Process(EventData* event)
 {
-  if (!enabled)
+  if (!_enabled)
     return 0;
 
 

@@ -17,12 +17,14 @@
 class Integrator
 {
 public:
-  Integrator();
-  void Initialize(CfgReader cfg);
+  Integrator(CfgReader const& cfg);
+  //void Initialize(); //Add an Initialize function only if necessary.
   int Process(EventData* event);
 
   std::string module_name;
-  bool enabled;
+
+private:
+  bool _enabled;
 
 };
 

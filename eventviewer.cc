@@ -12,6 +12,8 @@
   v0.2 AFan 2013-08-17
     - TApplication works as expected now:
     - GUI is responsive, cmd line entry works, event stepping works
+  v0.3 AFan 2014-01-21
+    - Better event viewer. Uses multithreading.
 
  */
 
@@ -34,12 +36,10 @@
 #include "DAQheader.hh"
 #include "CfgReader.hh"
 #include "EventData.hh"
-#include "testAnalysis.hh"
 #include "ChannelData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
 #include "ProcessedPlotter.hh"
-//#include "RootGraphics.hh"
 #include "RootGraphix.hh"
 
 #include <string>
@@ -65,31 +65,19 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   TCanvas* c = new TCanvas("c", "c");
 
   
-  // --------- INSTANTIATE AND INITIALIZE ALL MODULES ------------  
-  Converter converter;
-  //BaselineFinder baselineFinder("BaselineFinder");
-  //darkart::RootGraphics* gr = new darkart::RootGraphics();
+  //------------------- INSTANTIATE ALL MODULES -------------------
+  Converter converter(cfg);
+  //BaselineFinder baselineFinder(cfg);
+  ProcessedPlotter plotter(cfg);
+
+
+  //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
   RootGraphix* graphix = new RootGraphix;
-  ProcessedPlotter plotter;
-
-  converter.Initialize(cfg); 
-  //baselineFinder.Initialize(cfg);
-
   graphix->Initialize();
-  plotter.Initialize(cfg, c, graphix);
-
-  /*
-  c = graphix->GetCanvas();
-  RootGraphix::Lock glock = graphix->AcquireLock();
-  c->Divide(2,2);
-  c->cd(1);
-  
-  std::string test;
-  std::cin >> test;
-  */
+  plotter.Initialize(c, graphix);
   
   
-
+  //---------------------- DRAW AN EVENT --------------------------
   int evt = 1;
   std::string line;
   while (line!="q") {
@@ -129,53 +117,6 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
 
 
   
-  
-  /*
-  // ------------ PLOT AN EVENT WITH SOME ANALYSIS ---------------
-  int evt = 1;
-  // Use of TTimer allows TApplication to respond to mouse clicks while
-  // code continues running.
-  TTimer* timer = new TTimer("gSystem->ProcessEvents();", 50, kFALSE);  
-  std::string line;
-  while (line!="q") {
-    
-    timer->TurnOn();
-    timer->Reset();
-
-    event->Clear();
-    event->run_id = 0;
-    event->event_id = evt;
-
-    // Run all the modules
-    converter.Process(event, DAQ_header);
-    //baselineFinder.Process(event);
-    plotter.Process(event);
-    gPad->Modified();
-    gPad->Update();
-
-
-    // Decide what to do next
-    cout << "Enter option: " << endl
-         << "  <enter> for next event" << endl
-         << "  b for prev event" << endl
-         << "  # for event_id #" << endl
-         << "  q to quit" << endl;
-    
-    getline(std::cin, line);
-
-    // read and interpret command line input
-    if (line=="")
-      evt++;
-    else if (line=="b")
-      evt--;
-    else if (line=="q"||line=="Q")
-      break;
-    else
-      evt = atoi(line.c_str());
-
-    timer->TurnOff();      
-  }
-  */
   graphix->Finalize();
   if (c) delete c;
   return 1;
