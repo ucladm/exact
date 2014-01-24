@@ -34,6 +34,12 @@ public:
   // populate contents from file
   int readCfgFile(string fName);
 
+  // get value of string parameter in a module
+  string getParam(string moduleName,
+                  string paramName,
+                  string defValue,
+                  bool useDefValue) const;
+  
   // get value of parameter in a module
   template <typename Type>
   Type getParam(string moduleName,
@@ -64,6 +70,42 @@ ValueType CfgReader::string_to_Type(string name) const
 }
 
 
+inline string CfgReader::getParam(string moduleName,
+                                  string paramName,
+                                  string defValue,
+                                  bool useDefValue) const
+{
+  if (!cfgIsInit) {
+    cout << "ERROR: CfgReader not initialized!!!" << endl;
+    return defValue;
+  }
+  
+  else if (contents.find(moduleName) == contents.end()) {
+    cout << "ERROR: module \"" << moduleName
+         << "\" doesn't exist!!!" << endl;
+    return defValue;
+  }
+  
+  else if (useDefValue) {
+    return defValue;
+  }
+  
+  else if (contents.at(moduleName).find(paramName) ==
+           contents.at(moduleName).end()) {
+    cout << "WARNING: CfgReader: "
+         << moduleName << ": parameter \"" << paramName
+         << "\" not found in cfg file. Setting to default: "
+         << defValue << endl;
+    return defValue;
+  }
+  
+  cout << "CfgReader: " << moduleName
+       << ": read parameter \"" << paramName << "\": "
+       << contents.at(moduleName).at(paramName)
+       << endl;
+
+  return contents.at(moduleName).at(paramName);
+}
 
 template <typename Type> inline
 Type CfgReader::getParam(string moduleName,

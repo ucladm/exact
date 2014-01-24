@@ -2,6 +2,7 @@
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TGraph.h"
+#include "TMultiGraph.h"
 #include "TAxis.h"
 #include "TLegend.h"
 #include "TList.h"
@@ -62,10 +63,14 @@ int ProcessedPlotter::Process(EventData* event)
     _canvas->Divide(5,4);
 
 
+  //TODO clean up: remove chans_per_pad
   for (int pad=0; pad<total_pads; pad++) {
     _canvas->cd( (total_pads == 1 ? 0 : pad+1 ) );
-    if( cpp == 1 || nchans == 1 )
-      event->DrawChannel(pad);
+    if( cpp == 1 || nchans == 1 ) {
+      TMultiGraph* mg = event->GetTMultiGraph(event->channel_id[pad]);
+      mg->Draw("alp");
+    }
+    
   }
 
   _canvas->cd(0);

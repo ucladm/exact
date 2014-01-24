@@ -18,22 +18,35 @@
 class BaselineFinder
 {
 public:
-  //BaselineFinder();
-  //BaselineFinder(std::string module_label);
   BaselineFinder(CfgReader const& cfg);
-  void Initialize(CfgReader cfg);
   int Process(EventData* event);
 
   std::string module_name;
 
 
+  // Produces baseline vector using a fixed search region.
+  void fixed_baseline(EventData* event);
+
+  void moving_baseline(EventData* event);
 
 private:
-  bool   _enabled;  
+  bool   _enabled;
+  std::string _mode;
+
+  // fixed baseline parameters
   double _start_time;
   double _end_time;
   double _threshold;
-    
+
+
+  // moving baseline parameters
+  int _pre_samps;
+  int _post_samps;
+  double _max_sigma;
+  double _max_amplitude;
+
+
+  void interpolate_baseline(vector<double> & baseline, int start, int end);
 
 };
 

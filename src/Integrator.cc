@@ -23,15 +23,16 @@ int Integrator::Process(EventData* event)
     
     // integral should start at t=0, NOT samp=0
     // so compute pretrigger sum first, then subtract from full integral
-    double pretrigger_sum = 0;
-    for (int i=0; i<event->trigger_index; ++i)
-      pretrigger_sum += bs_wfm[i];
+    //double pretrigger_sum = 0;
+    //for (int i=0; i<event->trigger_index; ++i)
+    //  pretrigger_sum += bs_wfm[i];
 
     vector<double> integral;
     integral.reserve(bs_wfm.size());
     double sum = 0;
     for (size_t i=0; i<bs_wfm.size(); ++i) {
-      integral.push_back(sum - pretrigger_sum);
+      //integral.push_back(sum - pretrigger_sum);
+      integral.push_back(sum);
       sum += bs_wfm[i];
     }
 

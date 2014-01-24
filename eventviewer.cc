@@ -38,6 +38,7 @@
 #include "EventData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
+#include "Integrator.hh"
 #include "ProcessedPlotter.hh"
 #include "RootGraphix.hh"
 
@@ -66,7 +67,8 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   
   //------------------- INSTANTIATE ALL MODULES -------------------
   Converter converter(cfg);
-  //BaselineFinder baselineFinder(cfg);
+  BaselineFinder baselineFinder(cfg);
+  Integrator integrator(cfg);
   ProcessedPlotter plotter(cfg);
 
 
@@ -87,7 +89,8 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
 
     // Run all the modules
     converter.Process(event, DAQ_header);
-    //baselineFinder.Process(event);
+    baselineFinder.Process(event);
+    integrator.Process(event);
     plotter.Process(event);
     gPad->Modified();
     gPad->Update();

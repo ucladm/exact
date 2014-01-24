@@ -32,6 +32,7 @@ RootGraphix::RootGraphix():
   _mutex(),
   _thread(RunRootGraphix)
 {
+  _app.SetReturnFromRun(true);
   _mutex.SetBit(fKeepRunning, true);
   
 }

@@ -97,7 +97,7 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
     event->event_id = evt;
     
     // Run processing modules on event
-    converter.Process(event, DAQ_header);
+    converter.Process(event, DAQ_header); 
     baselineFinder.Process(event);
     integrator.Process(event);
 

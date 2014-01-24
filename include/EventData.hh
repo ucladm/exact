@@ -17,7 +17,7 @@
 
 using namespace std;
 
-class TGraph;
+class TMultiGraph;
 
 class EventData
 {
@@ -68,10 +68,10 @@ public:
   double SampleToTime(int samp) const;
   int TimeToSample(double time, bool checkrange=true) const;
 
-  void DrawChannel(int ch);
+  TMultiGraph* GetTMultiGraph(int ch);
 
 private:
-  TGraph* GetTGraph(int ch);
+
   
   ClassDef(EventData, 1)
 };
