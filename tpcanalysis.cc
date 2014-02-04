@@ -35,7 +35,9 @@
 #include "EventData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
+#include "ZeroSuppressor.hh"
 #include "Integrator.hh"
+#include "SumChannel.hh"
 
 #include <string>
 
@@ -79,7 +81,10 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   // ------------------ INSTANTIATE ALL MODULES -------------------
   Converter converter(cfg);
   BaselineFinder baselineFinder(cfg);
+  ZeroSuppressor zeroSuppressor(cfg);
   Integrator integrator(cfg);
+  SumChannel sumChannel(cfg);
+  
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
 
@@ -96,10 +101,13 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
     event->run_id = 0;
     event->event_id = evt;
     
-    // Run processing modules on event
+    // Run processing modules on event. ORDER MATTERS!
     converter.Process(event, DAQ_header); 
     baselineFinder.Process(event);
+    zeroSuppressor.Process(event);
+    sumChannel.Process(event);
     integrator.Process(event);
+
 
     
     tree->Fill();

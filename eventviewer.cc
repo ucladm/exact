@@ -38,7 +38,9 @@
 #include "EventData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
+#include "ZeroSuppressor.hh"
 #include "Integrator.hh"
+#include "SumChannel.hh"
 #include "ProcessedPlotter.hh"
 #include "RootGraphix.hh"
 
@@ -68,7 +70,10 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   //------------------- INSTANTIATE ALL MODULES -------------------
   Converter converter(cfg);
   BaselineFinder baselineFinder(cfg);
+  SumChannel sumChannel(cfg);
+  ZeroSuppressor zeroSuppressor(cfg);
   Integrator integrator(cfg);
+
   ProcessedPlotter plotter(cfg);
 
 
@@ -87,9 +92,11 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
     event->run_id = 0;
     event->event_id = evt;
 
-    // Run all the modules
+    // Run all the modules. ORDER MATTERS!
     converter.Process(event, DAQ_header);
     baselineFinder.Process(event);
+    zeroSuppressor.Process(event);
+    sumChannel.Process(event);
     integrator.Process(event);
     plotter.Process(event);
     gPad->Modified();

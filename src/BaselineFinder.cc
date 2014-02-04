@@ -63,7 +63,7 @@ void BaselineFinder::fixed_baseline(EventData* event)
       vector<double> bs_wfm;
       bs_wfm.reserve(raw.size());
       for (size_t i=0; i<raw.size(); ++i)
-        bs_wfm.push_back( -(raw[i] - event->baseline_mean[idx]) );
+        bs_wfm.push_back(raw[i] - event->baseline_mean[idx]);
       event->baseline_subtracted_waveform.push_back(bs_wfm);
     }
 
@@ -106,7 +106,6 @@ void BaselineFinder::moving_baseline(EventData* event)
 
     // now traverse through the waveform
     for (int samp = _pre_samps; samp<nsamps-_post_samps-1; samp++) {
-      //std::cout << mean <<" "<<variance<<" "<< _max_sigma*_max_sigma<<" "<<in_baseline<<std::endl;
       if (!in_baseline) { // previously not in baseline
 
         // determine if now in baseline
@@ -139,7 +138,8 @@ void BaselineFinder::moving_baseline(EventData* event)
       }
 
       mean = mean + (raw[samp+_post_samps] - raw[samp-_pre_samps])/window_size;
-      variance = variance + (raw[samp+_post_samps]*raw[samp+_post_samps] - raw[samp-_pre_samps]*raw[samp-_pre_samps])/window_size;
+      variance = variance + (raw[samp+_post_samps]*raw[samp+_post_samps] -
+                             raw[samp-_pre_samps]*raw[samp-_pre_samps])/window_size;
     }// end loop over waveform
 
 

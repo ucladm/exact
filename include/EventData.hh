@@ -41,6 +41,8 @@ public:
     baseline_valid.clear();
     baseline_subtracted_waveform.clear();
     integral.clear();
+    zero_suppressed_waveform.clear();
+    sum_waveform.clear();
     
   }
 
@@ -62,13 +64,15 @@ public:
   vector<bool> baseline_valid;
   vector< vector<double> > baseline_subtracted_waveform;
   vector< vector<double> > integral;
-  
+  vector< vector<double> > zero_suppressed_waveform;
 
+  vector<double> sum_waveform;
 
   double SampleToTime(int samp) const;
   int TimeToSample(double time, bool checkrange=true) const;
 
   TMultiGraph* GetTMultiGraph(int ch);
+  TMultiGraph* GetTMultiGraph_sumch();
 
 private:
 

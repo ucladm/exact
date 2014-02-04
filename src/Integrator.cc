@@ -20,13 +20,6 @@ int Integrator::Process(EventData* event)
     vector<double> const& bs_wfm = event->baseline_subtracted_waveform[idx];
 
 
-    
-    // integral should start at t=0, NOT samp=0
-    // so compute pretrigger sum first, then subtract from full integral
-    //double pretrigger_sum = 0;
-    //for (int i=0; i<event->trigger_index; ++i)
-    //  pretrigger_sum += bs_wfm[i];
-
     vector<double> integral;
     integral.reserve(bs_wfm.size());
     double sum = 0;

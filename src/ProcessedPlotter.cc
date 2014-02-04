@@ -42,7 +42,7 @@ int ProcessedPlotter::Process(EventData* event)
   int cpp = _chans_per_pad;
   if(cpp < 1)
     cpp = (nchans > 0 ? nchans : 1);
-  int total_pads = (nchans+cpp-1)/cpp;
+  int total_pads = (nchans+cpp-1)/cpp+1; //extra pad for sum channel
       
   if(total_pads == 0)
     return 0;
@@ -67,9 +67,16 @@ int ProcessedPlotter::Process(EventData* event)
   for (int pad=0; pad<total_pads; pad++) {
     _canvas->cd( (total_pads == 1 ? 0 : pad+1 ) );
     if( cpp == 1 || nchans == 1 ) {
-      TMultiGraph* mg = event->GetTMultiGraph(event->channel_id[pad]);
-      mg->Draw("alp");
+      if (pad != total_pads-1) {
+        TMultiGraph* mg = event->GetTMultiGraph(event->channel_id[pad]);
+        mg->Draw("alp");
+      }
+      else {
+        TMultiGraph* mg = event->GetTMultiGraph_sumch();
+        mg->Draw("alp");
+      }
     }
+      
     
   }
 
