@@ -18,9 +18,9 @@ int ZeroSuppressor::Process(EventData* event)
 
   // Loop over the channels
   for (int idx = 0; idx<event->nchans; ++idx) {
-    if (!event->baseline_valid[idx])
+    if (!event->baseline_validities[idx])
       return 1;
-    vector<double> const& bs_wfm = event->baseline_subtracted_waveform[idx];
+    vector<double> const& bs_wfm = event->baseline_subtracted_waveforms[idx];
 
     vector<double> zs_wfm;
     zs_wfm.reserve(bs_wfm.size());
@@ -31,7 +31,7 @@ int ZeroSuppressor::Process(EventData* event)
         zs_wfm.push_back(0);
     }
 
-    event->zero_suppressed_waveform.push_back(zs_wfm);
+    event->zero_suppressed_waveforms.push_back(zs_wfm);
 
 
   }// end loop over channels

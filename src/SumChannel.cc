@@ -14,7 +14,8 @@ int SumChannel::Process(EventData* event)
     return 0;
 
   std::vector<double> & sum = event->sum_waveform;
-  std::vector<std::vector<double> > const& wfms = event->zero_suppressed_waveform;
+  std::vector<std::vector<double> > const& wfms = event->zero_suppressed_waveforms;
+
   
   //Loop over the channels
   for (size_t idx = 0; idx<wfms.size(); ++idx) {
@@ -22,8 +23,9 @@ int SumChannel::Process(EventData* event)
     vector<double> const& wfm = wfms[idx];
 
     // size the sum channel appropriately
-    if (idx == 0)
+    if (idx == 0) {
       sum.resize(wfm.size());
+    }
 
     // add waveform to sum channel
     for (size_t i=0; i<wfm.size(); ++i) {

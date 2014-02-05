@@ -17,6 +17,8 @@
 
 using namespace std;
 
+#define BOT_CHANNEL_ID 0
+
 class TMultiGraph;
 
 class EventData
@@ -32,16 +34,16 @@ public:
     nsamps = -1;
     us_per_samp = -1.0;
     trigger_index = -1;
-    channel_id.clear();
-    channel_index.clear();
-    spe_mean.clear();
-    raw_waveform.clear();
-    baseline_mean.clear();
-    baseline_sigma.clear();
-    baseline_valid.clear();
-    baseline_subtracted_waveform.clear();
-    integral.clear();
-    zero_suppressed_waveform.clear();
+    channel_nums.clear();
+    channel_ids.clear();
+    spe_means.clear();
+    raw_waveforms.clear();
+    baseline_means.clear();
+    baseline_sigmas.clear();
+    baseline_validities.clear();
+    baseline_subtracted_waveforms.clear();
+    integrals.clear();
+    zero_suppressed_waveforms.clear();
     sum_waveform.clear();
     
   }
@@ -53,20 +55,34 @@ public:
   int nsamps;
   double us_per_samp;
   int trigger_index;
+  int trigger_index_offset; //for top-channels only
 
 
-  vector<int> channel_id;
-  map<int, int> channel_index;
-  vector<double> spe_mean;
-  vector< vector<double> > raw_waveform;
-  vector<double> baseline_mean;
-  vector<double> baseline_sigma;
-  vector<bool> baseline_valid;
-  vector< vector<double> > baseline_subtracted_waveform;
-  vector< vector<double> > integral;
-  vector< vector<double> > zero_suppressed_waveform;
+  vector<int> channel_nums; // DAQ channel number. check that this is same in every event
+  vector<int> channel_ids; // global channel ID to be used by all modules
+  vector<double> spe_means;
+  vector< vector<double> > raw_waveforms;
+  vector<double> baseline_means;
+  vector<double> baseline_sigmas;
+  vector<bool> baseline_validities;
+  vector< vector<double> > baseline_subtracted_waveforms;
+  vector< vector<double> > integrals;
+  vector< vector<double> > zero_suppressed_waveforms;
 
   vector<double> sum_waveform;
+  vector<double> pulse_start_times;
+  vector<double> pulse_end_times;
+  vector<double> pulse_peak_times;
+  vector<double> pulse_peak_amps;
+  vector<double> pulse_integrals;
+  vector<double> pulse_fixed_int1;
+  vector<double> pulse_fixed_int2;
+
+  vector< vector<double> > ch_pulse_peak_times;
+  vector< vector<double> > ch_pulse_peak_amps;
+  vector< vector<double> > ch_pulse_integrals;
+  vector< vector<double> > ch_pulse_fixed_int1;
+  vector< vector<double> > ch_pulse_fixed_int2;
 
   double SampleToTime(int samp) const;
   int TimeToSample(double time, bool checkrange=true) const;

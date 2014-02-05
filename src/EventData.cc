@@ -10,6 +10,10 @@
 #include "TMarker.h"
 #include <complex> //abs
 #include <algorithm> //min_element
+#include <iostream>  // std::cerr
+#include <stdexcept> // std::out_of_range
+#include <vector>    // std::vector
+
 
 double EventData::SampleToTime(int samp) const
 {
@@ -31,14 +35,13 @@ int EventData::TimeToSample(double time, bool checkrange) const
 TMultiGraph* EventData::GetTMultiGraph(int ch)
 {
 
-  int idx = channel_index[ch];
+  int idx = ch;
   char name[30];
-  sprintf(name, "r%ie%ich%i", run_id, event_id, channel_id[idx]);
+  sprintf(name, "r%ie%ich%i", run_id, event_id, channel_ids[idx]);
   TMultiGraph* mg = new TMultiGraph(name, name);
+
   
-  if (raw_waveform[idx].empty())
-    return 0;
-  int nsamps = raw_waveform[idx].size();
+  int nsamps = raw_waveforms[idx].size();
   std::vector<double> x(nsamps);
 
 
@@ -47,20 +50,21 @@ TMultiGraph* EventData::GetTMultiGraph(int ch)
     x[i] = (i - trigger_index) * us_per_samp;
 
 
-  //std::vector<double> const& raw = raw_waveform[idx];
-  std::vector<double> const& raw = baseline_subtracted_waveform[idx];
+  std::vector<double> const& raw = raw_waveforms[idx];
+  //std::vector<double> const& raw = baseline_subtracted_waveforms[idx];
   TGraph* gr_raw = new TGraph(nsamps, &x[0], &raw[0]);
   gr_raw->SetTitle(name);
   gr_raw->SetName(name);
+  gr_raw->SetMarkerStyle(7);
   mg->Add(gr_raw);
 
   mg->Draw("alp");
   mg->GetXaxis()->SetTitle("time [#mus]");
-  mg->GetYaxis()->SetTitle("amp [arb]");
+  mg->GetYaxis()->SetTitle("amp [mV]");
 
   
-  //TODO allow this to be skipped if waveform isn't present]
-  std::vector<double> baseline = baseline_subtracted_waveform[idx];
+  //TODO allow this to be skipped if waveform isn't present
+  std::vector<double> baseline = baseline_subtracted_waveforms[idx];
   for (size_t i=0; i<baseline.size(); i++)
     baseline[i] = raw[i] - baseline[i];
   TGraph* gr_baseline = new TGraph(nsamps, &x[0], &baseline[0]);
@@ -75,8 +79,8 @@ TMultiGraph* EventData::GetTMultiGraph(int ch)
   gPad->Update();
   gPad->GetRangeAxis(x1,y1,x2,y2);
   double raw_ratio = (y2 - integral_offset) / (integral_offset - y1);
-  double integral_max = *std::max_element(integral[idx].begin(), integral[idx].end());
-  double integral_min = *std::min_element(integral[idx].begin(), integral[idx].end());
+  double integral_max = *std::max_element(integrals[idx].begin(), integrals[idx].end());
+  double integral_min = *std::min_element(integrals[idx].begin(), integrals[idx].end());
   double integral_ratio = std::abs(integral_max) / std::abs(integral_min);
   double integral_scale;
   if (raw_ratio < integral_ratio)
@@ -86,7 +90,7 @@ TMultiGraph* EventData::GetTMultiGraph(int ch)
   
   
   for(int i = 0; i<nsamps; i++)
-    adjusted_integral[i] = integral_scale*integral[idx][i] + integral_offset;
+    adjusted_integral[i] = integral_scale*integrals[idx][i] + integral_offset;
   
   int integral_color = kBlue;
   

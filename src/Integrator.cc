@@ -14,23 +14,22 @@ int Integrator::Process(EventData* event)
   // Loop over channels
   for (int idx = 0; idx<event->nchans; ++idx) {
 
-    if (!event->baseline_valid[idx])
+    if (!event->baseline_validities[idx])
       return 1;
     
-    vector<double> const& bs_wfm = event->baseline_subtracted_waveform[idx];
+    vector<double> const& bs_wfm = event->baseline_subtracted_waveforms[idx];
 
 
     vector<double> integral;
     integral.reserve(bs_wfm.size());
     double sum = 0;
     for (size_t i=0; i<bs_wfm.size(); ++i) {
-      //integral.push_back(sum - pretrigger_sum);
       integral.push_back(sum);
       sum += bs_wfm[i];
     }
 
     
-    event->integral.push_back(integral);
+    event->integrals.push_back(integral);
     
   } // end loop over channels
 

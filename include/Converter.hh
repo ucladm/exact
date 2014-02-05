@@ -28,6 +28,12 @@ public:
 
 private:
   bool _enabled;
+
+  int _trigger_index_offset; //offset for top channels to align all channels in time
+
+  // channel numbers of first event. we check that channel numbers of all events
+  // match this one.
+  std::vector<int> _initial_channel_nums; 
   
 };
 

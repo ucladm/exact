@@ -68,7 +68,7 @@ int ProcessedPlotter::Process(EventData* event)
     _canvas->cd( (total_pads == 1 ? 0 : pad+1 ) );
     if( cpp == 1 || nchans == 1 ) {
       if (pad != total_pads-1) {
-        TMultiGraph* mg = event->GetTMultiGraph(event->channel_id[pad]);
+        TMultiGraph* mg = event->GetTMultiGraph(event->channel_ids[pad]);
         mg->Draw("alp");
       }
       else {

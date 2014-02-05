@@ -43,7 +43,7 @@ void BaselineFinder::fixed_baseline(EventData* event)
 {
   // Loop over channels
   for (int idx = 0; idx<event->nchans; ++idx) {
-    vector<double> const& raw = event->raw_waveform[idx];
+    vector<double> const& raw = event->raw_waveforms[idx];
     double sum = 0;
     double var = 0;
     int start_samp = event->TimeToSample(_start_time);
@@ -53,18 +53,18 @@ void BaselineFinder::fixed_baseline(EventData* event)
       var += raw[i]*raw[i];
     }
 
-    event->baseline_mean.push_back(sum / (end_samp - start_samp));
-    event->baseline_sigma.push_back(sqrt(var / (end_samp - start_samp)));
+    event->baseline_means.push_back(sum / (end_samp - start_samp));
+    event->baseline_sigmas.push_back(sqrt(var / (end_samp - start_samp)));
 
-    if (event->baseline_sigma[idx] < _threshold) {
-      event->baseline_valid.push_back(true);
+    if (event->baseline_sigmas[idx] < _threshold) {
+      event->baseline_validities.push_back(true);
 
       // compute the baseline-subtracted and inverted waveform
       vector<double> bs_wfm;
       bs_wfm.reserve(raw.size());
       for (size_t i=0; i<raw.size(); ++i)
-        bs_wfm.push_back(raw[i] - event->baseline_mean[idx]);
-      event->baseline_subtracted_waveform.push_back(bs_wfm);
+        bs_wfm.push_back(raw[i] - event->baseline_means[idx]);
+      event->baseline_subtracted_waveforms.push_back(bs_wfm);
     }
 
     
@@ -84,9 +84,9 @@ void BaselineFinder::moving_baseline(EventData* event)
 {
   // Loop over channels
 
-  for (size_t idx=0; idx<event->raw_waveform.size(); idx++) {
+  for (size_t idx=0; idx<event->raw_waveforms.size(); idx++) {
 
-    vector<double> const& raw = event->raw_waveform[idx];
+    vector<double> const& raw = event->raw_waveforms[idx];
     int const nsamps = event->nsamps;
     vector<double> baseline(nsamps, BASELINE_INIT);
     bool in_baseline = false;
@@ -179,10 +179,10 @@ void BaselineFinder::moving_baseline(EventData* event)
       
     }
     
-    event->baseline_mean.push_back(1);
-    event->baseline_sigma.push_back(1);
-    event->baseline_valid.push_back(true);
-    event->baseline_subtracted_waveform.push_back(bswfm);
+    event->baseline_means.push_back(1);
+    event->baseline_sigmas.push_back(1);
+    event->baseline_validities.push_back(true);
+    event->baseline_subtracted_waveforms.push_back(bswfm);
 
     
   }// end loop over channels
