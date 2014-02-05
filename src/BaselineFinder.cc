@@ -28,10 +28,16 @@ int BaselineFinder::Process(EventData* event)
   if (!_enabled)
     return 0;
 
+  event->baseline_subtracted_waveforms.resize(event->nchans);
+  
   if (_mode == "FIXED")
     fixed_baseline(event);
   else if (_mode == "MOVING")
     moving_baseline(event);
+  else {
+    std::cout << "BaselineFinder mode not recognized. Using FIXED."<<std::endl;
+    fixed_baseline(event);
+  }
 
   
   return 1;
@@ -60,11 +66,11 @@ void BaselineFinder::fixed_baseline(EventData* event)
       event->baseline_validities.push_back(true);
 
       // compute the baseline-subtracted and inverted waveform
-      vector<double> bs_wfm;
+      vector<double> & bs_wfm = event->baseline_subtracted_waveforms[idx];
       bs_wfm.reserve(raw.size());
       for (size_t i=0; i<raw.size(); ++i)
         bs_wfm.push_back(raw[i] - event->baseline_means[idx]);
-      event->baseline_subtracted_waveforms.push_back(bs_wfm);
+      //event->baseline_subtracted_waveforms.push_back(bs_wfm);
     }
 
     
@@ -153,7 +159,7 @@ void BaselineFinder::moving_baseline(EventData* event)
 
     
     // subtract off the baseline
-    vector<double> bswfm(nsamps);
+    vector<double> & bswfm = event->baseline_subtracted_waveforms[idx];
     
     for (int samp=0; samp<nsamps; samp++) {
 
@@ -182,7 +188,7 @@ void BaselineFinder::moving_baseline(EventData* event)
     event->baseline_means.push_back(1);
     event->baseline_sigmas.push_back(1);
     event->baseline_validities.push_back(true);
-    event->baseline_subtracted_waveforms.push_back(bswfm);
+    //event->baseline_subtracted_waveforms.push_back(bswfm);
 
     
   }// end loop over channels

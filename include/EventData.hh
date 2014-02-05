@@ -34,6 +34,10 @@ public:
     nsamps = -1;
     us_per_samp = -1.0;
     trigger_index = -1;
+    adc_bits = -1;
+    adc_range_top = -1;
+    adc_range_bot = -1;
+    
     channel_nums.clear();
     channel_ids.clear();
     spe_means.clear();
@@ -45,6 +49,7 @@ public:
     integrals.clear();
     zero_suppressed_waveforms.clear();
     sum_waveform.clear();
+    sum_integral.clear();
     npulses = 0;
     pulse_start_times.clear();
     pulse_end_times.clear();
@@ -62,6 +67,9 @@ public:
   double us_per_samp;
   int trigger_index;
   int trigger_index_offset; //for top-channels only
+  int adc_bits; //number of ADC bits
+  double adc_range_top; //dynamic range of top PMTs [V]
+  double adc_range_bot; //dynamic range of bot PMTs [V]
 
 
   vector<int> channel_nums; // DAQ channel number. check that this is same in every event
@@ -76,6 +84,7 @@ public:
   vector< vector<double> > zero_suppressed_waveforms;
 
   vector<double> sum_waveform;
+  vector<double> sum_integral;
   int npulses;
   vector<double> pulse_start_times;
   vector<double> pulse_end_times;

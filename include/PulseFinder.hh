@@ -14,6 +14,7 @@
 #include "EventData.hh"
 #include "CfgReader.hh"
 #include <string>
+#include <vector>
 
 class PulseFinder
 {
@@ -27,9 +28,17 @@ public:
 private:
   bool _enabled;
 
-  double _pulse_start_threshold;
+  std::string _mode;
 
-  int EvaluatePulses(EventData* event);
+  int _down_sample_factor;
+  double _pulse_start_threshold;
+  double _pulse_start_amp;
+  double _pulse_end_threshold;
+
+  void EvaluatePulses(EventData* event);
+
+  void ThresholdSearch(EventData* event);
+  void IntegralSearch(EventData* event);
 };
 
 

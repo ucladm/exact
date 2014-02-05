@@ -28,11 +28,9 @@ void* RunRootGraphix(void* mutexptr)
 }
 
 RootGraphix::RootGraphix():
-  _app("app", 0, 0),
   _mutex(),
   _thread(RunRootGraphix)
 {
-  _app.SetReturnFromRun(true);
   _mutex.SetBit(fKeepRunning, true);
   
 }

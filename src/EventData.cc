@@ -144,25 +144,29 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
   mg->GetYaxis()->SetTitle("amp [arb]");
 
   
-  /*
-  //TODO allow this to be skipped if waveform isn't present]
-  std::vector<double> baseline = baseline_subtracted_waveform[idx];
+  
+  
+  std::vector<double> baseline = sum_waveform;
   for (size_t i=0; i<baseline.size(); i++)
-    baseline[i] = raw[i] - baseline[i];
+    baseline[i] = sum_waveform[i] - baseline[i];
   TGraph* gr_baseline = new TGraph(nsamps, &x[0], &baseline[0]);
   gr_baseline->SetMarkerColor(kRed);
   gr_baseline->SetLineColor(kRed);
   mg->Add(gr_baseline);
 
+
+  if (sum_integral.empty())
+    return mg;
+  
   // need to adjust size of integral so it fits
   std::vector<double> adjusted_integral(nsamps); 
-  double integral_offset = 0; //(draw_baseline_subtracted ? 0 : bs_info.mean);
+  double integral_offset = 0; 
   double x1,x2,y1,y2;
   gPad->Update();
   gPad->GetRangeAxis(x1,y1,x2,y2);
   double raw_ratio = (y2 - integral_offset) / (integral_offset - y1);
-  double integral_max = *std::max_element(integral[idx].begin(), integral[idx].end());
-  double integral_min = *std::min_element(integral[idx].begin(), integral[idx].end());
+  double integral_max = *std::max_element(sum_integral.begin(), sum_integral.end());
+  double integral_min = *std::min_element(sum_integral.begin(), sum_integral.end());
   double integral_ratio = std::abs(integral_max) / std::abs(integral_min);
   double integral_scale;
   if (raw_ratio < integral_ratio)
@@ -172,7 +176,7 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
   
   
   for(int i = 0; i<nsamps; i++)
-    adjusted_integral[i] = integral_scale*integral[idx][i] + integral_offset;
+    adjusted_integral[i] = integral_scale*sum_integral[i] + integral_offset;
   
   int integral_color = kBlue;
   
@@ -180,7 +184,7 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
   integral_gr->SetLineColor(integral_color);
   integral_gr->SetMarkerColor(integral_color);
   mg->Add(integral_gr);
-  */
+  
 
   for (size_t i=0; i<pulse_start_times.size(); i++) {
     double base = 0;

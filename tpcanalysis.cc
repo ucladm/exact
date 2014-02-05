@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <time.h> 
 
 
 #include "TROOT.h"
@@ -168,8 +169,11 @@ int main(int args, char* argv[]) {
   }
   DAQ_header.ReadHeaderContent();
 
+  clock_t t = clock();
   
   ProcessEvents(DAQ_header, argv[1]);
-  
+
+  t = clock() - t;
+  std::cout << "Processing time: "<<((float)t)/CLOCKS_PER_SEC<<" s." << std::endl;
   return 1;
 }

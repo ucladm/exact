@@ -31,6 +31,11 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
   event->trigger_index = DAQ_header.getTriggerIndex();
   event->trigger_index_offset = _trigger_index_offset;
 
+  // hard code these for now. should (will?) be added to DAQ header later.
+  event->adc_bits = 8;
+  event->adc_range_top = 0.2;
+  event->adc_range_bot = 2;
+
   // Fill channel-level info
   for (int i=0; i<DAQ_header.getNchans(); ++i) {
     event->channel_nums.push_back(DAQ_header.WorkingChannelNbr.at(i));

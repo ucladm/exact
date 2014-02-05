@@ -25,7 +25,6 @@ public:
   TCanvas* GetCanvas(const char* title=0, bool preventclose=true, bool hidemenu=false);
 
 private:
-  TApplication _app;
   TMutex _mutex;
   TThread _thread;
 

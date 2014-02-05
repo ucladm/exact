@@ -13,6 +13,7 @@
 #include "EventData.hh"
 #include "CfgReader.hh"
 #include <string>
+#include <vector>
 
 class Integrator
 {
@@ -26,6 +27,7 @@ public:
 private:
   bool _enabled;
 
+  void integrate(std::vector<double> const& wfm, std::vector<double> & result);
 };
 
 #endif

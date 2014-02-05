@@ -71,8 +71,8 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   //------------------- INSTANTIATE ALL MODULES -------------------
   Converter converter(cfg);
   BaselineFinder baselineFinder(cfg);
-  SumChannel sumChannel(cfg);
   ZeroSuppressor zeroSuppressor(cfg);
+  SumChannel sumChannel(cfg);
   Integrator integrator(cfg);
   PulseFinder pulseFinder(cfg);
 
