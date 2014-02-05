@@ -41,6 +41,7 @@
 #include "ZeroSuppressor.hh"
 #include "Integrator.hh"
 #include "SumChannel.hh"
+#include "PulseFinder.hh"
 #include "ProcessedPlotter.hh"
 #include "RootGraphix.hh"
 
@@ -73,6 +74,7 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   SumChannel sumChannel(cfg);
   ZeroSuppressor zeroSuppressor(cfg);
   Integrator integrator(cfg);
+  PulseFinder pulseFinder(cfg);
 
   ProcessedPlotter plotter(cfg);
 
@@ -98,6 +100,7 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
     zeroSuppressor.Process(event);
     sumChannel.Process(event);
     integrator.Process(event);
+    pulseFinder.Process(event);
     plotter.Process(event);
     gPad->Modified();
     gPad->Update();

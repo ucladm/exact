@@ -45,6 +45,12 @@ public:
     integrals.clear();
     zero_suppressed_waveforms.clear();
     sum_waveform.clear();
+    npulses = 0;
+    pulse_start_times.clear();
+    pulse_end_times.clear();
+    pulse_peak_times.clear();
+    pulse_peak_amps.clear();
+    pulse_integrals.clear();
     
   }
 
@@ -70,19 +76,20 @@ public:
   vector< vector<double> > zero_suppressed_waveforms;
 
   vector<double> sum_waveform;
+  int npulses;
   vector<double> pulse_start_times;
   vector<double> pulse_end_times;
   vector<double> pulse_peak_times;
   vector<double> pulse_peak_amps;
   vector<double> pulse_integrals;
-  vector<double> pulse_fixed_int1;
-  vector<double> pulse_fixed_int2;
+  //vector<double> pulse_fixed_int1;
+  //vector<double> pulse_fixed_int2;
 
-  vector< vector<double> > ch_pulse_peak_times;
-  vector< vector<double> > ch_pulse_peak_amps;
-  vector< vector<double> > ch_pulse_integrals;
-  vector< vector<double> > ch_pulse_fixed_int1;
-  vector< vector<double> > ch_pulse_fixed_int2;
+  //vector< vector<double> > ch_pulse_peak_times;
+  //vector< vector<double> > ch_pulse_peak_amps;
+  //vector< vector<double> > ch_pulse_integrals;
+  //vector< vector<double> > ch_pulse_fixed_int1;
+  //vector< vector<double> > ch_pulse_fixed_int2;
 
   double SampleToTime(int samp) const;
   int TimeToSample(double time, bool checkrange=true) const;

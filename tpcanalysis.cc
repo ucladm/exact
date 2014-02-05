@@ -38,6 +38,7 @@
 #include "ZeroSuppressor.hh"
 #include "Integrator.hh"
 #include "SumChannel.hh"
+#include "PulseFinder.hh"
 
 #include <string>
 
@@ -65,17 +66,24 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   // event. Create a branch to hold all event data.
   EventData* event = new EventData();
   //tree->Branch("EventData", "EventData", &event);
-  tree->Branch("run_id", &(event->run_id));
-  tree->Branch("event_id", &(event->event_id));
-  tree->Branch("nchans", &(event->nchans));
-  tree->Branch("nsamps", &(event->nsamps));
-  tree->Branch("us_per_samp", &(event->us_per_samp));
-  tree->Branch("trigger_index", &(event->trigger_index));
-  tree->Branch("channel_id", &(event->channel_id));
-  tree->Branch("spe_mean", &(event->spe_mean));
-  tree->Branch("baseline_mean", &(event->baseline_mean));
-  tree->Branch("baseline_sigma", &(event->baseline_sigma));
-  tree->Branch("baseline_valid", &(event->baseline_valid));
+  tree->Branch("run_id",              &(event->run_id));
+  tree->Branch("event_id",            &(event->event_id));
+  tree->Branch("nchans",              &(event->nchans));
+  tree->Branch("nsamps",              &(event->nsamps));
+  tree->Branch("us_per_samp",         &(event->us_per_samp));
+  tree->Branch("trigger_index",       &(event->trigger_index));
+  tree->Branch("channel_ids",         &(event->channel_ids));
+  tree->Branch("spe_means",           &(event->spe_means));
+  tree->Branch("baseline_means",      &(event->baseline_means));
+  tree->Branch("baseline_sigmas",     &(event->baseline_sigmas));
+  tree->Branch("baseline_validities", &(event->baseline_validities));
+  tree->Branch("npulses",             &(event->npulses));
+  tree->Branch("pulse_start_times",   &(event->pulse_start_times));
+  tree->Branch("pulse_end_times",     &(event->pulse_end_times));
+  tree->Branch("pulse_peak_times",    &(event->pulse_peak_times));
+  tree->Branch("pulse_peak_amps",     &(event->pulse_peak_amps));
+  tree->Branch("pulse_integrals",     &(event->pulse_integrals));
+  
   
   
   // ------------------ INSTANTIATE ALL MODULES -------------------
@@ -84,6 +92,7 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   ZeroSuppressor zeroSuppressor(cfg);
   Integrator integrator(cfg);
   SumChannel sumChannel(cfg);
+  PulseFinder pulseFinder(cfg);
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
@@ -107,6 +116,7 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
     zeroSuppressor.Process(event);
     sumChannel.Process(event);
     integrator.Process(event);
+    pulseFinder.Process(event);
 
 
     
