@@ -36,12 +36,38 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
   event->adc_range_top = 0.2;
   event->adc_range_bot = 2;
 
+    
+    //----------------------------
+    
+    const double BOT_PMT_ConvertFactor = 10/1.602177/25; //--- convert mV*ns to 1E6 e-, with 25 ohm impadence ------
+    const double TOP_PMT_ConvertFactor = 10/1.602177/50; //--- convert mV*ns to 1E6 e-, with 25 ohm impadence ------
+
+    const double btm_PMT_Gain = 4.064; //--- unit: 1E6 ---
+    
+    /*
+    --- channel order ----
+     Channel#0 3" PMT   Channel#1 LV1556
+     Channel#2 LV1549   Channel#3 LV1548
+     Channel#4 LV1550   Channel#5 LV
+     
+    */
+    
+    const double top_PMT_Gain[7] = {}; //--- unit: 1E6, follows the cable order ---
+
+    //----------------------------
+    
   // Fill channel-level info
   for (int i=0; i<DAQ_header.getNchans(); ++i) {
+      
     event->channel_nums.push_back(DAQ_header.WorkingChannelNbr.at(i));
     event->channel_ids.push_back(i);
-    event->spe_means.push_back(1);
     event->raw_waveforms.push_back(DAQ_header.ReadSingleChannel(event->event_id, DAQ_header.WorkingChannelNbr.at(i)));
+    
+    if(i==0)//--- assuming top PMT is always the channel#0 ---
+    event->spe_means.push_back(btm_PMT_Gain/2/BOT_PMT_ConvertFactor);
+    else
+    event->spe_means.push_back(top_PMT_Gain[i+1]/2/TOP_PMT_ConvertFactor);
+      
   }
 
   

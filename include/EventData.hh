@@ -56,7 +56,16 @@ public:
     pulse_peak_times.clear();
     pulse_peak_amps.clear();
     pulse_integrals.clear();
-    
+      
+      //------------------
+
+      saturated.clear();
+      ch_pulse_integrals.clear();
+      ch_5samp_exttended_pulse_integrals.clear();
+      ch_10samp_exttended_pulse_integrals.clear();
+
+      //------------------
+
   }
 
   // all the data for a single event  
@@ -100,6 +109,18 @@ public:
   //vector< vector<double> > ch_pulse_fixed_int1;
   //vector< vector<double> > ch_pulse_fixed_int2;
 
+  //------------------
+    
+    vector<bool> saturated;
+    
+    vector< vector<double> > ch_pulse_integrals;
+    vector< vector<double> > ch_5samp_exttended_pulse_integrals;
+    vector< vector<double> > ch_10samp_exttended_pulse_integrals;
+    
+  //------------------
+
+    
+    
   double SampleToTime(int samp) const;
   int TimeToSample(double time, bool checkrange=true) const;
 
