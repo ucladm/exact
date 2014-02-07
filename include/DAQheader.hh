@@ -83,7 +83,7 @@ public:
 
   //void WriteEvtTime();
 
-  std::vector<double> ReadSingleChannel(int EventNbr, int ChannelNbr);
+  std::vector<double> ReadSingleChannel(int EventNbr, int ChannelNbr, double & gain, double & offset);
     
   std::vector< std::vector<double> > ReadEvent(int EventNbr);
 

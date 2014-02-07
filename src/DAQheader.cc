@@ -190,7 +190,7 @@ void DAQheader::ReadHeaderContent(){
 //==================================================================================================
 
 
-std::vector<double> DAQheader::ReadSingleChannel(int EventNbr, int ChannelNbr)
+std::vector<double> DAQheader::ReadSingleChannel(int EventNbr, int ChannelNbr, double & gain, double & offset)
 {
     
   std::vector<double> SampleArray;
@@ -247,14 +247,16 @@ std::vector<double> DAQheader::ReadSingleChannel(int EventNbr, int ChannelNbr)
         
     binary_file.read((char*)&Sample,  sizeof(Sample));
         
-    double Value = (vGain*int(Sample)- vOffset)*1000;
-    //double Value = 1.0*int(Sample);
+    //double Value = (vGain*int(Sample)- vOffset)*1000;
+    double Value = 1.0*int(Sample);
 
     SampleArray.push_back(Value);
         
 
   }
-    
+
+  gain = vGain;
+  offset = vOffset;
   return SampleArray;
 }
 
@@ -316,8 +318,8 @@ std::vector< std::vector<double> > DAQheader::ReadEvent(int EventNbr){
             
       binary_file.read((char*)&Sample,  sizeof(Sample));
                                                            
-      double Value = (vGain*int(Sample)-vOffset)*1000;
-      //double Value = 1.0*int(Sample);    
+      //double Value = (vGain*int(Sample)-vOffset)*1000;
+      double Value = 1.0*int(Sample);    
             
       SingleWaveform.push_back(Value);
 

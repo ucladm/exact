@@ -58,7 +58,7 @@ TMultiGraph* EventData::GetTMultiGraph(int ch)
     
     mg->Draw("alp");
     mg->GetXaxis()->SetTitle("time [#mus]");
-    mg->GetYaxis()->SetTitle("amp [mV]");
+    mg->GetYaxis()->SetTitle("amp [counts]");
   }
   catch (const std::out_of_range& oor) {
     //std::cerr << "Out of Range error: " << oor.what() << '\n';
@@ -82,7 +82,7 @@ TMultiGraph* EventData::GetTMultiGraph(int ch)
   // need to adjust size of integral so it fits
   try {
     std::vector<double> adjusted_integral(nsamps); 
-    double integral_offset = 0; //(draw_baseline_subtracted ? 0 : bs_info.mean);
+    double integral_offset = baseline_means.at(ch); //(draw_baseline_subtracted ? 0 : bs_info.mean);
     double x1,x2,y1,y2;
     gPad->Update();
     gPad->GetRangeAxis(x1,y1,x2,y2);
