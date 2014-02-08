@@ -44,9 +44,60 @@ void PulseFinder::EvaluatePulses(EventData* event)
     int peak_index = std::min_element(waveform.begin() + start_index, waveform.begin() + end_index)-waveform.begin();
     event->pulse_peak_times.push_back(event->SampleToTime(peak_index));
     event->pulse_peak_amps.push_back(waveform[peak_index]);
-    event->pulse_integrals.push_back(std::accumulate(waveform.begin()+start_index, waveform.begin()+end_index, 0.0));
-    
+    event->pulse_integrals.push_back(-std::accumulate(waveform.begin()+start_index, waveform.begin()+end_index, 0.0));
   }
+    
+    vector<double> Pulse_5samp_Extended_Integral;
+    vector<double> Pulse_10samp_Extended_Integral;
+    vector<double> Pulse_Integral;
+    
+    for(unsigned int ch=0; ch<event->baseline_subtracted_waveforms.size();ch++){
+     
+    vector<double> const& SingleWaveform = event->baseline_subtracted_waveforms[ch];
+
+        int start_point, end_point;
+        
+        for (int i=0; i<event->npulses; i++) {
+            unsigned int start_index = event->TimeToSample(event->pulse_start_times[i]);
+            unsigned int end_index = event->TimeToSample(event->pulse_end_times[i]);
+            
+            double Pulse_Area = -std::accumulate(SingleWaveform.begin()+start_index, SingleWaveform.begin()+end_index, 0.0);
+            Pulse_Integral.push_back(Pulse_Area);
+            
+            if((start_index-5)>0)
+                start_point = start_index-5;
+            else
+                start_point = 0;
+            if(end_index+5<=(SingleWaveform.size()-1))
+                end_point = end_index+5;
+            else
+                end_point = SingleWaveform.size()-1;
+            
+            double Pulse_5samp_Extended_Area = -std::accumulate(SingleWaveform.begin()+start_point, SingleWaveform.begin()+end_point, 0.0);
+            Pulse_5samp_Extended_Integral.push_back(Pulse_5samp_Extended_Area);
+            
+            
+            
+            if((start_index-10)>0)
+                start_point = start_index-10;
+            else
+                start_point = 0;
+            if(end_index+10<=(SingleWaveform.size()-1))
+                end_point = end_index+10;
+                else
+                end_point = SingleWaveform.size()-1;
+            
+            double Pulse_10samp_Extended_Area = -std::accumulate(SingleWaveform.begin()+start_point, SingleWaveform.begin()+end_point, 0.0);
+            Pulse_10samp_Extended_Integral.push_back(Pulse_10samp_Extended_Area);
+
+            
+        }
+    }
+    
+    event->ch_pulse_integrals.push_back(Pulse_Integral);
+    event->ch_5samp_extended_pulse_integrals.push_back(Pulse_5samp_Extended_Integral);
+    event->ch_10samp_extended_pulse_integrals.push_back(Pulse_10samp_Extended_Integral);
+
 }
 
 void PulseFinder::ThresholdSearch(EventData* event)
@@ -82,12 +133,13 @@ void PulseFinder::IntegralSearch(EventData* event)
 
   std::vector<double> ds_integral(ds_wfm_nsamps);
   bool in_pulse = false;
+    
   for (int i=0; i<ds_wfm_nsamps; i++) {
     ds_integral[i] = integral[i*_down_sample_factor];
     
     // If two consecuative pulses in the down-sampled integral are vertically separated by
     // more than _pulse_start_threshold, then there's a pulse somewhere nearby
-
+      
     if ( i>1 && !in_pulse && (ds_integral[i]-ds_integral[i-1] < _pulse_start_threshold) ) {
       in_pulse = true;
       //now do fine-grained search for pulse start point
@@ -102,8 +154,17 @@ void PulseFinder::IntegralSearch(EventData* event)
       in_pulse = false;
       event->pulse_end_times.push_back(event->SampleToTime(i*_down_sample_factor));
     }
+
+    if(in_pulse &&(i==ds_wfm_nsamps-1)){
+        in_pulse = false;
+        event->pulse_end_times.push_back(i*_down_sample_factor);
+    }
+      
   }// end loop over down-sampled integral
 
-  event->npulses = std::min(event->pulse_start_times.size(), event->pulse_end_times.size());
-  
+  event->npulses = event->pulse_start_times.size();
+    
+    if(event->pulse_start_times.size()!=event->pulse_end_times.size())
+        std::cout<<"the size of pulse_start_times is not equal to pulse_end_times!"<<std::endl;
+        
 }

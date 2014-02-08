@@ -1,4 +1,4 @@
-/#include "Converter.hh"
+#include "Converter.hh"
 
 #include <iostream>
 #include <map>
@@ -46,11 +46,12 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
     --- channel order ----
      Channel#0 3" PMT   Channel#1 LV1556
      Channel#2 LV1549   Channel#3 LV1548
-     Channel#4 LV1550   Channel#5 LV
+     Channel#4 LV1550   Channel#5 LV1557
+     Channel#6 LV1551   Channel#7 LV1552
      
     */
     
-    const double top_PMT_Gain[7] = {}; //--- unit: 1E6, follows the cable order ---
+    const double top_PMT_Gain[7] = {4.12, 4.359, 4.211, 4.099, 4.105, 3.718, 4.325}; //--- unit: 1E6, follows the cable order ---
 
     //----------------------------
     
@@ -67,14 +68,13 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
           abort();
       }
       
-    event->raw_waveforms.push_back(DAQ_header.ReadSingleChannel(event->event_id, DAQ_header.WorkingChannelNbr.at(i)));
     
     if(i==0)//--- assuming top PMT is always the channel#0 ---
     event->spe_means.push_back(btm_PMT_Gain/2/BOT_PMT_ConvertFactor);
     else
     event->spe_means.push_back(top_PMT_Gain[i+1]/2/TOP_PMT_ConvertFactor);
       
-    event->spe_means.push_back(1);
+
     double gain, offset;
     event->raw_waveforms.push_back(DAQ_header.ReadSingleChannel(event->event_id,
                                                                 DAQ_header.WorkingChannelNbr.at(i),

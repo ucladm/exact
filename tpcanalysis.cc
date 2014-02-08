@@ -74,18 +74,26 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile)
   tree->Branch("nsamps",              &(event->nsamps));
   tree->Branch("us_per_samp",         &(event->us_per_samp));
   tree->Branch("trigger_index",       &(event->trigger_index));
-  tree->Branch("channel_ids",         &(event->channel_ids));
+  tree->Branch("trigger_index_offset",&(event->trigger_index_offset));
+  tree->Branch("adc_gains",           &(event->adc_gains));
+  tree->Branch("adc_offsets",         &(event->adc_offsets));
+  tree->Branch("adc_ranges",          &(event->adc_ranges));
   tree->Branch("spe_means",           &(event->spe_means));
   tree->Branch("baseline_means",      &(event->baseline_means));
   tree->Branch("baseline_sigmas",     &(event->baseline_sigmas));
-  tree->Branch("baseline_validities", &(event->baseline_validities));
+  //tree->Branch("baseline_validities", &(event->baseline_validities));
   tree->Branch("npulses",             &(event->npulses));
   tree->Branch("pulse_start_times",   &(event->pulse_start_times));
   tree->Branch("pulse_end_times",     &(event->pulse_end_times));
   tree->Branch("pulse_peak_times",    &(event->pulse_peak_times));
   tree->Branch("pulse_peak_amps",     &(event->pulse_peak_amps));
   tree->Branch("pulse_integrals",     &(event->pulse_integrals));
-  
+
+    tree->Branch("saturated",                               &(event->saturated));
+    tree->Branch("ch_pulse_integrals",                      &(event->ch_pulse_integrals));
+    tree->Branch("ch_5samp_extended_pulse_integrals",      &(event->ch_5samp_extended_pulse_integrals));
+    tree->Branch("ch_10samp_extended_pulse_integrals",     &(event->ch_10samp_extended_pulse_integrals));
+
   
   
   // ------------------ INSTANTIATE ALL MODULES -------------------

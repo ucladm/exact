@@ -59,12 +59,11 @@ public:
     pulse_integrals.clear();
       
       //------------------
-
       saturated.clear();
       ch_pulse_integrals.clear();
-      ch_5samp_exttended_pulse_integrals.clear();
-      ch_10samp_exttended_pulse_integrals.clear();
-
+      ch_pulse_peak_amps.clear();
+      ch_5samp_extended_pulse_integrals.clear();
+      ch_10samp_extended_pulse_integrals.clear();
       //------------------
 
   }
@@ -90,7 +89,7 @@ public:
   vector<double> baseline_means;
   vector<double> baseline_sigmas;
   vector<bool> baseline_validities;
-  vector< vector<double> > baseline_subtracted_waveforms;
+  vector< vector<double> > baseline_subtracted_waveforms; // unit: ADC counts
   vector< vector<double> > integrals;
   vector< vector<double> > zero_suppressed_waveforms;
 
@@ -116,8 +115,9 @@ public:
     vector<bool> saturated;
     
     vector< vector<double> > ch_pulse_integrals;
-    vector< vector<double> > ch_5samp_exttended_pulse_integrals;
-    vector< vector<double> > ch_10samp_exttended_pulse_integrals;
+    vector< vector<double> > ch_pulse_peak_amps;
+    vector< vector<double> > ch_5samp_extended_pulse_integrals;
+    vector< vector<double> > ch_10samp_extended_pulse_integrals;
     
   //------------------
 
