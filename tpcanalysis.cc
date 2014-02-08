@@ -46,7 +46,8 @@
 using namespace std;
 
 
-int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
+int ProcessEvents(DAQheader& DAQ_header, string cfgFile)
+//TTree* ProcessEvents(DAQheader& DAQ_header, string cfgFile)
 {
 
     
@@ -134,6 +135,7 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
   rootfile->Close();
 
   return 1;
+  //return tree;
 }
 
 

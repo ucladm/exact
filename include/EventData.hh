@@ -35,11 +35,12 @@ public:
     us_per_samp = -1.0;
     trigger_index = -1;
     adc_bits = -1;
-    adc_range_top = -1;
-    adc_range_bot = -1;
     
     channel_nums.clear();
     channel_ids.clear();
+    adc_gains.clear();
+    adc_offsets.clear();
+    adc_ranges.clear();
     spe_means.clear();
     raw_waveforms.clear();
     baseline_means.clear();
@@ -77,12 +78,13 @@ public:
   int trigger_index;
   int trigger_index_offset; //for top-channels only
   int adc_bits; //number of ADC bits
-  double adc_range_top; //dynamic range of top PMTs [V]
-  double adc_range_bot; //dynamic range of bot PMTs [V]
 
 
   vector<int> channel_nums; // DAQ channel number. check that this is same in every event
   vector<int> channel_ids; // global channel ID to be used by all modules
+  vector<double> adc_gains; // volts per ADC-count
+  vector<double> adc_offsets;
+  vector<double> adc_ranges;
   vector<double> spe_means;
   vector< vector<double> > raw_waveforms;
   vector<double> baseline_means;

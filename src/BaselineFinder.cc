@@ -59,21 +59,23 @@ void BaselineFinder::fixed_baseline(EventData* event)
       var += raw[i]*raw[i];
     }
 
-    event->baseline_means.push_back(sum / (end_samp - start_samp));
-    event->baseline_sigmas.push_back(sqrt(var / (end_samp - start_samp)));
+    double mean = sum/(end_samp-start_samp);
+    event->baseline_means.push_back(mean);
+    event->baseline_sigmas.push_back( sqrt(var/(end_samp - start_samp) - mean*mean) );
 
+    vector<double> & bs_wfm = event->baseline_subtracted_waveforms[idx];
+    bs_wfm.reserve(raw.size());
     if (event->baseline_sigmas[idx] < _threshold) {
       event->baseline_validities.push_back(true);
 
       // compute the baseline-subtracted and inverted waveform
-      vector<double> & bs_wfm = event->baseline_subtracted_waveforms[idx];
-      bs_wfm.reserve(raw.size());
       for (size_t i=0; i<raw.size(); ++i)
-        bs_wfm.push_back(raw[i] - event->baseline_means[idx]);
-      //event->baseline_subtracted_waveforms.push_back(bs_wfm);
+        bs_wfm.push_back(raw[i] - mean);
+    }
+    else {
+      bs_wfm.push_back(-1);
     }
 
-    
   } // end loop over channels
 }
 

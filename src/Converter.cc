@@ -1,4 +1,4 @@
-#include "Converter.hh"
+/#include "Converter.hh"
 
 #include <iostream>
 #include <map>
@@ -33,8 +33,6 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
 
   // hard code these for now. should (will?) be added to DAQ header later.
   event->adc_bits = 8;
-  event->adc_range_top = 0.2;
-  event->adc_range_bot = 2;
 
     
     //----------------------------
@@ -57,10 +55,18 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
     //----------------------------
     
   // Fill channel-level info
+  // DAQ channel numbers are 1-indexed. Want global channel IDs to be 0-indexed. Presumably, DAQ
+  // channel numbers are in order. Check anyway.
   for (int i=0; i<DAQ_header.getNchans(); ++i) {
       
     event->channel_nums.push_back(DAQ_header.WorkingChannelNbr.at(i));
     event->channel_ids.push_back(i);
+
+      if (DAQ_header.WorkingChannelNbr.at(i) != i+1) {
+          std::cerr << "Event "<<event->event_id<<": Unexpected channel order!"<<std::endl;
+          abort();
+      }
+      
     event->raw_waveforms.push_back(DAQ_header.ReadSingleChannel(event->event_id, DAQ_header.WorkingChannelNbr.at(i)));
     
     if(i==0)//--- assuming top PMT is always the channel#0 ---
@@ -68,20 +74,14 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
     else
     event->spe_means.push_back(top_PMT_Gain[i+1]/2/TOP_PMT_ConvertFactor);
       
-  }
-
-  
-  // Check that channel numbers match first event
-  if (event->event_id == 1) {
-    for (int i=0; i<event->nchans; i++) {
-      _initial_channel_nums.push_back(event->channel_nums[i]);
-    }
-  }
-  else {
-    for (int i=0; i<event->nchans; i++) {
-      if (event->channel_nums[i] != _initial_channel_nums[i])
-        std::cerr << "Event "<<event->event_id<<" channels in wrong order!"<<std::endl;
-    }
+    event->spe_means.push_back(1);
+    double gain, offset;
+    event->raw_waveforms.push_back(DAQ_header.ReadSingleChannel(event->event_id,
+                                                                DAQ_header.WorkingChannelNbr.at(i),
+                                                                gain,offset));
+    event->adc_gains.push_back(gain);
+    event->adc_offsets.push_back(offset);
+    event->adc_ranges.push_back(DAQ_header.WorkingChannelFullScale.at(i));
   }
   
   

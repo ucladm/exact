@@ -29,7 +29,7 @@ int SumChannel::Process(EventData* event)
 
     // add waveform to sum channel
     for (size_t i=0; i<wfm.size(); ++i) {
-      sum[i] += wfm[i];
+      sum[i] += wfm[i]*event->adc_gains[idx]*1000; // ADC gain in V, want mV
     }
     
   }// end loop over channels

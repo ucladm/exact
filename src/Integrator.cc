@@ -26,7 +26,6 @@ int Integrator::Process(EventData* event)
     integrate(bs_wfm, integral);
 
     
-    //event->integrals.push_back(integral);
     
   } // end loop over channels
 

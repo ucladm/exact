@@ -15,10 +15,6 @@ int ZeroSuppressor::Process(EventData* event)
   if (!_enabled)
     return 0;
 
-  int ncounts = 1 << event->adc_bits;
-  double count_size_top = event->adc_range_top*1000. / ncounts; //adc range is in V, waveforms are in mV
-  double count_size_bot = event->adc_range_bot*1000. / ncounts;
-  
   event->zero_suppressed_waveforms.resize(event->nchans);
 
   // Loop over the channels
@@ -30,7 +26,7 @@ int ZeroSuppressor::Process(EventData* event)
     vector<double> & zs_wfm = event->zero_suppressed_waveforms[idx];
     zs_wfm.reserve(bs_wfm.size());
     for (size_t i=0; i<bs_wfm.size(); ++i) {
-      if (std::fabs(bs_wfm[i]) > _threshold*(idx==BOT_CHANNEL_ID ? count_size_bot : count_size_top))
+      if (std::fabs(bs_wfm[i]) > _threshold) //*event->adc_gains[idx])
         zs_wfm.push_back(bs_wfm[i]);
       else
         zs_wfm.push_back(0);
