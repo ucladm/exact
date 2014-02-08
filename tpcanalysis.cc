@@ -120,6 +120,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
   std::ifstream infile(fileList.c_str());
   std::string datafile;
   int total_events=0;
+  
   while (infile >> datafile) {
     DAQ_header.LoadFileName(datafile.c_str());
     if (!DAQ_header.binary_file.is_open()) {
@@ -128,6 +129,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
     }
     DAQ_header.ReadHeaderContent();
     total_events+= DAQ_header.TotEventNbr;
+    DAQ_header.binary_file.close();
   }
   infile.close();
 
@@ -145,7 +147,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
 
     if (evt>max_evt)
       break;
-    
+
     // Open new data file. We've already looped through the files
     // once, so we know we can open them.
     DAQ_header.LoadFileName(datafile.c_str());

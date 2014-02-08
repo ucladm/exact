@@ -15,9 +15,6 @@ int Integrator::Process(EventData* event)
   
   // Loop over channels
   for (int idx = 0; idx<event->nchans; ++idx) {
-
-    if (!event->baseline_validities[idx])
-      return 1;
     
 //    vector<double> const& bs_wfm = event->baseline_subtracted_waveforms[idx];
       vector<double> const& bs_wfm = event->zero_suppressed_waveforms[idx];
@@ -25,8 +22,6 @@ int Integrator::Process(EventData* event)
 
     vector<double> & integral = event->integrals[idx];
     integrate(bs_wfm, integral);
-
-    
     
   } // end loop over channels
 
@@ -46,5 +41,6 @@ void Integrator::integrate(std::vector<double> const&  wfm, std::vector<double> 
   for (size_t i=0; i<wfm.size(); ++i) {
     result[i] = sum;
     sum += wfm[i];
-  } 
+  }
+
 }

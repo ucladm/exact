@@ -33,7 +33,7 @@ all: $(OBJS) $(DICTSRC) $(EXEC1) $(EXEC2)
 
 # compile each class individually; recompile only those with changes
 $(ODIR)/%.o: %.cc $(DEPS)
-	@echo [g++] Compiling class $<
+	@echo [${CC}] Compiling class $<
 	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
 
 # generate dictionary for all classes, including shared dictionary 
@@ -41,28 +41,28 @@ $(ODIR)/%.o: %.cc $(DEPS)
 $(DICTSRC): $(DEPS) $(OBJS)
 	@echo [ROOTCINT] Generating dictionary $(DICTSRC)
 	@rootcint -l -f $(DICTSRC) -c $(DEPS) LinkDef.h
-	@echo [g++] Compiling dictionary $(DICTSRC)
+	@echo [${CC}] Compiling dictionary $(DICTSRC)
 	@$(CC) $(CFLAGS) $(COPTS) -c $(DICTSRC) -o $(DICT).o
-	@echo [g++] Generating shared library $(DICT).so
+	@echo [${CC}] Generating shared library $(DICT).so
 	@$(CC) -shared  -o $(DICT).so  $(OBJS) $(DICT).o $(LIBS)
 
 # compile executable
 $(EXEC1).o : $(EXEC1).cc
-	@echo [g++] Compiling $(EXEC1).cc
+	@echo [${CC}] Compiling $(EXEC1).cc
 	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
 
 $(EXEC2).o : $(EXEC2).cc
-	@echo [g++] Compiling $(EXEC2).cc
+	@echo [${CC}] Compiling $(EXEC2).cc
 	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
 
 # link everything
 $(EXEC1): $(OBJS) $(EXEC1).o
-	@echo [g++] Linking $(EXEC1)
+	@echo [${CC}] Linking $(EXEC1)
 	@$(CC) $(EXEC1).o $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS)
 	@echo [DONE]
 
 $(EXEC2): $(OBJS) $(EXEC2).o
-	@echo [g++] Linking $(EXEC2)
+	@echo [${CC}] Linking $(EXEC2)
 	@$(CC) $(EXEC2).o $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS)
 	@echo [DONE]
 

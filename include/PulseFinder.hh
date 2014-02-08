@@ -37,8 +37,8 @@ private:
 
   void EvaluatePulses(EventData* event);
 
-  void ThresholdSearch(EventData* event);
-  void IntegralSearch(EventData* event);
+  int ThresholdSearch(EventData* event);
+  int IntegralSearch(EventData* event);
 };
 
 

@@ -28,7 +28,14 @@ public:
 private:
   bool _enabled;
 
+  // main threshold to decide if a portion of the waveform should
+  // be zero-suppressed
   double _threshold;
+
+  // once a portion of the waveform is determined to be zero-suppressed,
+  // suppress those samples up to the first sample and past the last sample
+  // that are beyond this threshold
+  double _edge_threshold;
 
 };
 
