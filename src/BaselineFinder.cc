@@ -80,7 +80,6 @@ void BaselineFinder::fixed_baseline(EventData* event)
     }
     else
       event->baseline_validities.push_back(false);
-
   } // end loop over channels
 }
 

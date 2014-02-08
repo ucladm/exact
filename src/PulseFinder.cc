@@ -135,7 +135,8 @@ int PulseFinder::ThresholdSearch(EventData* event)
 }
 
 int PulseFinder::IntegralSearch(EventData* event)
-{  
+{
+
   vector<double> const& waveform = event->sum_waveform;
   vector<double> const& integral = event->sum_integral;
 
@@ -170,7 +171,7 @@ int PulseFinder::IntegralSearch(EventData* event)
         in_pulse = false;
         event->pulse_end_times.push_back(i*_down_sample_factor);
     }
-      
+
   }// end loop over down-sampled integral
 
   event->npulses = event->pulse_start_times.size();
@@ -178,6 +179,6 @@ int PulseFinder::IntegralSearch(EventData* event)
   if(event->pulse_start_times.size()!=event->pulse_end_times.size())
     std::cout<<"the size of pulse_start_times is not equal to pulse_end_times!"<<std::endl;
 
-  return event->npulses;  
+  return event->npulses;
         
 }
