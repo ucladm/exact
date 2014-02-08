@@ -19,7 +19,8 @@ int Integrator::Process(EventData* event)
     if (!event->baseline_validities[idx])
       return 1;
     
-    vector<double> const& bs_wfm = event->baseline_subtracted_waveforms[idx];
+//    vector<double> const& bs_wfm = event->baseline_subtracted_waveforms[idx];
+      vector<double> const& bs_wfm = event->zero_suppressed_waveforms[idx];
 
 
     vector<double> & integral = event->integrals[idx];

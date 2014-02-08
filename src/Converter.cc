@@ -72,7 +72,7 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
     if(i==0)//--- assuming top PMT is always the channel#0 ---
     event->spe_means.push_back(btm_PMT_Gain/2/BOT_PMT_ConvertFactor);
     else
-    event->spe_means.push_back(top_PMT_Gain[i+1]/2/TOP_PMT_ConvertFactor);
+    event->spe_means.push_back(top_PMT_Gain[i-1]/2/TOP_PMT_ConvertFactor);
       
 
     double gain, offset;
