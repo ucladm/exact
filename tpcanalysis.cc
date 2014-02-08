@@ -9,11 +9,11 @@
   
   v0.1 AFan 2013-04-21
 
+  v0.2 AFan 2014-02-07
+  - Multiple files implemented.
+  - 
 
-  2013-04-21
-  implement multiple file processing later
-
- */
+*/
 
 
 #include <iostream>
@@ -29,6 +29,7 @@
 #include "TH1F.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TChain.h"
 #include "TBranch.h"
 
 #include "DAQheader.hh"
@@ -46,10 +47,13 @@
 using namespace std;
 
 
-int ProcessEvents(DAQheader& DAQ_header, string cfgFile)
-//TTree* ProcessEvents(DAQheader& DAQ_header, string cfgFile)
+int ProcessEvents(string fileList, string cfgFile, string outputfile)
 {
 
+  // Instantiate DAQheader
+  DAQheader DAQ_header;
+  if (DAQ_header.FormatTest()==false)
+    std::cout << "ALARM! Variable size doesn't match!" << std::endl;
     
   // Instantiate CfgReader
   CfgReader cfg;
@@ -61,13 +65,13 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile)
   // Create TTree to hold all processd info and open a file
   // to hold the TTree.
   TTree* tree = new TTree("Events", "EventData");
-  TFile* rootfile = new TFile("output.root", "RECREATE");
+  TFile* rootfile = new TFile(outputfile.c_str(), "RECREATE");
+  std::cout << "Saving output to "<<outputfile<<std::endl;
 
 
   // Instantiate EventData; will repopulate this object for each
-  // event. Create a branch to hold all event data.
+  // event. Create a branch for each variable we want to save.
   EventData* event = new EventData();
-  //tree->Branch("EventData", "EventData", &event);
   tree->Branch("run_id",              &(event->run_id));
   tree->Branch("event_id",            &(event->event_id));
   tree->Branch("nchans",              &(event->nchans));
@@ -92,41 +96,87 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile)
   Converter converter(cfg);
   BaselineFinder baselineFinder(cfg);
   ZeroSuppressor zeroSuppressor(cfg);
-  Integrator integrator(cfg);
   SumChannel sumChannel(cfg);
+  Integrator integrator(cfg);
   PulseFinder pulseFinder(cfg);
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
 
-  
-  // -------------------- LOOP OVER EVENTS ------------------------
+
+
+  // -------------------- LOOP OVER FILES -------------------------
+
+
+  // Do a quick loop through the files to find the total number of events.
+  std::ifstream infile(fileList.c_str());
+  std::string datafile;
+  int total_events=0;
+  while (infile >> datafile) {
+    DAQ_header.LoadFileName(datafile.c_str());
+    if (!DAQ_header.binary_file.is_open()) {
+      std::cout << "\nCan't open datafile: "<< datafile.c_str() << std::endl;
+      return 1;
+    }
+    DAQ_header.ReadHeaderContent();
+    total_events+= DAQ_header.TotEventNbr;
+  }
+  infile.close();
+
+  // Determine start and end of event loop.
   int min_evt = cfg.getParam<int>("tpcanalysis", "min", 1);
-  int max_evt = cfg.getParam<int>("tpcanalysis", "max",
-                                  DAQ_header.TotEventNbr);
+  int max_evt = cfg.getParam<int>("tpcanalysis", "max", total_events);
+  int evt = 0;
+  int subfile = -1;
+  int nevents = 0;
   std::cout << "\nBeginning loop over events.\n" << std::endl;
-  for (int evt=min_evt; evt<=max_evt; evt++) {
-    if (evt%10000 == 0)
-      std::cout << "Processing event " << evt << std::endl;
-    event->Clear();
-    event->run_id = 0;
-    event->event_id = evt;
+  
+  // Now loop through files...for real this time.
+  infile.open(fileList.c_str());
+  while (infile >> datafile) {
+
+    if (evt>max_evt)
+      break;
     
-    // Run processing modules on event. ORDER MATTERS!
-    converter.Process(event, DAQ_header); 
-    baselineFinder.Process(event);
-    zeroSuppressor.Process(event);
-    sumChannel.Process(event);
-    integrator.Process(event);
-    pulseFinder.Process(event);
+    // Open new data file. We've already looped through the files
+    // once, so we know we can open them.
+    DAQ_header.LoadFileName(datafile.c_str());
+    std::cout << "Opening file "<<datafile<<std::endl;
+    ++subfile;
+    DAQ_header.ReadHeaderContent();
+
+  
+    // -------------------- LOOP OVER EVENTS ------------------------
+
+    //while (evt++ < max_evt) {
+    for (int n=1; n<DAQ_header.TotEventNbr; n++) {
+      evt++;
+      if (evt<min_evt)
+        continue;
+      if (evt>max_evt)
+        break;
+      if (evt%10000 == 0)
+        std::cout << "Processing event " << evt << std::endl;
+      event->Clear();
+      event->run_id = subfile;
+      event->event_id = n; //evt;
+    
+      // Run processing modules on event. ORDER MATTERS!
+      converter.Process(event, DAQ_header); 
+      baselineFinder.Process(event);
+      zeroSuppressor.Process(event);
+      sumChannel.Process(event);
+      integrator.Process(event);
+      pulseFinder.Process(event);
 
 
     
-    tree->Fill();
+      tree->Fill();
     
+      nevents++;
+    }// end loop over events
 
-  }// end loop over events
-
+  }// end loop over files
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
 
 
@@ -134,8 +184,8 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile)
   tree->Write();
   rootfile->Close();
 
-  return 1;
-  //return tree;
+  //return 1;
+  return nevents;
 }
 
 
@@ -146,36 +196,31 @@ int ProcessEvents(DAQheader& DAQ_header, string cfgFile)
 
 int main(int args, char* argv[]) {
 
-  if (args!=3) {
+  // argv[1] is cfg file
+  // argv[2] is input text file with list of raw data files
+  // argv[3] (optional) is output file
+
+  std::string outputfile = "output.root";
+
+  if (args!=3 && args!=4) {
     std::cout << "Use correct command: ./tpcanalysis <cfg file> <rawdatafile>"
               << std::endl;
     return 1;
   }
+  if (args==4)
+    outputfile = argv[3];
   
   // initialize ROOT application
   TApplication *theApp = new TApplication("app", 0, 0);
   theApp->SetReturnFromRun(false);
 
-  // initialize DAQheader
-  DAQheader DAQ_header;
-  if (DAQ_header.FormatTest()==false)
-    std::cout << "ALARM! Variable size doesn't match!" << std::endl;
-
-  // open raw data file
-  string datafile = argv[2];
-  DAQ_header.LoadFileName(datafile.c_str());
-  if (!DAQ_header.binary_file.is_open()) {
-    std::cout << std::endl << "Can't open datafile: "
-              << datafile.c_str() << std::endl;
-    return 1;
-  }
-  DAQ_header.ReadHeaderContent();
 
   clock_t t = clock();
   
-  ProcessEvents(DAQ_header, argv[1]);
+  int nevents = ProcessEvents(argv[2], argv[1], outputfile);
 
   t = clock() - t;
-  std::cout << "Processing time: "<<((float)t)/CLOCKS_PER_SEC<<" s." << std::endl;
+  std::cout << "Processed "<<nevents<<" events in "<<((float)t)/CLOCKS_PER_SEC<<" s." << std::endl;
+  
   return 1;
 }
