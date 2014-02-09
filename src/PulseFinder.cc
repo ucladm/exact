@@ -55,23 +55,23 @@ void PulseFinder::EvaluatePulses(EventData* event)
     
     for(unsigned int ch=0; ch<event->baseline_subtracted_waveforms.size();ch++){
      
-    vector<double> const& SingleIntegral = event->integrals[ch];
-
+        Pulse_Integral.clear();
+        Pulse_5samp_Extended_Integral.clear();
+        Pulse_10samp_Extended_Integral.clear();
+        
+    vector<double> SingleIntegral = event->integrals[ch];
         int start_point, end_point;
         
         for (int i=0; i<event->npulses; i++) {
             unsigned int start_index = event->TimeToSample(event->pulse_start_times[i]);
-            unsigned int end_index = event->TimeToSample(event->pulse_end_times[i]);
+            unsigned int   end_index = event->TimeToSample(event->pulse_end_times[i]);
             
             //double Pulse_Area = -std::accumulate(SingleWaveform.begin()+start_index, SingleWaveform.begin()+end_index, 0.0);
-            //if(start_index==0)
-              //  start_index = 1;
             double Pulse_Area = SingleIntegral[start_index-1] - SingleIntegral[end_index-1];
-
         
             Pulse_Integral.push_back(Pulse_Area);
-            
-            
+            //std::cout<<"Channel#: "<<ch<<", Pulse#: "<<i<<", Area: "<<Pulse_Area<<std::endl;
+
             
             if((start_index-5)>1)
                 start_point = start_index-5;
