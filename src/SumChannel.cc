@@ -27,6 +27,12 @@ int SumChannel::Process(EventData* event)
       sum.resize(wfm.size());
     }
 
+    if (!event->baseline_validities[idx]) {
+      sum.clear();
+      sum.resize(wfm.size());
+      return 0;
+    }
+
       //std::cout<<event->spe_means[idx]<<std::endl;
       
     // add waveform to sum channel
