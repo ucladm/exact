@@ -100,15 +100,15 @@ void PulseFinder::EvaluatePulses(EventData* event)
             //double Pulse_10samp_Extended_Area = -std::accumulate(SingleWaveform.begin()+start_point, SingleWaveform.begin()+end_point, 0.0);
             double Pulse_10samp_Extended_Area = SingleIntegral[start_point-1] - SingleIntegral[end_point-1];
             Pulse_10samp_Extended_Integral.push_back(Pulse_10samp_Extended_Area);
-
-            
         }
-    }
-    
+        
     event->ch_pulse_integrals.push_back(Pulse_Integral);
     event->ch_5samp_extended_pulse_integrals.push_back(Pulse_5samp_Extended_Integral);
     event->ch_10samp_extended_pulse_integrals.push_back(Pulse_10samp_Extended_Integral);
 
+    }
+    
+   
 }
 
 int PulseFinder::ThresholdSearch(EventData* event)
