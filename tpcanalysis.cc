@@ -211,7 +211,7 @@ int main(int args, char* argv[]) {
   std::string outputfile = "output.root";
 
   if (args!=3 && args!=4) {
-    std::cout << "Use correct command: ./tpcanalysis <cfg file> <rawdatafile>"
+    std::cout << "Use correct command: ./tpcanalysis <cfg file> <rawdatafile> <output ROOT filename>"
               << std::endl;
     return 1;
   }
