@@ -52,17 +52,25 @@ void BaselineFinder::fixed_baseline(EventData* event)
     vector<double> const& raw = event->raw_waveforms[idx];
     double sum = 0;
     double var = 0;
-    const int saturating_count = 127;
-    bool ch_saturated = false;
     int start_samp = event->TimeToSample(_start_time);
     int end_samp = event->TimeToSample(_end_time);
     for (int i = start_samp; i<end_samp; ++i) {
       sum += raw[i];
       var += raw[i]*raw[i];
-        
-        if(raw[i]>=saturating_count)
-            ch_saturated = true;
     }
+      
+      // parameters used for saturation search
+      const int saturating_count = -127;
+      bool ch_saturated = false;
+      
+      for (int i = 0; i<event->nsamps; i++){
+          
+          if(raw[i]<saturating_count){
+              ch_saturated = true;
+              break;
+          }
+      }
+
     event->saturated.push_back(ch_saturated);
       
     double mean = sum/(end_samp-start_samp);
@@ -95,7 +103,7 @@ void BaselineFinder::interpolate_baseline(vector<double> & baseline, int start, 
 void BaselineFinder::moving_baseline(EventData* event)
 {
   // Loop over channels
-    const int saturating_count = 127;
+    const int saturating_count = -126;
          bool ch_saturated = false;
 
   for (size_t idx=0; idx<event->raw_waveforms.size(); idx++) {
@@ -111,7 +119,7 @@ void BaselineFinder::moving_baseline(EventData* event)
     int window_size = _pre_samps+_post_samps+1;
     double last_baseline_samp = 0;
 
-      if(raw[idx]>=saturating_count)
+      if(raw[idx]<=saturating_count)
           ch_saturated = true;
 
     // start the mean off with the very beginning of the waveform
