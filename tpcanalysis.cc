@@ -11,7 +11,8 @@
 
   v0.2 AFan 2014-02-07
   - Multiple files implemented.
-  - 
+  - Use command line switches
+  - Allow event lists
 
 */
 
@@ -19,7 +20,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <time.h> 
+#include <time.h>
+#include <unistd.h> //getopt
 
 
 #include "TROOT.h"
@@ -41,13 +43,15 @@
 #include "Integrator.hh"
 #include "SumChannel.hh"
 #include "PulseFinder.hh"
+#include "AverageWaveforms.hh"
 
 #include <string>
 
 using namespace std;
 
 
-int ProcessEvents(string fileList, string cfgFile, string outputfile)
+int ProcessEvents(string fileList, string cfgFile, string outputfile,
+                  bool use_eventlist, string eventlist)
 {
 
   // Instantiate DAQheader
@@ -58,10 +62,18 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
   // Instantiate CfgReader
   CfgReader cfg;
   if (!cfg.readCfgFile(cfgFile)) {
-    std::cout << "ERROR reading cfg file" << std::endl;
+    std::cout << "ERROR reading cfg file " << cfgFile<<std::endl;
     return 0;
   }
+  else
+    std::cout << "Using cfg file "<<cfgFile<<std::endl;
 
+  ifstream ifs;
+  if (use_eventlist)
+    ifs.open(eventlist.c_str());
+
+
+  
   // Create TTree to hold all processd info and open a file
   // to hold the TTree.
   TTree* tree = new TTree("Events", "EventData");
@@ -93,10 +105,10 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
   tree->Branch("pulse_peak_amps",     &(event->pulse_peak_amps));
   tree->Branch("pulse_integrals",     &(event->pulse_integrals));
 
-    tree->Branch("saturated",                               &(event->saturated));
-    tree->Branch("ch_pulse_integrals",                      &(event->ch_pulse_integrals));
-    tree->Branch("ch_5samp_extended_pulse_integrals",      &(event->ch_5samp_extended_pulse_integrals));
-    tree->Branch("ch_10samp_extended_pulse_integrals",     &(event->ch_10samp_extended_pulse_integrals));
+  tree->Branch("saturated",                               &(event->saturated));
+  tree->Branch("ch_pulse_integrals",                      &(event->ch_pulse_integrals));
+  tree->Branch("ch_5samp_extended_pulse_integrals",      &(event->ch_5samp_extended_pulse_integrals));
+  tree->Branch("ch_10samp_extended_pulse_integrals",     &(event->ch_10samp_extended_pulse_integrals));
 
   
   
@@ -107,10 +119,11 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
   SumChannel sumChannel(cfg);
   Integrator integrator(cfg);
   PulseFinder pulseFinder(cfg);
+  AverageWaveforms avgwfms(cfg);
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
-
+  avgwfms.Initialize();
 
 
   // -------------------- LOOP OVER FILES -------------------------
@@ -140,6 +153,9 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
   int subfile = -1;
   int nevents = 0;
   std::cout << "\nBeginning loop over events.\n" << std::endl;
+
+  int current_event;
+  ifs >> current_event;
   
   // Now loop through files...for real this time.
   infile.open(fileList.c_str());
@@ -158,19 +174,31 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
   
     // -------------------- LOOP OVER EVENTS ------------------------
 
-    //while (evt++ < max_evt) {
     for (int n=1; n<DAQ_header.TotEventNbr; n++) {
       evt++;
       if (evt<min_evt)
         continue;
       if (evt>max_evt)
         break;
-      if (evt%10000 == 0)
-        std::cout << "Processing event " << evt << std::endl;
+
+      // If using event list, step the event loop forward until find matching event
+      if (use_eventlist) {
+        if (n != current_event)
+          continue;
+        else {
+          std::cout << "Processing event " << n << std::endl;
+          ifs >> current_event;
+        }
+      }
+                
+      
+      if (!use_eventlist && evt%10000 == 0)
+        std::cout << "Processing event " << n << std::endl;
       event->Clear();
       event->run_id = subfile;
       event->event_id = n; //evt;
-    
+
+      /////////////////////////////////////////////////////////////
       // Run processing modules on event. ORDER MATTERS!
       converter.Process(event, DAQ_header); 
       baselineFinder.Process(event);
@@ -178,7 +206,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
       sumChannel.Process(event);
       integrator.Process(event);
       pulseFinder.Process(event);
-
+      avgwfms.Process(event);
+      /////////////////////////////////////////////////////////////
 
     
       tree->Fill();
@@ -188,9 +217,11 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
 
   }// end loop over files
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
+  avgwfms.Finalize();
 
-
+  
   // write TTree to file
+  rootfile->cd();
   tree->Write();
   rootfile->Close();
 
@@ -204,30 +235,50 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
 //----------------------------------------------------------------
 
 
-int main(int args, char* argv[]) {
+int main(int argc, char* argv[]) {
 
-  // argv[1] is cfg file
-  // argv[2] is input text file with list of raw data files
-  // argv[3] (optional) is output file
 
+  std::string cfgfile;
+  std::string inputlist;
+  std::string eventlist;
+  bool use_eventlist = false;
   std::string outputfile = "output.root";
 
-  if (args!=3 && args!=4) {
-    std::cout << "Use correct command: ./tpcanalysis <cfg file> <rawdatafile>"
-              << std::endl;
-    return 1;
+  int opt;
+  while ((opt=getopt(argc, argv, "hc:i:o:e:")) != -1) {
+    switch (opt) {
+    case 'h':
+      std::cout << "Usage: [-c cfgfile] [-i inputlist] [-o outputfile]" << std::endl;
+      exit(EXIT_SUCCESS);
+    case 'c':
+      cfgfile = optarg;
+      break;
+    case 'i':
+      inputlist = optarg;
+      break;
+    case 'o':
+      outputfile = optarg;
+      break;
+    case 'e':
+      use_eventlist = true;
+      eventlist = optarg;
+      break;
+    default:
+      std::cout << "Usage: [-c cfgfile] [-i inputlist] [-o outputfile]" << std::endl;
+      exit(EXIT_FAILURE);
+    }
   }
-  if (args==4)
-    outputfile = argv[3];
-  
+
   // initialize ROOT application
   TApplication *theApp = new TApplication("app", 0, 0);
   theApp->SetReturnFromRun(false);
 
 
+  
   clock_t t = clock();
   
-  int nevents = ProcessEvents(argv[2], argv[1], outputfile);
+  int nevents = ProcessEvents(inputlist, cfgfile, outputfile,
+                              use_eventlist, eventlist);
 
   t = clock() - t;
   std::cout << "Processed "<<nevents<<" events in "<<((float)t)/CLOCKS_PER_SEC<<" s." << std::endl;
