@@ -60,18 +60,8 @@ void BaselineFinder::fixed_baseline(EventData* event)
     }
       
       // parameters used for saturation search
-      const int saturating_count = -127;
+      int saturating_count = -128;
       bool ch_saturated = false;
-      
-      for (int i = 0; i<event->nsamps; i++){
-          
-          if(raw[i]<saturating_count){
-              ch_saturated = true;
-              break;
-          }
-      }
-
-    event->saturated.push_back(ch_saturated);
       
     double mean = sum/(end_samp-start_samp);
     event->baseline_means.push_back(mean);
@@ -79,12 +69,23 @@ void BaselineFinder::fixed_baseline(EventData* event)
     
     vector<double> & bs_wfm = event->baseline_subtracted_waveforms[idx];
     bs_wfm.resize(raw.size());
-    if (event->baseline_sigmas[idx] < _threshold) {
+    
+      if (event->baseline_sigmas[idx] < _threshold) {        
       event->baseline_validities.push_back(true);
 
+
       // compute the baseline-subtracted and inverted waveform
-      for (size_t i=0; i<raw.size(); ++i)
-        bs_wfm[i] = raw[i] - mean;
+        for (size_t i=0; i<raw.size(); ++i){
+            bs_wfm[i] = raw[i] - mean;
+        
+            if(raw[i]==saturating_count){
+                ch_saturated = true;
+	//	std::cout<<"found saturation!"<<std::endl;
+	    }
+        }
+
+     event->saturated.push_back(ch_saturated);
+
     }
     else
       event->baseline_validities.push_back(false);
@@ -103,7 +104,8 @@ void BaselineFinder::interpolate_baseline(vector<double> & baseline, int start, 
 void BaselineFinder::moving_baseline(EventData* event)
 {
   // Loop over channels
-    const int saturating_count = -126;
+    
+    const int saturating_count = -128;
          bool ch_saturated = false;
 
   for (size_t idx=0; idx<event->raw_waveforms.size(); idx++) {
@@ -119,7 +121,7 @@ void BaselineFinder::moving_baseline(EventData* event)
     int window_size = _pre_samps+_post_samps+1;
     double last_baseline_samp = 0;
 
-      if(raw[idx]<=saturating_count)
+      if(raw[idx]==saturating_count)
           ch_saturated = true;
 
     // start the mean off with the very beginning of the waveform

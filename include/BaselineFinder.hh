@@ -32,7 +32,8 @@ public:
 private:
   bool   _enabled;
   std::string _mode;
-
+  std::string adc_saturation_count;
+    
   // fixed baseline parameters
   double _start_time;
   double _end_time;

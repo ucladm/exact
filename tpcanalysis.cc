@@ -85,7 +85,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
   tree->Branch("spe_means",           &(event->spe_means));
   tree->Branch("baseline_means",      &(event->baseline_means));
   tree->Branch("baseline_sigmas",     &(event->baseline_sigmas));
-  //tree->Branch("baseline_validities", &(event->baseline_validities));
+  tree->Branch("baseline_validities", &(event->baseline_validities));
   tree->Branch("npulses",             &(event->npulses));
   tree->Branch("pulse_start_times",   &(event->pulse_start_times));
   tree->Branch("pulse_end_times",     &(event->pulse_end_times));
