@@ -59,10 +59,18 @@ void XenonChamber_Processed_AcqirisData_Co57_Analysis()
      */
     
 
-    
-    string ROOT_File = "Run029_Co57_ProcessedData.root";
+    std::ostringstream FileName;
 
-    TFile     *f = new TFile(ROOT_File.c_str(), "READ");
+    std::string RunNbr = "038";
+    std::string Source = "Co57";
+    
+    FileName<<"Run"<<RunNbr<<"_"<<Source<<"_ProcessedData.root";
+    
+    //string ROOT_File = "Run035_Co57_ProcessedData.root";
+    //TFile     *f = new TFile(ROOT_File.c_str(), "READ");
+    
+    TFile     *f = new TFile(FileName.str().c_str(), "READ");
+
     TTree *tData = (TTree*)f->Get("Events");
     
     
@@ -139,7 +147,8 @@ void XenonChamber_Processed_AcqirisData_Co57_Analysis()
     TCanvas *Canvas_TopPMT_S1 = new TCanvas("Canvas_TopPMT_S1", "Canvas_TopPMT_S1", 2000, 1000);
     TCanvas *Canvas_BtmPMT_S1 = new TCanvas("Canvas_BtmPMT_S1", "Canvas_BtmPMT_S1", 2000, 1000);
 
-    TH1F    *hist_S1 = new TH1F("hist_S1", "", 600, 100, 2500);
+    
+    TH1F    *hist_S1 = new TH1F("hist_S1", "", 400, 100, 2500);
     
     //hist_S1->SetStats(0);
     hist_S1->SetTitleSize(0.05);
@@ -150,7 +159,7 @@ void XenonChamber_Processed_AcqirisData_Co57_Analysis()
     hist_S1->GetYaxis()->SetTitle("[Counts/Bin]");
     hist_S1->GetYaxis()->CenterTitle(false);
     hist_S1->GetYaxis()->SetTitleSize(0.03);
-    hist_S1->SetTitle("Run029 S1 from ^{57}Co Calibration ");
+    hist_S1->SetTitle(Form("Run%s S1 from ^{57}Co Calibration", RunNbr.c_str()));
     hist_S1->SetLineColor(38);
 
     
@@ -186,7 +195,7 @@ void XenonChamber_Processed_AcqirisData_Co57_Analysis()
 
     
     
-    TF1* Gaus_Func = new TF1("Gaus_Func","gaus",700,1100);
+    TF1* Gaus_Func = new TF1("Gaus_Func","gaus",800,1300);
     
     //TF1* Gaus_Co57_xRay_Func = new TF1("Gaus_Func","gaus",200,400);
     
@@ -255,15 +264,15 @@ void XenonChamber_Processed_AcqirisData_Co57_Analysis()
     //hist_S1->Fit(Gaus_Co57_xRay_Func,"R+");
     hist_S1->Draw("SAMES");
 
-    c0->SaveAs("ScENE_XenonChamber_Run029_Co57_S1_Spectrum.pdf");
-    c0->SaveAs("ScENE_XenonChamber_Run029_Co57_S1_Spectrum.eps");
+    c0->SaveAs(Form("ScENE_XenonChamber_Run%s_%s_S1_Spectrum.pdf", RunNbr.c_str(), Source.c_str()));
+    c0->SaveAs(Form("ScENE_XenonChamber_Run%s_%s_S1_Spectrum.eps", RunNbr.c_str(), Source.c_str()));
     //*/
     
     
     
     Canvas_TopPMT_S1->cd();
     
-    TopPMT_S1[0].SetMaximum(1700.);
+    TopPMT_S1[0].SetMaximum(2300.);
     TopPMT_S1[0].SetMinimum(0.);
     
     TopPMT_S1[0].SetStats(0);
@@ -273,7 +282,7 @@ void XenonChamber_Processed_AcqirisData_Co57_Analysis()
     TopPMT_S1[0].GetYaxis()->SetTitle("[Counts/Bin]");
     TopPMT_S1[0].GetYaxis()->CenterTitle(false);
     TopPMT_S1[0].GetYaxis()->SetTitleSize(0.03);
-    TopPMT_S1[0].SetTitle(" Top 1-inch PMT Array S1 Comparison ");
+    TopPMT_S1[0].SetTitle(Form("Run%s Top 1-inch PMT Array S1 Comparison", RunNbr.c_str()));
     TopPMT_S1[0].Draw("");
 
     for(int t=1; t<TopPMT_HistNbr; t++)
@@ -283,13 +292,17 @@ void XenonChamber_Processed_AcqirisData_Co57_Analysis()
     TLegend* leg0 = new TLegend(0.7,0.55,0.9,0.9);
     leg0->SetFillColor(0);
     
+    leg0->AddEntry(&TopPMT_S1[0],   Form("Channel_%i S1 Spectrum", 1), "L");
+
     for(int t=1; t<TopPMT_HistNbr; t++)
-        leg0->AddEntry(&TopPMT_S1[t],   Form("Channel_%i S1 Spectrum", t), "L");
+        leg0->AddEntry(&TopPMT_S1[t],   Form("Channel_%i S1 Spectrum", (t+1)), "L");
     
     leg0->SetTextSize(0.02);
     leg0->Draw("SAME");
 
-    
+    Canvas_TopPMT_S1->SaveAs(Form("ScENE_XenonChamber_Run%s_%s_TopPMT_S1_Pattern.pdf", RunNbr.c_str(), Source.c_str()));
+    Canvas_TopPMT_S1->SaveAs(Form("ScENE_XenonChamber_Run%s_%s_TopPMT_S1_Pattern.eps", RunNbr.c_str(), Source.c_str()));
+
     
     
     Canvas_BtmPMT_S1->cd();
@@ -301,9 +314,14 @@ void XenonChamber_Processed_AcqirisData_Co57_Analysis()
     BtmPMT_S1->GetYaxis()->SetTitle("[Counts/Bin]");
     BtmPMT_S1->GetYaxis()->CenterTitle(false);
     BtmPMT_S1->GetYaxis()->SetTitleSize(0.03);
-    BtmPMT_S1->SetTitle(" Bottom 3-inch PMT Array S1 ");
+    BtmPMT_S1->SetTitle(Form("Run%s Bottom 3-inch PMT Array S1", RunNbr.c_str()));
 
     BtmPMT_S1->Draw("");
+    
+    Canvas_BtmPMT_S1->SaveAs(Form("ScENE_XenonChamber_Run%s_%s_BtmPMT_S1.pdf", RunNbr.c_str(), Source.c_str()));
+    Canvas_BtmPMT_S1->SaveAs(Form("ScENE_XenonChamber_Run%s_%s_BtmPMT_S1.eps", RunNbr.c_str(), Source.c_str()));
+
+    
     
     //c1->SetLogy();
     /*

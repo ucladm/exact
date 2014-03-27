@@ -21,7 +21,7 @@ TH1F* OneDimHist(std::string HistName, std::string Title="Title", std::string xA
     hist->SetTitleSize(0.05);
     hist->SetFillColor(FillColorNbr);
     hist->SetLineColor(LineColorNbr);
-    hist->SetLineWidth(3);
+    hist->SetLineWidth(1);
     
     return hist;
     
