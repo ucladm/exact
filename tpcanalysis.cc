@@ -78,9 +78,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   
   // Create TTree to hold all processd info and open a file
   // to hold the TTree.
-  //TTree* tree = new TTree("Events", "EventData");
   TFile* rootfile = new TFile(outputfile.c_str(), "RECREATE");
-  //std::cout << "Saving output to "<<outputfile<<std::endl;
+  std::cout << "Saving output to "<<outputfile<<std::endl;
 
 
   // Instantiate EventData; will repopulate this object for each
@@ -103,7 +102,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
   avgwfms.Initialize();
-  eventDataWriter.Initialize(rootfile);
+  eventDataWriter.Initialize();
 
 
   // -------------------- LOOP OVER FILES -------------------------
@@ -191,15 +190,13 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       /////////////////////////////////////////////////////////////
 
     
-      //tree->Fill();
-      
       nevents++;
     }// end loop over events
 
   }// end loop over files
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
-  avgwfms.Finalize();
-  eventDataWriter.Finalize();
+  avgwfms.Finalize(rootfile);
+  eventDataWriter.Finalize(rootfile);
 
   
   // write TTree to file

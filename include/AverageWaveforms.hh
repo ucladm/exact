@@ -20,6 +20,7 @@
 #include "TGraph.h"
 #include "TGraphErrors.h"
 #include "TAxis.h"
+#include "TFile.h"
 
 class AverageWaveforms
 {
@@ -27,7 +28,7 @@ public:
   AverageWaveforms(CfgReader const& cfg);
   void Initialize();
   int Process(EventData* event);
-  void Finalize();
+  void Finalize(TFile* f);
 
   std::string module_name;
 

@@ -59,7 +59,7 @@ int AverageWaveforms::Process(EventData* event)
 }
 
 
-void AverageWaveforms::Finalize()
+void AverageWaveforms::Finalize(TFile* f)
 {
   //TFile* outfile = new TFile("output.root", "RECREATE");
   // save the number of events in each channel in a histogram
@@ -88,6 +88,7 @@ void AverageWaveforms::Finalize()
     h->SetBinContent(ch, _nevents[ch]);
   }
   h->SetStats(kFALSE);
+  f->cd();
   h->Write();
   //  outfile->Close();
 

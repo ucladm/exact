@@ -26,9 +26,9 @@ class EventDataWriter
 {
 public:
   EventDataWriter(CfgReader const& cfg);
-  void Initialize(TFile* f);
+  void Initialize();
   int Process(EventData* event);
-  void Finalize();
+  void Finalize(TFile* f);
 
   std::string module_name;
   
@@ -36,8 +36,7 @@ private:
   
   bool _enabled;
 
-  TFile* _outfile;
-  EventData* _event;
+  //EventData* _event;
   TTree* _tree;
 };
 
