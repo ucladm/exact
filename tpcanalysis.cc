@@ -44,11 +44,13 @@
 #include "SumChannel.hh"
 #include "PulseFinder.hh"
 #include "AverageWaveforms.hh"
+#include "EventDataWriter.hh"
 
 #include <string>
 
 using namespace std;
 
+#define NCHANS 8
 
 int ProcessEvents(string fileList, string cfgFile, string outputfile,
                   bool use_eventlist, string eventlist)
@@ -76,39 +78,15 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   
   // Create TTree to hold all processd info and open a file
   // to hold the TTree.
-  TTree* tree = new TTree("Events", "EventData");
+  //TTree* tree = new TTree("Events", "EventData");
   TFile* rootfile = new TFile(outputfile.c_str(), "RECREATE");
-  std::cout << "Saving output to "<<outputfile<<std::endl;
+  //std::cout << "Saving output to "<<outputfile<<std::endl;
 
 
   // Instantiate EventData; will repopulate this object for each
   // event. Create a branch for each variable we want to save.
   EventData* event = new EventData();
-  tree->Branch("run_id",              &(event->run_id));
-  tree->Branch("event_id",            &(event->event_id));
-  tree->Branch("nchans",              &(event->nchans));
-  tree->Branch("nsamps",              &(event->nsamps));
-  tree->Branch("us_per_samp",         &(event->us_per_samp));
-  tree->Branch("trigger_index",       &(event->trigger_index));
-  tree->Branch("trigger_index_offset",&(event->trigger_index_offset));
-  tree->Branch("adc_gains",           &(event->adc_gains));
-  tree->Branch("adc_offsets",         &(event->adc_offsets));
-  tree->Branch("adc_ranges",          &(event->adc_ranges));
-  tree->Branch("spe_means",           &(event->spe_means));
-  tree->Branch("baseline_means",      &(event->baseline_means));
-  tree->Branch("baseline_sigmas",     &(event->baseline_sigmas));
-  //tree->Branch("baseline_validities", &(event->baseline_validities));
-  tree->Branch("npulses",             &(event->npulses));
-  tree->Branch("pulse_start_times",   &(event->pulse_start_times));
-  tree->Branch("pulse_end_times",     &(event->pulse_end_times));
-  tree->Branch("pulse_peak_times",    &(event->pulse_peak_times));
-  tree->Branch("pulse_peak_amps",     &(event->pulse_peak_amps));
-  tree->Branch("pulse_integrals",     &(event->pulse_integrals));
-
-  tree->Branch("saturated",                               &(event->saturated));
-  tree->Branch("ch_pulse_integrals",                      &(event->ch_pulse_integrals));
-  tree->Branch("ch_5samp_extended_pulse_integrals",      &(event->ch_5samp_extended_pulse_integrals));
-  tree->Branch("ch_10samp_extended_pulse_integrals",     &(event->ch_10samp_extended_pulse_integrals));
+  
 
   
   
@@ -120,10 +98,12 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   Integrator integrator(cfg);
   PulseFinder pulseFinder(cfg);
   AverageWaveforms avgwfms(cfg);
+  EventDataWriter eventDataWriter(cfg);
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
   avgwfms.Initialize();
+  eventDataWriter.Initialize(rootfile);
 
 
   // -------------------- LOOP OVER FILES -------------------------
@@ -207,22 +187,24 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       integrator.Process(event);
       pulseFinder.Process(event);
       avgwfms.Process(event);
+      eventDataWriter.Process(event);
       /////////////////////////////////////////////////////////////
 
     
-      tree->Fill();
-    
+      //tree->Fill();
+      
       nevents++;
     }// end loop over events
 
   }// end loop over files
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
   avgwfms.Finalize();
+  eventDataWriter.Finalize();
 
   
   // write TTree to file
-  rootfile->cd();
-  tree->Write();
+  //rootfile->cd();
+  //tree->Write();
   rootfile->Close();
 
   //return 1;

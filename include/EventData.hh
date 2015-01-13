@@ -6,7 +6,7 @@
 
   v0.1 AFan 2013-05-01
   
- */
+*/
 
 #ifndef EventData_hh
 #define EventData_hh
@@ -58,13 +58,13 @@ public:
     pulse_peak_amps.clear();
     pulse_integrals.clear();
       
-      //------------------
-      saturated.clear();
-      ch_pulse_integrals.clear();
-      ch_pulse_peak_amps.clear();
-      ch_5samp_extended_pulse_integrals.clear();
-      ch_10samp_extended_pulse_integrals.clear();
-      //------------------
+    //------------------
+    saturated.clear();
+    //ch_pulse_integrals.clear();
+    //ch_pulse_peak_amps.clear();
+    //ch_5samp_extended_pulse_integrals.clear();
+    //ch_10samp_extended_pulse_integrals.clear();
+    //------------------
 
   }
 
@@ -112,12 +112,12 @@ public:
 
   //------------------
     
-    vector<bool> saturated;
+  vector<bool> saturated;
     
-    vector< vector<double> > ch_pulse_integrals;
-    vector< vector<double> > ch_pulse_peak_amps;
-    vector< vector<double> > ch_5samp_extended_pulse_integrals;
-    vector< vector<double> > ch_10samp_extended_pulse_integrals;
+  //vector< vector<double> > ch_pulse_integrals;
+  //vector< vector<double> > ch_pulse_peak_amps;
+  //vector< vector<double> > ch_5samp_extended_pulse_integrals;
+  //vector< vector<double> > ch_10samp_extended_pulse_integrals;
     
   //------------------
 
