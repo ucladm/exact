@@ -48,23 +48,22 @@ class DAQheader{
 
 public:
 
-  char FileName[300];                               //---- Binary File Name -----
+  char FileName[300];                             //Binary File Name
 
-  int HeaderSize;                                   //---- Header Section Size (unit: byte), include information on file level (TotEvtNbr, TriggerLevel etc.) ----
+  int HeaderSize;                                 //Header Section Size (unit: byte), include information on file level (TotEvtNbr, TriggerLevel etc.)
 
-  int EventDataSize;				    //---- single event includes all channels data, also the time stamp: #1. UTC time, #2, plus milli-seconds ------				
-  int ChannelDataSize;				    //---- single channel includes #1. the vGain, #2. the vOffset, #3.samples from waveform ----------
+  int EventDataSize;                              //single event includes all channels data, also the time stamp: #1. UTC time, #2, plus milli-seconds
+  int ChannelDataSize;                            //single channel includes #1. the vGain, #2. the vOffset, #3.samples from waveform
     
   int TotWorkingChannelNbr;
   int TriggerChannelNbr;
 
-  int TotEventNbr;                                   //---- total event numbers in raw data file ------
-  int TotSampleNbr;                                  //---- total sample number of single event ------
+  int TotEventNbr;                                //total event numbers in raw data file
+  int TotSampleNbr;                               //total sample number of single event
 
-  double TimeInterval;                               //---- sampling rate (unit: sec) --------
-  double TimeDelay;                                  //---- the trigger position within event (unit: percentage, 50 indicates 50%) ----
-
-  double TriggerLevel;                               //---- Trigger Threshold (unit: mV, default sign is negtive)
+  double TimeInterval;                            //sampling rate (unit: sec)
+  double TimeDelay;                               //the trigger position within event (unit: percentage, 50 indicates 50%)
+  double TriggerLevel;                            //Trigger Threshold (unit: mV, default sign is negtive)
 
   std::vector<int>     WorkingChannelNbr;
   std::vector<double>  WorkingChannelFullScale;
@@ -74,17 +73,12 @@ public:
 	
 
   bool FormatTest();
-    
   void WriteHeaderContent();
-    
   void LoadFileName(std::string File);
-
   void ReadHeaderContent();
-
   //void WriteEvtTime();
 
   std::vector<double> ReadSingleChannel(int EventNbr, int ChannelNbr, double & gain, double & offset);
-    
   std::vector< std::vector<double> > ReadEvent(int EventNbr);
 
   int getNchans() const { return TotWorkingChannelNbr; }

@@ -72,27 +72,20 @@ void DAQheader::WriteHeaderContent(){
   binary_file.write((char*)&TotWorkingChannelNbr,sizeof(TotWorkingChannelNbr));
   binary_file.write((char*)&TriggerChannelNbr,sizeof(TriggerChannelNbr));
 
-
   if(int(WorkingChannelNbr.size())!=TotWorkingChannelNbr){
     std::cout<<"ERROR! \n In DAQ output configueration, the working channel# are NOT consistent! "<<std::endl;
     abort();
   }
 
-
   for(int i=0; i<TotWorkingChannelNbr; i++){
-
     int	     tempChannelNbr = WorkingChannelNbr[i];
     double   tempChannelScale = WorkingChannelFullScale[i];
     double   tempChannelOffset = WorkingChannelOffset[i];
-
 
     binary_file.write((char*)&tempChannelNbr,	      sizeof(tempChannelNbr));
     binary_file.write((char*)&tempChannelScale,       sizeof(tempChannelScale));
     binary_file.write((char*)&tempChannelOffset,      sizeof(tempChannelOffset));
   }
-
-    
-    
 }
 
 
@@ -144,7 +137,7 @@ void DAQheader::ReadHeaderContent(){
 
 
   binary_file.read(FileName,sizeof(FileName));
-    
+  
   binary_file.read((char*)&TotEventNbr,sizeof(TotEventNbr));
   binary_file.read((char*)&TotSampleNbr,sizeof(TotSampleNbr));
     
@@ -196,40 +189,31 @@ std::vector<double> DAQheader::ReadSingleChannel(int EventNbr, int ChannelNbr, d
   std::vector<double> SampleArray;
     
   const int ChannelDataLength = (TotSampleNbr + 2*DoubleTypeSize);
-    
   const int EventDataLength = ChannelDataLength*TotWorkingChannelNbr + DoubleTypeSize + IntTypeSize;
-    
+  
   int  ChannelOrder = 0;
-    
-    
+  
   if(EventNbr>TotEventNbr){
     std::cout<<"ERROR! \n the expected event exceeds the TotEventNbr! "<<std::endl;
     abort();
   }
     
   //----------- Check channel whether exist ---------- 
-    
   bool ChannelExist = false;
-    
   for(int k=0; k<TotWorkingChannelNbr; k++){
-        
     if(WorkingChannelNbr[k]==ChannelNbr){
-                
       ChannelOrder = k;
       ChannelExist = true;
       break;
     }
-  }
-    
+  }    
   if(!ChannelExist){
-            
     std::cout<<"ERROR! \n the expected channel is not recorded! "<<std::endl;
     abort();
   }
   //---------------------------------------------------
         
   const long int StartPoint = HeaderSize + (EventNbr-1)*EventDataLength + ChannelDataLength*ChannelOrder + (IntTypeSize + DoubleTypeSize);
-
         
   double vGain;
   double vOffset;
@@ -242,17 +226,11 @@ std::vector<double> DAQheader::ReadSingleChannel(int EventNbr, int ChannelNbr, d
   //std::cout<<"Gain: "<<vGain<<", Offset: "<<vOffset<<std::endl;
     
   for(long int k=0; k<TotSampleNbr; k++){
-           
     char Sample;
-        
     binary_file.read((char*)&Sample,  sizeof(Sample));
-        
     //double Value = (vGain*int(Sample)- vOffset)*1000;
     double Value = 1.0*int(Sample);
-
     SampleArray.push_back(Value);
-        
-
   }
 
   gain = vGain;
