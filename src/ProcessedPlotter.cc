@@ -7,23 +7,32 @@
 #include "TLegend.h"
 #include "TList.h"
 
+#include "TEveManager.h"
+#include "TEveBrowser.h"
+
+
 int colors[] = {kBlack, kRed, kGreen, kCyan, kBlue, kMagenta, kYellow, kGray+2,
 		kOrange-3, kGreen+3, kCyan+3, kMagenta-5, kRed-2};
 int ncolors = sizeof(colors)/sizeof(int);
 
+
+TCanvas* gCanvas = 0;
+
+
+
 ProcessedPlotter::ProcessedPlotter(CfgReader const& cfg):
   module_name("ProcessedPlotter"),
   _enabled(cfg.getParam<bool>(module_name, "enabled", 0)),
-  _chans_per_pad(cfg.getParam<int>(module_name, "chans_per_pad", 1)),
-  _graphix(0),
-  _canvas(0)
-
+  _chans_per_pad(cfg.getParam<int>(module_name, "chans_per_pad", 1))
 { }
 
-void ProcessedPlotter::Initialize(TCanvas* canvas, RootGraphix* graphix)
+void ProcessedPlotter::Initialize()
 {
-  _canvas = canvas;
-  _graphix = graphix;
+  // create an embedded canvas
+  gEve->GetBrowser()->StartEmbedding(1);
+  gCanvas = new TCanvas;
+  gEve->GetBrowser()->StopEmbedding("EventViewer");
+  
 }
 
 
@@ -31,11 +40,10 @@ int ProcessedPlotter::Process(EventData* event)
 {
   if (!_enabled)
     return 1;
-  RootGraphix::Lock glock = _graphix->AcquireLock();
-  _canvas->Clear();
+  gCanvas->Clear();
   char title[30];
   sprintf(title, "Run %d - Event %d", event->run_id, event->event_id);
-  _canvas->SetTitle(title);
+  gCanvas->SetTitle(title);
 
   int nchans = event->nchans;
 
@@ -48,24 +56,24 @@ int ProcessedPlotter::Process(EventData* event)
     return 0;
   else if(total_pads == 1) {}
   else if(total_pads == 2)
-    _canvas->Divide(2,1);
+    gCanvas->Divide(2,1);
   else if(total_pads < 5)
-    _canvas->Divide(2,2);
+    gCanvas->Divide(2,2);
   else if(total_pads < 7)
-    _canvas->Divide(3,2);
+    gCanvas->Divide(3,2);
   else if(total_pads < 10)
-    _canvas->Divide(3,3);
+    gCanvas->Divide(3,3);
   else if(total_pads < 13)
-    _canvas->Divide(4,3);
+    gCanvas->Divide(4,3);
   else if(total_pads < 17)
-    _canvas->Divide(4,4);
+    gCanvas->Divide(4,4);
   else
-    _canvas->Divide(5,4);
+    gCanvas->Divide(5,4);
 
 
   //TODO clean up: remove chans_per_pad
   for (int pad=0; pad<total_pads; pad++) {
-    _canvas->cd( (total_pads == 1 ? 0 : pad+1 ) );
+    gCanvas->cd( (total_pads == 1 ? 0 : pad+1 ) );
     if( cpp == 1 || nchans == 1 ) {
       if (pad != total_pads-1) {
         event->GetTMultiGraph(event->channel_ids[pad]);
@@ -80,8 +88,8 @@ int ProcessedPlotter::Process(EventData* event)
     
   }
 
-  _canvas->cd(0);
-  _canvas->Update();
+  gCanvas->cd(0);
+  gCanvas->Update();
 
   return 1;
 }

@@ -45,7 +45,7 @@ public:
   Type getParam(string moduleName,
                 string paramName,
                 Type defValue,
-                bool useDefValue) const;
+                bool useDefValue=false) const;
 
   
 private:
@@ -111,7 +111,7 @@ template <typename Type> inline
 Type CfgReader::getParam(string moduleName,
                          string paramName,
                          Type defValue,
-                         bool useDefValue=false) const
+                         bool useDefValue) const
 {
   if (!cfgIsInit) {
     cout << "ERROR: CfgReader not initialized!!!" << endl;

@@ -46,11 +46,8 @@
 #include "AverageWaveforms.hh"
 #include "EventDataWriter.hh"
 
-#include <string>
 
 using namespace std;
-
-#define NCHANS 8
 
 int ProcessEvents(string fileList, string cfgFile, string outputfile,
                   bool use_eventlist, string eventlist)
@@ -199,12 +196,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   eventDataWriter.Finalize(rootfile);
 
   
-  // write TTree to file
-  //rootfile->cd();
-  //tree->Write();
   rootfile->Close();
 
-  //return 1;
   return nevents;
 }
 

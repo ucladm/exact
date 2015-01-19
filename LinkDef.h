@@ -1,3 +1,6 @@
+#ifndef LinkDef_h
+#define LinkDef_h
+
 /*
   based mostly on genroot.
 
@@ -16,5 +19,14 @@
 using namespace std;
 
 #ifdef __MAKECINT__
+#pragma link off all globals;
+#pragma link off all classes;
+#pragma link off all functions;
+#pragma link C++ nestedclasses;
+
 #pragma link C++ class EventData+;
+#pragma link C++ class EventNavigator+;
+#endif
+
+
 #endif

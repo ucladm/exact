@@ -42,7 +42,7 @@ void EventDataWriter::Initialize()
   //_tree->Branch("ch_5samp_extended_pulse_integrals",      &(ptr->ch_5samp_extended_pulse_integrals));
   //_tree->Branch("ch_10samp_extended_pulse_integrals",     &(ptr->ch_10samp_extended_pulse_integrals));
 
-  delete ptr;
+  //delete ptr;
 }
 
 int EventDataWriter::Process(EventData* event)

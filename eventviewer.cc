@@ -23,7 +23,9 @@
 #include <fstream>
 
 
+
 #include "TApplication.h"
+#include "TRint.h"
 #include "TCanvas.h"
 #include "TH1F.h"
 #include "TFile.h"
@@ -32,6 +34,14 @@
 #include "TSystem.h"
 #include "TTimer.h"
 #include "TRootCanvas.h"
+
+#include "TEveManager.h"
+#include "TEveBrowser.h"
+#include <TQObject.h>
+#include <RQ_OBJECT.h>
+#include "TSystem.h"
+#include "TGButton.h"
+
 
 #include "DAQheader.hh"
 #include "CfgReader.hh"
@@ -44,96 +54,48 @@
 #include "PulseFinder.hh"
 #include "ProcessedPlotter.hh"
 #include "RootGraphix.hh"
-
-#include <string>
+#include "EventProcessor.hh"
+#include "EventNavigator.hh"
 
 using namespace std;
 
+extern EventProcessor* gEventProcessor;
 
-
-int ProcessEvents(DAQheader& DAQ_header, string cfgFile )
+void make_gui()
 {
+  TEveBrowser* browser = gEve->GetBrowser();
+  browser->StartEmbedding(TRootBrowser::kLeft);
+  
 
-    
-  // Instantiate CfgReader
-  CfgReader cfg;
-  if (!cfg.readCfgFile(cfgFile)) {
-    std::cout << "ERROR reading cfg file" << std::endl;
-    return 0;
+  TGMainFrame* frmMain = new TGMainFrame(gClient->GetRoot(), 1000, 600);
+  frmMain->SetWindowName("XX GUI");
+  frmMain->SetCleanup(kDeepCleanup);
+
+  
+  TGHorizontalFrame* hf = new TGHorizontalFrame(frmMain);
+  {
+      
+    TString icondir( Form("%s/icons/", gSystem->Getenv("ROOTSYS")) );
+    TGPictureButton* b = 0;
+    EventNavigator    *fh = new EventNavigator;
+
+    b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoBack.gif"));
+    hf->AddFrame(b);
+    b->Connect("Clicked()", "EventNavigator", fh, "Bck()");
+
+    b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoForward.gif"));
+    hf->AddFrame(b);
+    b->Connect("Clicked()", "EventNavigator", fh, "Fwd()");
   }
-
-
-  // Repopulate these objects for each new event
-  EventData* event = new EventData();
-  TCanvas* c = new TCanvas("c", "c");
-
+  frmMain->AddFrame(hf);
   
-  //------------------- INSTANTIATE ALL MODULES -------------------
-  Converter converter(cfg);
-  BaselineFinder baselineFinder(cfg);
-  ZeroSuppressor zeroSuppressor(cfg);
-  SumChannel sumChannel(cfg);
-  Integrator integrator(cfg);
-  PulseFinder pulseFinder(cfg);
+  frmMain->MapSubwindows();
+  frmMain->Resize();
+  frmMain->MapWindow();
 
-  ProcessedPlotter plotter(cfg);
-
-
-  //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
-  RootGraphix* graphix = new RootGraphix;
-  graphix->Initialize();
-  plotter.Initialize(c, graphix);
-  
-  
-  //---------------------- DRAW AN EVENT --------------------------
-  int evt = 1;
-  std::string line;
-  while (line!="q") {
-    
-    event->Clear();
-    event->run_id = 0;
-    event->event_id = evt;
-
-    // Run all the modules. ORDER MATTERS!
-    converter.Process(event, DAQ_header);
-    baselineFinder.Process(event);
-    zeroSuppressor.Process(event);
-    sumChannel.Process(event);
-    integrator.Process(event);
-    pulseFinder.Process(event);
-    plotter.Process(event);
-    gPad->Modified();
-    gPad->Update();
-
-
-    // Decide what to do next
-    cout << "Enter option: " << endl
-         << "  <enter> for next event" << endl
-         << "  b for prev event" << endl
-         << "  # for event_id #" << endl
-         << "  q to quit" << endl;
-    
-    getline(std::cin, line);
-
-    // read and interpret command line input
-    if (line=="")
-      evt++;
-    else if (line=="b")
-      evt--;
-    else if (line=="q"||line=="Q")
-      break;
-    else
-      evt = atoi(line.c_str());
-
-  }
-
-
-  
-  graphix->Finalize();
-  if (c) delete c;
-  return 1;
+  browser->StopEmbedding();
+  browser->SetTabTitle("Event Control", 0);
 }
-
 
 //----------------------------------------------------------------
 //----------------------------------------------------------------
@@ -152,21 +114,31 @@ int main(int args, char* argv[]) {
   TApplication *theApp = new TApplication("app", 0, 0);
   theApp->SetReturnFromRun(true);
   //theApp->ProcessFile(".rootstart.C");
+  
+  TEveManager::Create();
 
-  // initialize DAQheader
-  DAQheader DAQ_header;
-  if (DAQ_header.FormatTest()==false)
-    std::cout << "ALARM! Variable size doesn't match!" << std::endl;
-
-  // open raw data file
-  string datafile = argv[2];
-  DAQ_header.LoadFileName(datafile.c_str());
-  if (!DAQ_header.binary_file.is_open()) {
-    std::cout << std::endl << "Can't open datafile: "
-              << datafile.c_str() << std::endl;
-    return 1;
+  make_gui();
+  
+  string cfgFile = argv[1];
+  
+  // Instantiate CfgReader
+  CfgReader cfg;
+  if (!cfg.readCfgFile(cfgFile)) {
+    std::cout << "ERROR reading cfg file" << std::endl;
+    return 0;
   }
-  DAQ_header.ReadHeaderContent();
 
-  return ProcessEvents(DAQ_header, argv[1]);
+
+  
+  string datafile = argv[2];
+
+  gEventProcessor = new EventProcessor(cfg, datafile);
+
+  gEventProcessor->Initialize();
+  
+  gEventProcessor->ProcessEvent(1);
+  
+  theApp->Run();
+  
+  return 0;
 }

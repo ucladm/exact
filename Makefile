@@ -6,7 +6,7 @@ ODIR = src
 COPTS =	-fPIC -DLINUX -Wall \
         $(shell root-config --cflags) 
 
-LIBS = $(shell root-config --glibs)
+LIBS = $(shell root-config --glibs) -lEve -lRGL
 
 CFLAGS = -c -g -Wall -I$(IDIR)
 VPATH = src
@@ -63,7 +63,7 @@ $(EXEC1): $(OBJS) $(EXEC1).o
 
 $(EXEC2): $(OBJS) $(EXEC2).o
 	@echo [${CC}] Linking $(EXEC2)
-	@$(CC) $(EXEC2).o $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS)
+	@$(CC) $(EXEC2).o $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS) 
 	@echo [DONE]
 
 

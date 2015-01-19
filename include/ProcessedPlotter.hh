@@ -14,7 +14,7 @@
 
 #include "EventData.hh"
 #include "CfgReader.hh"
-#include "RootGraphix.hh"
+//#include "RootGraphix.hh"
 #include <string>
 #include <iostream>
 
@@ -26,11 +26,13 @@ class ProcessedPlotter
 {
 public:
   ProcessedPlotter(CfgReader const& cfg);
-  void Initialize(TCanvas* canvas, RootGraphix* graphix);
+  //void Initialize(TCanvas* canvas, RootGraphix* graphix);
+  //void Initialize(TCanvas* canvas);
+  void Initialize();
   int Process(EventData* event);
   void Finalize();
   
-  const TCanvas* GetCanvas() { return _canvas; }
+  //const TCanvas* GetCanvas() { return _canvas; }
 
   std::string module_name;  
 
@@ -38,8 +40,6 @@ private:
 
   bool _enabled;
   int _chans_per_pad;
-  RootGraphix* _graphix;
-  TCanvas* _canvas;
   std::vector<TLegend*> _legends;
 
 
