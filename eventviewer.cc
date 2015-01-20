@@ -41,7 +41,7 @@
 #include "TGButton.h"
 #include "TGNumberEntry.h"
 #include "TGLabel.h"
-
+#include "TGLayout.h"
 
 #include "DAQheader.hh"
 #include "CfgReader.hh"
@@ -61,7 +61,7 @@ using namespace std;
 
 // These global variables are instantiated in EventProcessor.cc
 extern EventProcessor* gEventProcessor;
-extern TGNumberEntry* gEventNumberEntry;
+extern TGNumberEntryField* gEventNumberEntry;
 
 void make_gui()
 {
@@ -76,16 +76,32 @@ void make_gui()
   frmMain->SetCleanup(kDeepCleanup);
   
   TString icondir( Form("%s/icons/", gSystem->Getenv("ROOTSYS")) );
-  
+  TGLayoutHints* lh = new TGLayoutHints(kLHintsNormal, 0,0,4,0);
   TGHorizontalFrame* hf = new TGHorizontalFrame(frmMain);
   {
     TGPictureButton* b = 0;
     TGLabel* blabel = 0;
 
-    blabel = new TGLabel(hf, " \n Prev \n ");
+    blabel = new TGLabel(hf, " Next ");
     blabel->SetTextJustify(kTextCenterY);
-    b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoBack.gif"));
-    hf->AddFrame(blabel);
+    b = new TGPictureButton(hf, gClient->GetPicture(icondir+"tb_forw.xpm"));
+    hf->AddFrame(blabel,lh);
+    hf->AddFrame(b);
+    b->Connect("Clicked()", "EventNavigator", eNav, "Fwd()");
+
+
+  }
+  frmMain->AddFrame(hf);
+
+  hf = new TGHorizontalFrame(frmMain);
+  {
+    TGPictureButton* b = 0;
+    TGLabel* blabel = 0;
+
+    blabel = new TGLabel(hf, " Prev ");
+    blabel->SetTextJustify(kTextCenterY);
+    b = new TGPictureButton(hf, gClient->GetPicture(icondir+"tb_back.xpm"));
+    hf->AddFrame(blabel, lh);
     hf->AddFrame(b);
     b->Connect("Clicked()", "EventNavigator", eNav, "Bck()");
   }
@@ -93,30 +109,16 @@ void make_gui()
 
   hf = new TGHorizontalFrame(frmMain);
   {
-    TGPictureButton* b = 0;
-    TGLabel* blabel = 0;
-
-    blabel = new TGLabel(hf, " \n Next \n ");
-    blabel->SetTextJustify(kTextCenterY);
-    b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoForward.gif"));
-    hf->AddFrame(blabel);
-    hf->AddFrame(b);
-    b->Connect("Clicked()", "EventNavigator", eNav, "Fwd()");
-  }
-  frmMain->AddFrame(hf);
-
-  hf = new TGHorizontalFrame(frmMain);
-  {
     // ability to jump to event
     TGLabel* eventNbrLabel = new TGLabel(hf, " Go to event # " );
-    gEventNumberEntry = new TGNumberEntry(hf, 0, 7, -1,
-                                          TGNumberFormat::kNESInteger,
-                                          TGNumberFormat::kNEAAnyNumber,
-                                          TGNumberFormat::kNELLimitMinMax,
-                                          0, 10000000);
-    hf->AddFrame(eventNbrLabel);
+    gEventNumberEntry = new TGNumberEntryField(hf, 0, 0,
+                                               TGNumberFormat::kNESInteger,
+                                               TGNumberFormat::kNEAPositive,
+                                               TGNumberFormat::kNELLimitMinMax,
+                                               0, 10000000);
+    hf->AddFrame(eventNbrLabel,lh);
     hf->AddFrame(gEventNumberEntry);
-    gEventNumberEntry->Connect("ValueSet(Long_t)", "EventNavigator", eNav, "GotoEvent()");
+    gEventNumberEntry->Connect("ReturnPressed()", "EventNavigator", eNav, "GotoEvent()");
   }
   frmMain->AddFrame(hf);
 

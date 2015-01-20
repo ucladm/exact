@@ -4,7 +4,7 @@
 
 int gEventID = 1;
 EventProcessor* gEventProcessor = 0;
-TGNumberEntry* gEventNumberEntry = 0;
+TGNumberEntryField* gEventNumberEntry = 0;
 
 void EventNavigator::Fwd()
 {
@@ -29,13 +29,13 @@ void EventNavigator::Bck()
 }
 
 void EventNavigator::GotoEvent() {
-  gEventID  = gEventNumberEntry->GetNumber();
-  if (gEventID <= 1) {
-    std::cout << "Event ID too low!" << std::endl;
+  gEventID  = gEventNumberEntry->GetIntNumber();
+  if (gEventID < 1) {
+    std::cout << "Event ID too low! Going to first event." << std::endl;
     gEventID = 1;
   }
-  else if (gEventID >= gEventProcessor->nevents) {
-    std::cout << "Event ID beyond file!" << std::endl;
+  else if (gEventID > gEventProcessor->nevents) {
+    std::cout << "Event ID beyond file! Going to last event." << std::endl;
     gEventID = gEventProcessor->nevents;
   }
   gEventProcessor->ProcessEvent(gEventID);
