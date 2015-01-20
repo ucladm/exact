@@ -1,5 +1,5 @@
 #include "EventDataWriter.hh"
-
+#include "ChannelData.hh"
 #include <iostream>
 
 EventDataWriter::EventDataWriter(CfgReader const& cfg):
@@ -25,48 +25,68 @@ void EventDataWriter::Initialize()
   _tree->Branch("trigger_index",         &(ptr->trigger_index),            "trigger_index/I");
   _tree->Branch("trigger_index_offset",  &(ptr->trigger_index_offset),     "trigger_index_offset/I");
 
-  /*
-  // channel level metadata
-  _tree->Branch("channel_id",            &(ptr->channel_id[0]),            "channel_id[nchans]/I");
-  _tree->Branch("adc_gain",              &(ptr->adc_gain[0]),              "adc_gain[nchans]/F");
-  _tree->Branch("adc_offset",            &(ptr->adc_offset[0]),            "adc_offset[nchans]/F");
-  _tree->Branch("adc_range",             &(ptr->adc_range[0]),             "adc_range[nchans]/F");
+  const int max_nchans = 8;
+  
+  int channel_id[max_nchans];
+  double spe_mean[max_nchans];
+  bool saturated[max_nchans];
+  double baseline_mean[max_nchans];
+  
+  _tree->Branch("channel_id", channel_id, "channel_id[nchans]/I");
+  _tree->Branch("spe_mean", spe_mean, "spe_mean[nchans]/D");
+  _tree->Branch("saturated", saturated, "saturated[nchans]/O");
+  _tree->Branch("baseline_mean", baseline_mean, "baseline_mean[nchans]/D");
 
-  // laser calibration info
-  _tree->Branch("spe_mean",             &(ptr->spe_mean[0]),                "spe_mean[nchans]/D");
-
-  // baseline finder 
-  _tree->Branch("baseline_means",        &(ptr->baseline_means),           "baseline_means[NCHANS]/F");
-  //_tree->Branch("baseline_sigmas",       &(ptr->baseline_sigmas),          "baseline_sigmas[NCHANS]/F");
-  ////_tree->Branch("baseline_validities",   &(ptr->baseline_validities),      "baseline_validities[NCHANS]/I");
-  _tree->Branch("npulses",               &(ptr->npulses),                  "npulses/I");
-  _tree->Branch("pulse_start_times",     &(ptr->pulse_start_times[0]),     "pulse_start_times[npulses]/D");
-  //_tree->Branch("pulse_end_times",       &(ptr->pulse_end_times),          "pulse_end_times[npulses]/F");
-  //_tree->Branch("pulse_peak_times",      &(ptr->pulse_peak_times),         "pulse_peak_times[npulses]/F");
-  //_tree->Branch("pulse_peak_amps",       &(ptr->pulse_peak_amps),          "pulse_peak_amps[npulses]/F");
-  _tree->Branch("pulse_integrals",       &(ptr->pulse_integrals[0]),          "pulse_integrals[npulses]/D");
-
-  //_tree->Branch("saturated",             &(ptr->saturated),                "saturated[npulses]/I");
-  //_tree->Branch("ch_pulse_integrals",    &(ptr->ch_pulse_integrals));
-  //_tree->Branch("ch_5samp_extended_pulse_integrals",      &(ptr->ch_5samp_extended_pulse_integrals));
-  //_tree->Branch("ch_10samp_extended_pulse_integrals",     &(ptr->ch_10samp_extended_pulse_integrals));
-
-  */
+  _tree->Branch("npulses", &(ptr->npulses), "npulses/I");
+ 
 }
 
 int EventDataWriter::Process(EventData* event)
 {
   EventData* ptr = event;
+
+  // Event metadata
   _tree->SetBranchAddress("run_id",              &(ptr->run_id));
   _tree->SetBranchAddress("event_id",            &(ptr->event_id));
   _tree->SetBranchAddress("nchans",              &(ptr->nchans));
-  //_tree->SetBranchAddress("adc_gain",            &(ptr->adc_gain[0]));
-  //_tree->SetBranchAddress("adc_offset",          &(ptr->adc_offset[0]));
-  //_tree->SetBranchAddress("npulses",             &(ptr->npulses));
-  //_tree->SetBranchAddress("pulse_start_times",   &(ptr->pulse_start_times[0]));
-  //_tree->SetBranchAddress("pulse_integrals",     &(ptr->pulse_integrals[0]));
+  _tree->SetBranchAddress("nsamps",              &(ptr->nsamps));
+  _tree->SetBranchAddress("us_per_samp",         &(ptr->us_per_samp));
+  _tree->SetBranchAddress("trigger_index",       &(ptr->trigger_index));
+  _tree->SetBranchAddress("trigger_index_offset",&(ptr->trigger_index_offset));
+
+  // The rest of the branches must be filled by looping over the ChannelData or PulseData objects.
+
+  const int nchans = ptr->nchans;
+
+  int channel_id[nchans];
+  double spe_mean[nchans];
+  bool saturated[nchans];
+  double baseline_mean[nchans];
+  
+  // loop over channels
+  for (int chID = 0; chID<nchans; ++chID) {
+
+    if (chID != event->channels[chID]->channel_id) {
+      std::cout << "[" << module_name << "] "
+                << "unexpected channel ID!"<<std::endl;
+      return 0;
+    }
+
+    ChannelData* ch = event->GetChannel(chID);
+
+    channel_id[chID] = ch->channel_id;
+    spe_mean[chID] = ch->spe_mean;
+    saturated[chID] = ch->saturated;
+    baseline_mean[chID] = ch->baseline_mean;
+  } // loop over channels
+  
+  _tree->SetBranchAddress("channel_id", channel_id);
+  _tree->SetBranchAddress("spe_mean", spe_mean);
+  _tree->SetBranchAddress("saturated", saturated);
+  _tree->SetBranchAddress("baseline_mean", baseline_mean);
 
 
+  _tree->SetBranchAddress("npulses", &(ptr->npulses));
 
   _tree->Fill();
   
