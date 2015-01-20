@@ -1,8 +1,10 @@
 #include "BaselineFinder.hh"
+#include "ChannelData.hh"
 #include <cmath>
 #include <vector>
 #include <algorithm>
 #include <numeric>
+
 
 #define BASELINE_INIT -999
 
@@ -28,7 +30,7 @@ int BaselineFinder::Process(EventData* event)
   if (!_enabled)
     return 0;
 
-  event->baseline_subtracted_waveforms.resize(event->nchans);
+  //event->baseline_subtracted_waveforms.resize(event->nchans);
   
   if (_mode == "FIXED")
     fixed_baseline(event);
@@ -49,7 +51,10 @@ void BaselineFinder::fixed_baseline(EventData* event)
 {
   // Loop over channels
   for (int idx = 0; idx<event->nchans; ++idx) {
-    vector<double> const& raw = event->raw_waveforms[idx];
+
+    ChannelData* channel = event->GetChannel(idx);
+    
+    vector<double> const& raw = channel->raw_waveform;
     double sum = 0;
     double var = 0;
     int start_samp = event->TimeToSample(_start_time);
@@ -59,35 +64,35 @@ void BaselineFinder::fixed_baseline(EventData* event)
       var += raw[i]*raw[i];
     }
       
-      // parameters used for saturation search
-      const int saturating_count = -127;
-      bool ch_saturated = false;
+    // parameters used for saturation search
+    const int saturating_count = -127;
+    bool ch_saturated = false;
       
-      for (int i = 0; i<event->nsamps; i++){
+    for (int i = 0; i<event->nsamps; i++){
           
-          if(raw[i]<saturating_count){
-              ch_saturated = true;
-              break;
-          }
+      if(raw[i]<saturating_count){
+        ch_saturated = true;
+        break;
       }
+    }
 
-    event->saturated.push_back(ch_saturated);
+    channel->saturated = ch_saturated;
       
     double mean = sum/(end_samp-start_samp);
-    event->baseline_means.push_back(mean);
-    event->baseline_sigmas.push_back( sqrt(var/(end_samp - start_samp) - mean*mean) );
+    channel->baseline_mean = mean;
+    channel->baseline_sigma = sqrt(var/(end_samp - start_samp) - mean*mean);
     
-    vector<double> & bs_wfm = event->baseline_subtracted_waveforms[idx];
+    vector<double> & bs_wfm = channel->baseline_subtracted_waveform;
     bs_wfm.resize(raw.size());
-    if (event->baseline_sigmas[idx] < _threshold) {
-      event->baseline_validities.push_back(true);
+    if (channel->baseline_sigma < _threshold) {
+      channel->baseline_valid = true;
 
       // compute the baseline-subtracted and inverted waveform
       for (size_t i=0; i<raw.size(); ++i)
         bs_wfm[i] = raw[i] - mean;
     }
     else
-      event->baseline_validities.push_back(false);
+      channel->baseline_valid = false;
   } // end loop over channels
 }
 
@@ -103,13 +108,15 @@ void BaselineFinder::interpolate_baseline(vector<double> & baseline, int start, 
 void BaselineFinder::moving_baseline(EventData* event)
 {
   // Loop over channels
-    const int saturating_count = -126;
-         bool ch_saturated = false;
+  const int saturating_count = -126;
+  bool ch_saturated = false;
 
-  for (size_t idx=0; idx<event->raw_waveforms.size(); idx++) {
+  for (int idx=0; idx<event->nchans; idx++) {
 
-    vector<double> const& raw = event->raw_waveforms[idx];
-    int const nsamps = event->nsamps;
+    ChannelData* channel = event->GetChannel(idx);
+    
+    vector<double> const& raw = channel->raw_waveform;
+    const int nsamps = event->nsamps;
     vector<double> baseline(nsamps, BASELINE_INIT);
     bool in_baseline = false;
     int baseline_start = -1; // start point of baseline. fill in waveform start to baseline_start after main loop.
@@ -119,8 +126,8 @@ void BaselineFinder::moving_baseline(EventData* event)
     int window_size = _pre_samps+_post_samps+1;
     double last_baseline_samp = 0;
 
-      if(raw[idx]<=saturating_count)
-          ch_saturated = true;
+    if(raw[idx]<=saturating_count)
+      ch_saturated = true;
 
     // start the mean off with the very beginning of the waveform
 
@@ -178,7 +185,8 @@ void BaselineFinder::moving_baseline(EventData* event)
 
     
     // subtract off the baseline
-    vector<double> & bswfm = event->baseline_subtracted_waveforms[idx];
+    vector<double> & bswfm = channel->baseline_subtracted_waveform;
+    bswfm.resize(nsamps);
     
     for (int samp=0; samp<nsamps; samp++) {
 
@@ -204,10 +212,10 @@ void BaselineFinder::moving_baseline(EventData* event)
      
     }
     
-    event->saturated.push_back(ch_saturated);
-    event->baseline_means.push_back(1);
-    event->baseline_sigmas.push_back(1);
-    event->baseline_validities.push_back(true);
+    channel->saturated = ch_saturated;
+    channel->baseline_mean = 1;
+    channel->baseline_sigma = 1;
+    channel->baseline_valid = true;
     //event->baseline_subtracted_waveforms.push_back(bswfm);
 
     

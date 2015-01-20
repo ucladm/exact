@@ -16,6 +16,7 @@ void EventDataWriter::Initialize()
   _tree = new TTree("Events", "Reconstructed data tree");
   EventData* ptr = new EventData();
 
+  // event level metadata
   _tree->Branch("run_id",                &(ptr->run_id),                   "run_id/I");
   _tree->Branch("event_id",              &(ptr->event_id),                 "event_id/I");
   _tree->Branch("nchans",                &(ptr->nchans),                   "nchans/I");
@@ -23,11 +24,19 @@ void EventDataWriter::Initialize()
   _tree->Branch("us_per_samp",           &(ptr->us_per_samp),              "us_per_samp/D");
   _tree->Branch("trigger_index",         &(ptr->trigger_index),            "trigger_index/I");
   _tree->Branch("trigger_index_offset",  &(ptr->trigger_index_offset),     "trigger_index_offset/I");
-  _tree->Branch("adc_gains",             &(ptr->adc_gains[0]),             "adc_gains[nchans]/D");
-  _tree->Branch("adc_offsets",           &(ptr->adc_offsets[0]),           "adc_offsets[nchans]/D");
-  //_tree->Branch("adc_ranges",            &(ptr->adc_ranges),               "adc_ranges[NCHANS]/F");
-  //_tree->Branch("spe_means",             &(ptr->spe_means),                "spe_means[NCHANS]/F");
-  //_tree->Branch("baseline_means",        &(ptr->baseline_means),           "baseline_means[NCHANS]/F");
+
+  /*
+  // channel level metadata
+  _tree->Branch("channel_id",            &(ptr->channel_id[0]),            "channel_id[nchans]/I");
+  _tree->Branch("adc_gain",              &(ptr->adc_gain[0]),              "adc_gain[nchans]/F");
+  _tree->Branch("adc_offset",            &(ptr->adc_offset[0]),            "adc_offset[nchans]/F");
+  _tree->Branch("adc_range",             &(ptr->adc_range[0]),             "adc_range[nchans]/F");
+
+  // laser calibration info
+  _tree->Branch("spe_mean",             &(ptr->spe_mean[0]),                "spe_mean[nchans]/D");
+
+  // baseline finder 
+  _tree->Branch("baseline_means",        &(ptr->baseline_means),           "baseline_means[NCHANS]/F");
   //_tree->Branch("baseline_sigmas",       &(ptr->baseline_sigmas),          "baseline_sigmas[NCHANS]/F");
   ////_tree->Branch("baseline_validities",   &(ptr->baseline_validities),      "baseline_validities[NCHANS]/I");
   _tree->Branch("npulses",               &(ptr->npulses),                  "npulses/I");
@@ -42,7 +51,7 @@ void EventDataWriter::Initialize()
   //_tree->Branch("ch_5samp_extended_pulse_integrals",      &(ptr->ch_5samp_extended_pulse_integrals));
   //_tree->Branch("ch_10samp_extended_pulse_integrals",     &(ptr->ch_10samp_extended_pulse_integrals));
 
-  //delete ptr;
+  */
 }
 
 int EventDataWriter::Process(EventData* event)
@@ -51,11 +60,11 @@ int EventDataWriter::Process(EventData* event)
   _tree->SetBranchAddress("run_id",              &(ptr->run_id));
   _tree->SetBranchAddress("event_id",            &(ptr->event_id));
   _tree->SetBranchAddress("nchans",              &(ptr->nchans));
-  _tree->SetBranchAddress("adc_gains",           &(ptr->adc_gains[0]));
-  _tree->SetBranchAddress("adc_offsets",         &(ptr->adc_offsets[0]));
-  _tree->SetBranchAddress("npulses",             &(ptr->npulses));
-  _tree->SetBranchAddress("pulse_start_times",   &(ptr->pulse_start_times[0]));
-  _tree->SetBranchAddress("pulse_integrals",     &(ptr->pulse_integrals[0]));
+  //_tree->SetBranchAddress("adc_gain",            &(ptr->adc_gain[0]));
+  //_tree->SetBranchAddress("adc_offset",          &(ptr->adc_offset[0]));
+  //_tree->SetBranchAddress("npulses",             &(ptr->npulses));
+  //_tree->SetBranchAddress("pulse_start_times",   &(ptr->pulse_start_times[0]));
+  //_tree->SetBranchAddress("pulse_integrals",     &(ptr->pulse_integrals[0]));
 
 
 

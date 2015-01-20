@@ -28,7 +28,7 @@ int AverageWaveforms::Process(EventData* event)
 
   // Loop over channels
   for (int ch = 0; ch<event->nchans; ++ch) {
-    vector<double> const& waveform = event->baseline_subtracted_waveforms[ch];
+    vector<double> const& waveform = event->GetChannel(ch)->baseline_subtracted_waveform;
 
 
     // Initialize the TGraphErrors

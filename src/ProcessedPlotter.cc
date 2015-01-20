@@ -76,7 +76,7 @@ int ProcessedPlotter::Process(EventData* event)
     gCanvas->cd( (total_pads == 1 ? 0 : pad+1 ) );
     if( cpp == 1 || nchans == 1 ) {
       if (pad != total_pads-1) {
-        event->GetTMultiGraph(event->channel_ids[pad]);
+        event->GetTMultiGraph(event->GetChannel(pad)->channel_id);
         gPad->Modified();
       }
       else {

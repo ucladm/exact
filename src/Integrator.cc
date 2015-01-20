@@ -1,4 +1,5 @@
 #include "Integrator.hh"
+#include "ChannelData.hh"
 
 Integrator::Integrator(CfgReader const& cfg):
   module_name("Integrator"),
@@ -11,23 +12,25 @@ int Integrator::Process(EventData* event)
   if (!_enabled)
     return 0;
 
-  event->integrals.resize(event->nchans);
+  //event->integrals.resize(event->nchans);
   
   // Loop over channels
   for (int idx = 0; idx<event->nchans; ++idx) {
+
+    ChannelData* channel = event->GetChannel(idx);
     
 //    vector<double> const& bs_wfm = event->baseline_subtracted_waveforms[idx];
-      vector<double> const& bs_wfm = event->zero_suppressed_waveforms[idx];
+      vector<double> const& bs_wfm = channel->zero_suppressed_waveform;
 
 
-    vector<double> & integral = event->integrals[idx];
+    vector<double> & integral = channel->integral_waveform;
     integrate(bs_wfm, integral);
     
   } // end loop over channels
 
   //Now integrate the sum channel
-  vector<double> const& sum_wfm = event->sum_waveform;
-  vector<double> & sum_integral = event->sum_integral;
+  vector<double> const& sum_wfm = event->sumchannel->raw_waveform;
+  vector<double> & sum_integral = event->sumchannel->integral_waveform;
 
   integrate(sum_wfm, sum_integral);
          

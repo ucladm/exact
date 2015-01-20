@@ -1,5 +1,5 @@
 #include "Converter.hh"
-
+#include "ChannelData.hh"
 #include <iostream>
 #include <map>
 #include <algorithm> //sort
@@ -59,9 +59,12 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
   // DAQ channel numbers are 1-indexed. Want global channel IDs to be 0-indexed. Presumably, DAQ
   // channel numbers are in order. Check anyway.
   for (int i=0; i<DAQ_header.getNchans(); ++i) {
-      
-    event->daq_channel_nums.push_back(DAQ_header.WorkingChannelNbr.at(i));
-    event->channel_ids.push_back(i);
+
+    ChannelData* channel = new ChannelData();
+
+
+    channel->daq_channel_num = DAQ_header.WorkingChannelNbr.at(i);
+    channel->channel_id = channel->daq_channel_num-1; // These are separate in case I want to renumber things.
 
       if (DAQ_header.WorkingChannelNbr.at(i) != i+1) {
           std::cerr << "Event "<<event->event_id<<": Unexpected channel order!"<<std::endl;
@@ -70,18 +73,19 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
       
     
     if(i==0)//--- assuming top PMT is always the channel#0 ---
-    event->spe_means.push_back(btm_PMT_Gain/2/BOT_PMT_ConvertFactor);
+      channel->spe_mean = btm_PMT_Gain/2/BOT_PMT_ConvertFactor;
     else
-    event->spe_means.push_back(top_PMT_Gain[i-1]/2/TOP_PMT_ConvertFactor);
+      channel->spe_mean = top_PMT_Gain[i-1]/2/TOP_PMT_ConvertFactor;
       
 
     double gain, offset;
-    event->raw_waveforms.push_back(DAQ_header.ReadSingleChannel(event->event_id,
-                                                                DAQ_header.WorkingChannelNbr.at(i),
-                                                                gain,offset));
-    event->adc_gains.push_back(gain);
-    event->adc_offsets.push_back(offset);
-    event->adc_ranges.push_back(DAQ_header.WorkingChannelFullScale.at(i));
+    channel->raw_waveform = DAQ_header.ReadSingleChannel(event->event_id,
+                                                        DAQ_header.WorkingChannelNbr.at(i),
+                                                         gain,offset);
+    channel->adc_gain = gain;
+    channel->adc_offset = offset;
+    channel->adc_range = DAQ_header.WorkingChannelFullScale.at(i);
+    event->channels.push_back(channel);
   }
   
   
@@ -90,7 +94,7 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
   // If >0, trim start of top channels, and end of bottom channel.
   // If <0, trim start of bottom channel, and end of top channels.
   for (int ch=0; ch<event->nchans; ch++) {
-    std::vector<double> & waveform = event->raw_waveforms[ch];
+    std::vector<double> & waveform = event->GetChannel(ch)->raw_waveform;
     if (ch==BOT_CHANNEL_ID) {
       if (_trigger_index_offset < 0)
         waveform.erase(waveform.begin(), waveform.begin() - _trigger_index_offset);

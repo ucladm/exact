@@ -1,5 +1,5 @@
 #include "ZeroSuppressor.hh"
-
+#include "ChannelData.hh"
 #include <cmath>
 #include <algorithm>
 #include <vector>
@@ -18,19 +18,21 @@ int ZeroSuppressor::Process(EventData* event)
   if (!_enabled)
     return 0;
 
-  event->zero_suppressed_waveforms.resize(event->nchans);
+  //event->zero_suppressed_waveforms.resize(event->nchans);
 
   // Loop over the channels
   for (int idx = 0; idx<event->nchans; ++idx) {
 
-    vector<double> const& bs_wfm = event->baseline_subtracted_waveforms[idx];
-    vector<double> & zs_wfm = event->zero_suppressed_waveforms[idx];
+    ChannelData* channel = event->GetChannel(idx);
+    
+    vector<double> const& bs_wfm = channel->baseline_subtracted_waveform;
+    vector<double> & zs_wfm = channel->zero_suppressed_waveform;
 
     // initialize the waveform to zeros
     zs_wfm.clear();
     zs_wfm.resize(bs_wfm.size());
 
-    if (!event->baseline_validities[idx])
+    if (!channel->baseline_valid)
       continue;
 
     // Look for regions that are past _threshold. If in such a region,
@@ -70,9 +72,7 @@ int ZeroSuppressor::Process(EventData* event)
       
     }// end loop over samps
 
-
   }// end loop over channels
   
-
   return 1;
 }

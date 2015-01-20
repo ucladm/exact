@@ -39,17 +39,21 @@ int PulseFinder::Process(EventData* event)
 
 void PulseFinder::EvaluatePulses(EventData* event)
 {
-  vector<double> const& waveform = event->sum_waveform;
+  vector<double> const& waveform = event->sumchannel->raw_waveform;
   
   for (int i=0; i<event->npulses; i++) {
-    int start_index = event->TimeToSample(event->pulse_start_times[i]);
-    int end_index = event->TimeToSample(event->pulse_end_times[i]);
+    int start_index = event->TimeToSample(event->pulses[i]->start_time);
+    int end_index = event->TimeToSample(event->pulses[i]->end_time);
     int peak_index = std::min_element(waveform.begin() + start_index, waveform.begin() + end_index)-waveform.begin();
-    event->pulse_peak_times.push_back(event->SampleToTime(peak_index));
-    event->pulse_peak_amps.push_back(waveform[peak_index]);
-    event->pulse_integrals.push_back(event->sum_integral[start_index-1] - event->sum_integral[end_index-1]);
+    event->pulses[i]->peak_time = event->SampleToTime(peak_index);
+    event->pulses[i]->peak_amp = waveform[peak_index];
+    event->pulses[i]->integral = event->sumchannel->integral_waveform[start_index-1] - event->sumchannel->integral_waveform[end_index-1];
+    
+    //event->pulse_peak_times.push_back(event->SampleToTime(peak_index));
+    //event->pulse_peak_amps.push_back(waveform[peak_index]);
+    //event->pulse_integrals.push_back(event->sum_integral[start_index-1] - event->sum_integral[end_index-1]);
   }
-  
+  /*
   vector<double> Pulse_5samp_Extended_Integral;
   vector<double> Pulse_10samp_Extended_Integral;
   vector<double> Pulse_Integral;
@@ -68,15 +72,12 @@ void PulseFinder::EvaluatePulses(EventData* event)
       unsigned int   end_index = event->TimeToSample(event->pulse_end_times[i]);
             
 
-      /*
-        The integral from each channel is the integration of zero-supressed waveform.
-             
-        the pulse area calculated on individual channels is converted into #PE. 
-      */
+        //The integral from each channel is the integration of zero-supressed waveform.
+        //the pulse area calculated on individual channels is converted into #PE. 
             
                         
       //double Pulse_Area = SingleIntegral[start_index-1] - SingleIntegral[end_index-1]; //--- the ADC counts from zero-supressed wavform ---
-      double Pulse_Area = (SingleIntegral[start_index-1] - SingleIntegral[end_index-1])*event->adc_gains[ch]*1000*2/event->spe_means[ch]; //--- #PE ----
+      double Pulse_Area = (SingleIntegral[start_index-1] - SingleIntegral[end_index-1])*event->adc_gain[ch]*1000*2/event->spe_mean[ch]; //--- #PE ----
 
       Pulse_Integral.push_back(Pulse_Area);
       //std::cout<<"Channel#: "<<ch<<", Pulse#: "<<i<<", Area: "<<Pulse_Area<<std::endl;
@@ -93,7 +94,7 @@ void PulseFinder::EvaluatePulses(EventData* event)
             
       //double Pulse_5samp_Extended_Area = -std::accumulate(SingleWaveform.begin()+start_point, SingleWaveform.begin()+end_point, 0.0);
       //double Pulse_5samp_Extended_Area = SingleIntegral[start_point-1] - SingleIntegral[end_point-1]; //--- the ADC counts from zero-supressed wavform ---
-      double Pulse_5samp_Extended_Area = (SingleIntegral[start_point-1] - SingleIntegral[end_point-1])*event->adc_gains[ch]*1000*2/event->spe_means[ch];
+      double Pulse_5samp_Extended_Area = (SingleIntegral[start_point-1] - SingleIntegral[end_point-1])*event->adc_gain[ch]*1000*2/event->spe_mean[ch];
 
       Pulse_5samp_Extended_Integral.push_back(Pulse_5samp_Extended_Area);
             
@@ -110,7 +111,7 @@ void PulseFinder::EvaluatePulses(EventData* event)
             
       //double Pulse_10samp_Extended_Area = -std::accumulate(SingleWaveform.begin()+start_point, SingleWaveform.begin()+end_point, 0.0);
       //double Pulse_10samp_Extended_Area = SingleIntegral[start_point-1] - SingleIntegral[end_point-1]; //--- the ADC counts from zero-supressed wavform ---
-      double Pulse_10samp_Extended_Area = (SingleIntegral[start_point-1] - SingleIntegral[end_point-1])*event->adc_gains[ch]*1000*2/event->spe_means[ch];
+      double Pulse_10samp_Extended_Area = (SingleIntegral[start_point-1] - SingleIntegral[end_point-1])*event->adc_gain[ch]*1000*2/event->spe_mean[ch];
       Pulse_10samp_Extended_Integral.push_back(Pulse_10samp_Extended_Area);
     }
         
@@ -118,39 +119,41 @@ void PulseFinder::EvaluatePulses(EventData* event)
     //event->ch_5samp_extended_pulse_integrals.push_back(Pulse_5samp_Extended_Integral);
     //event->ch_10samp_extended_pulse_integrals.push_back(Pulse_10samp_Extended_Integral);
 
-  } // loop over channels
-    
+    } // loop over channels
+  */
    
 }
 
 int PulseFinder::ThresholdSearch(EventData* event)
 {
-  vector<double> const& waveform = event->sum_waveform;
+  vector<double> const& waveform = event->sumchannel->raw_waveform;
 
   bool in_pulse = false;
   for (size_t i=1; i<waveform.size(); i++) {
     if (!in_pulse) {
       if (waveform[i] < _pulse_start_threshold) {
         in_pulse = true;
-        event->pulse_start_times.push_back(event->SampleToTime(i));
+        event->pulses.push_back(new PulseData());
+        event->pulses.back()->start_time = event->SampleToTime(i);
       }
     }
     else { //in_pulse
       if (waveform[i] > _pulse_start_threshold) {
         in_pulse = false;
-        event->pulse_end_times.push_back(event->SampleToTime(i));
+        event->pulses.back()->end_time = event->SampleToTime(i);
       }
     }
   }
-  event->npulses = std::min(event->pulse_start_times.size(), event->pulse_end_times.size());
+  //event->npulses = std::min(event->pulse_start_times.size(), event->pulse_end_times.size());
+  event->npulses = event->pulses.size();
   return event->npulses;
 }
 
 int PulseFinder::IntegralSearch(EventData* event)
 {
 
-  vector<double> const& waveform = event->sum_waveform;
-  vector<double> const& integral = event->sum_integral;
+  vector<double> const& waveform = event->sumchannel->raw_waveform;
+  vector<double> const& integral = event->sumchannel->integral_waveform;
 
   // create down-sampled integral waveform
   int ds_wfm_nsamps = (int) event->nsamps / _down_sample_factor;
@@ -169,27 +172,28 @@ int PulseFinder::IntegralSearch(EventData* event)
       //now do fine-grained search for pulse start point
       for (int ii=(i-2)*_down_sample_factor; ii<i*_down_sample_factor; ii++) {
         if (waveform[ii] < _pulse_start_amp) {
-          event->pulse_start_times.push_back(event->SampleToTime(ii-1));
+          event->pulses.push_back(new PulseData());
+          event->pulses.back()->start_time = event->SampleToTime(ii-1);
           break;
         }
       }//end fine-grained search
     }
     else if (in_pulse && (std::fabs(ds_integral[i]-ds_integral[i-1]) < std::fabs(_pulse_end_threshold)) ) {
       in_pulse = false;
-      event->pulse_end_times.push_back(event->SampleToTime(i*_down_sample_factor));
+      event->pulses.back()->end_time = event->SampleToTime(i*_down_sample_factor);
     }
 
     if(in_pulse &&(i==ds_wfm_nsamps-1)){
       in_pulse = false;
-      event->pulse_end_times.push_back(i*_down_sample_factor);
+      event->pulses.back()->end_time = i*_down_sample_factor;
     }
 
   }// end loop over down-sampled integral
 
-  event->npulses = event->pulse_start_times.size();
+  event->npulses = event->pulses.size();
     
-  if(event->pulse_start_times.size()!=event->pulse_end_times.size())
-    std::cout<<"the size of pulse_start_times is not equal to pulse_end_times!"<<std::endl;
+  //if(event->pulse_start_times.size()!=event->pulse_end_times.size())
+    //std::cout<<"the size of pulse_start_times is not equal to pulse_end_times!"<<std::endl;
 
   return event->npulses;
         
