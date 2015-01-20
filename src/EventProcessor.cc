@@ -50,7 +50,8 @@ void EventProcessor::Initialize()
 void EventProcessor::ProcessEvent(int event_id)
 {
 
-  event->Clear();
+  //event->Clear();
+  event = new EventData();
   event->run_id = 0;
   event->event_id = event_id;
 

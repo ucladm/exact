@@ -15,6 +15,55 @@
 #include <stdexcept> // std::out_of_range
 #include <vector>
 
+EventData::EventData() :
+  // event level metadata
+  run_id(-1),
+  event_id(-1),
+  nchans(-1),
+  nsamps(-1),
+  us_per_samp(-1),
+  trigger_index(-1),
+  trigger_index_offset(-1),
+  adc_bits(-1),
+  
+  // channel level metadata
+  daq_channel_nums(),
+  channel_ids(),
+  adc_gains(),
+  adc_offsets(),
+  adc_ranges(),
+
+  // laser calibration info
+  spe_means(),
+
+  // baseline finder
+  baseline_means(),
+  baseline_sigmas(),
+  baseline_validities(),
+
+  // sum channel
+  sum_waveform(),
+  sum_integral(),
+
+  // pulse finder
+  npulses(-1),
+  saturated(),
+  pulse_start_times(),
+  pulse_end_times(),
+  pulse_peak_times(),
+  pulse_peak_amps(),
+  pulse_integrals(),
+
+
+  // channel waveforms 
+  raw_waveforms(),
+  baseline_subtracted_waveforms(),
+  integrals(),
+  zero_suppressed_waveforms()
+
+{}
+
+
 double EventData::SampleToTime(int samp) const
 {
   return (samp-trigger_index)*us_per_samp;

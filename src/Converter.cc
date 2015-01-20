@@ -60,7 +60,7 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
   // channel numbers are in order. Check anyway.
   for (int i=0; i<DAQ_header.getNchans(); ++i) {
       
-    event->channel_nums.push_back(DAQ_header.WorkingChannelNbr.at(i));
+    event->daq_channel_nums.push_back(DAQ_header.WorkingChannelNbr.at(i));
     event->channel_ids.push_back(i);
 
       if (DAQ_header.WorkingChannelNbr.at(i) != i+1) {

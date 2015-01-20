@@ -14,6 +14,9 @@
   - Use command line switches
   - Allow event lists
 
+  v0.3 AFan 2015-01-10
+  - Write outputs to better tree format
+
 */
 
 
@@ -170,7 +173,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       
       if (!use_eventlist && evt%10000 == 0)
         std::cout << "Processing event " << n << std::endl;
-      event->Clear();
+      event = new EventData();
       event->run_id = subfile;
       event->event_id = n; //evt;
 
@@ -191,6 +194,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
     }// end loop over events
 
   }// end loop over files
+  
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
   avgwfms.Finalize(rootfile);
   eventDataWriter.Finalize(rootfile);

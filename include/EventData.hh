@@ -25,50 +25,10 @@ class EventData
 {
 
 public:
-  EventData() {Clear();}
   
-  void Clear() {
-    run_id = -1;
-    event_id = -1;
-    nchans = -1;
-    nsamps = -1;
-    us_per_samp = -1.0;
-    trigger_index = -1;
-    adc_bits = -1;
-    
-    channel_nums.clear();
-    channel_ids.clear();
-    adc_gains.clear();
-    adc_offsets.clear();
-    adc_ranges.clear();
-    spe_means.clear();
-    raw_waveforms.clear();
-    baseline_means.clear();
-    baseline_sigmas.clear();
-    baseline_validities.clear();
-    baseline_subtracted_waveforms.clear();
-    integrals.clear();
-    zero_suppressed_waveforms.clear();
-    sum_waveform.clear();
-    sum_integral.clear();
-    npulses = 0;
-    pulse_start_times.clear();
-    pulse_end_times.clear();
-    pulse_peak_times.clear();
-    pulse_peak_amps.clear();
-    pulse_integrals.clear();
-      
-    //------------------
-    saturated.clear();
-    //ch_pulse_integrals.clear();
-    //ch_pulse_peak_amps.clear();
-    //ch_5samp_extended_pulse_integrals.clear();
-    //ch_10samp_extended_pulse_integrals.clear();
-    //------------------
-
-  }
-
-  // all the data for a single event  
+  EventData();
+  
+  // event-level metadata
   int run_id;
   int event_id;
   int nchans;
@@ -78,24 +38,29 @@ public:
   int trigger_index_offset; //for top-channels only
   int adc_bits; //number of ADC bits
 
-
-  vector<int> channel_nums; // DAQ channel number. check that this is same in every event
-  vector<int> channel_ids; // global channel ID to be used by all modules
+  // channel-level metadata
+  vector<int> daq_channel_nums;
+  vector<int> channel_ids; // global channel ID used by all modules
   vector<double> adc_gains; // volts per ADC-count
   vector<double> adc_offsets;
   vector<double> adc_ranges;
+
+  // laser calibration info
   vector<double> spe_means;
-  vector< vector<double> > raw_waveforms;
+
+
+  // baseline finder
   vector<double> baseline_means;
   vector<double> baseline_sigmas;
   vector<bool> baseline_validities;
-  vector< vector<double> > baseline_subtracted_waveforms; // unit: ADC counts
-  vector< vector<double> > integrals;
-  vector< vector<double> > zero_suppressed_waveforms;
 
+  // sum channels
   vector<double> sum_waveform;
   vector<double> sum_integral;
+
+  // pulse finder
   int npulses;
+  vector<bool> saturated;
   vector<double> pulse_start_times;
   vector<double> pulse_end_times;
   vector<double> pulse_peak_times;
@@ -110,17 +75,15 @@ public:
   //vector< vector<double> > ch_pulse_fixed_int1;
   //vector< vector<double> > ch_pulse_fixed_int2;
 
-  //------------------
     
-  vector<bool> saturated;
-    
-  //vector< vector<double> > ch_pulse_integrals;
-  //vector< vector<double> > ch_pulse_peak_amps;
-  //vector< vector<double> > ch_5samp_extended_pulse_integrals;
-  //vector< vector<double> > ch_10samp_extended_pulse_integrals;
-    
-  //------------------
 
+
+  // channel waveforms
+  vector< vector<double> > raw_waveforms;
+  vector< vector<double> > baseline_subtracted_waveforms; // unit: ADC counts
+  vector< vector<double> > integrals;
+  vector< vector<double> > zero_suppressed_waveforms;
+    
     
     
   double SampleToTime(int samp) const;
