@@ -11,6 +11,7 @@ public:
   
   void Fwd();
   void Bck();
+  void GotoEvent();
 };
 
 #endif

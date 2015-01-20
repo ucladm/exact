@@ -1,9 +1,5 @@
 /*
   Event viewer code for data from UCLA EXACT TPCs. Can overlay analysis
-
-  Two parts to code:
-  1. Event by event processing, including baseline finding, pulse finding, etc
-  2. Apply cuts and generate histograms and average waveforms
   
   Compile with Makefile
   
@@ -14,6 +10,8 @@
     - GUI is responsive, cmd line entry works, event stepping works
   v0.3 AFan 2014-01-21
     - Better event viewer. Uses multithreading.
+  v0.4 AFan 2015-01-17
+    - Much better event viewer! Uses TEve and GUIs.
 
  */
 
@@ -41,6 +39,8 @@
 #include <RQ_OBJECT.h>
 #include "TSystem.h"
 #include "TGButton.h"
+#include "TGNumberEntry.h"
+#include "TGLabel.h"
 
 
 #include "DAQheader.hh"
@@ -59,35 +59,67 @@
 
 using namespace std;
 
+// These global variables are instantiated in EventProcessor.cc
 extern EventProcessor* gEventProcessor;
+extern TGNumberEntry* gEventNumberEntry;
 
 void make_gui()
 {
   TEveBrowser* browser = gEve->GetBrowser();
   browser->StartEmbedding(TRootBrowser::kLeft);
+
   
+  EventNavigator    *eNav = new EventNavigator;
 
   TGMainFrame* frmMain = new TGMainFrame(gClient->GetRoot(), 1000, 600);
   frmMain->SetWindowName("XX GUI");
   frmMain->SetCleanup(kDeepCleanup);
-
+  
+  TString icondir( Form("%s/icons/", gSystem->Getenv("ROOTSYS")) );
   
   TGHorizontalFrame* hf = new TGHorizontalFrame(frmMain);
   {
-      
-    TString icondir( Form("%s/icons/", gSystem->Getenv("ROOTSYS")) );
     TGPictureButton* b = 0;
-    EventNavigator    *fh = new EventNavigator;
+    TGLabel* blabel = 0;
 
+    blabel = new TGLabel(hf, " \n Prev \n ");
+    blabel->SetTextJustify(kTextCenterY);
     b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoBack.gif"));
+    hf->AddFrame(blabel);
     hf->AddFrame(b);
-    b->Connect("Clicked()", "EventNavigator", fh, "Bck()");
-
-    b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoForward.gif"));
-    hf->AddFrame(b);
-    b->Connect("Clicked()", "EventNavigator", fh, "Fwd()");
+    b->Connect("Clicked()", "EventNavigator", eNav, "Bck()");
   }
   frmMain->AddFrame(hf);
+
+  hf = new TGHorizontalFrame(frmMain);
+  {
+    TGPictureButton* b = 0;
+    TGLabel* blabel = 0;
+
+    blabel = new TGLabel(hf, " \n Next \n ");
+    blabel->SetTextJustify(kTextCenterY);
+    b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoForward.gif"));
+    hf->AddFrame(blabel);
+    hf->AddFrame(b);
+    b->Connect("Clicked()", "EventNavigator", eNav, "Fwd()");
+  }
+  frmMain->AddFrame(hf);
+
+  hf = new TGHorizontalFrame(frmMain);
+  {
+    // ability to jump to event
+    TGLabel* eventNbrLabel = new TGLabel(hf, " Go to event # " );
+    gEventNumberEntry = new TGNumberEntry(hf, 0, 7, -1,
+                                          TGNumberFormat::kNESInteger,
+                                          TGNumberFormat::kNEAAnyNumber,
+                                          TGNumberFormat::kNELLimitMinMax,
+                                          0, 10000000);
+    hf->AddFrame(eventNbrLabel);
+    hf->AddFrame(gEventNumberEntry);
+    gEventNumberEntry->Connect("ValueSet(Long_t)", "EventNavigator", eNav, "GotoEvent()");
+  }
+  frmMain->AddFrame(hf);
+
   
   frmMain->MapSubwindows();
   frmMain->Resize();
@@ -95,6 +127,9 @@ void make_gui()
 
   browser->StopEmbedding();
   browser->SetTabTitle("Event Control", 0);
+
+
+  
 }
 
 //----------------------------------------------------------------
