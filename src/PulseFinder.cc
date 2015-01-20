@@ -191,6 +191,8 @@ int PulseFinder::IntegralSearch(EventData* event)
   }// end loop over down-sampled integral
 
   event->npulses = event->pulses.size();
+  for (int i=0; i<event->npulses; ++i)
+    event->pulses[i]->pulse_id = i;
     
   //if(event->pulse_start_times.size()!=event->pulse_end_times.size())
     //std::cout<<"the size of pulse_start_times is not equal to pulse_end_times!"<<std::endl;
