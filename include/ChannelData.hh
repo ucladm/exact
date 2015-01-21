@@ -37,8 +37,8 @@ public:
   // waveforms
   vector<double> raw_waveform;
   vector<double> baseline_subtracted_waveform;
-  vector<double> integral_waveform;
   vector<double> zero_suppressed_waveform;
+  vector<double> integral_waveform;
   
   // baseline finder
   double baseline_mean;
@@ -48,6 +48,8 @@ public:
   // pulse finder
   int npulses;
   vector<PulseData*> pulses;
+
+  double integrate(int start_samp, int end_samp) const;
   
 };
 

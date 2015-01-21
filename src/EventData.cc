@@ -50,6 +50,7 @@ int EventData::TimeToSample(double time, bool checkrange) const
   return samp;
 }
 
+
 ChannelData* EventData::GetChannel(int const channel_id)
 {
   if (channels[channel_id]->channel_id != channel_id)
