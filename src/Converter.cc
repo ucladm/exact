@@ -78,5 +78,18 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
   } // end loop over channels
   event->nsamps -= std::fabs(_trigger_index_offset);
   */
+
+  bool PRINT = false;
+  if (PRINT) {
+    for (int ch=0; ch<event->nchans; ++ch) {
+      cout << "event "<<event->event_id<<" ch "<<event->GetChannel(ch)->channel_id<<endl;
+      for (int i=0; i<event->nsamps; ++i) {
+        cout << event->GetChannel(ch)->raw_waveform[i]<<" ";
+      }
+      cout << endl << endl;
+    }
+  }
+
+  
   return 1;
 }

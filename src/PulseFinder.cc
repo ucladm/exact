@@ -3,6 +3,8 @@
 #include <numeric>   //accumulate
 #include <cmath>
 
+using namespace std;
+
 PulseFinder::PulseFinder(CfgReader const& cfg):
   module_name("PulseFinder"),
   _enabled(cfg.getParam<bool>(module_name, "enabled", true)),
@@ -112,14 +114,15 @@ int PulseFinder::IntegralSearch(EventData* event)
         }
       }//end fine-grained search
     }
-    else if (in_pulse && (std::fabs(ds_integral[i]-ds_integral[i-1]) < std::fabs(_pulse_end_threshold)) ) {
+    else if (in_pulse && i+1 < ds_wfm_nsamps-1 &&
+             (std::fabs(ds_integral[i+1]-ds_integral[i-1]) < std::fabs(_pulse_end_threshold)) ) {
       in_pulse = false;
       event->pulses.back().end_time = event->SampleToTime(i*_down_sample_factor);
     }
 
-    if(in_pulse &&(i==ds_wfm_nsamps-1)){
+    if(in_pulse && (i==ds_wfm_nsamps-1)){
       in_pulse = false;
-      event->pulses.back().end_time = i*_down_sample_factor;
+      event->pulses.back().end_time = event->SampleToTime(i*_down_sample_factor);
     }
 
   }// end loop over down-sampled integral

@@ -24,8 +24,9 @@ int ROI::Process(EventData* event)
   // loop over channels
   for (int ch=0; ch<event->nchans; ++ch) {
     double roi = -std::accumulate(event->GetChannel(ch)->baseline_subtracted_waveform.begin()+roi_start_index,
-                                  event->GetChannel(ch)->baseline_subtracted_waveform.begin()+roi_end_index,
-                                  0.0);
+                                  event->GetChannel(ch)->baseline_subtracted_waveform.begin()+roi_end_index,0.0);
+    //double roi = std::accumulate(event->GetChannel(ch)->raw_waveform.begin()+roi_start_index,
+    //                             event->GetChannel(ch)->raw_waveform.begin()+roi_end_index, 0.0);
     event->GetChannel(ch)->roi = roi;
     event->roi += roi;
   }

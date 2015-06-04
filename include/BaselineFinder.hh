@@ -44,6 +44,7 @@ private:
   int _post_samps;
   double _max_sigma;
   double _max_amplitude;
+  double _baseline_fixed_window;
 
 
   void interpolate_baseline(vector<double> & baseline, int start, int end);

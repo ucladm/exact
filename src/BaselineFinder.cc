@@ -21,7 +21,8 @@ BaselineFinder::BaselineFinder(CfgReader const& cfg):
   _pre_samps(cfg.getParam<int>(module_name, "pre_samps", 10)),
   _post_samps(cfg.getParam<int>(module_name, "post_samps", 10)),
   _max_sigma(cfg.getParam<double>(module_name, "max_sigma", 1)),
-  _max_amplitude(cfg.getParam<double>(module_name, "max_amplitude", 1))
+  _max_amplitude(cfg.getParam<double>(module_name, "max_amplitude", 1)),
+  _baseline_fixed_window(cfg.getParam<double>(module_name, "baseline_fixed_window", -0.07))
 { }
 
 
@@ -135,7 +136,7 @@ void BaselineFinder::moving_baseline(EventData* event)
       mean += raw[i]/window_size;
       variance += raw[i]*raw[i]/window_size;
     }
-
+    variance -= mean*mean;
     // now traverse through the waveform
     for (int samp = _pre_samps; samp<nsamps-_post_samps-1; samp++) {
       if (!in_baseline) { // previously not in baseline
@@ -169,9 +170,16 @@ void BaselineFinder::moving_baseline(EventData* event)
         
       }
 
-      mean = mean + (raw[samp+_post_samps] - raw[samp-_pre_samps])/window_size;
-      variance = variance + (raw[samp+_post_samps]*raw[samp+_post_samps] -
-                             raw[samp-_pre_samps]*raw[samp-_pre_samps])/window_size;
+      // First undo the 2nd term of the variance
+      variance += mean*mean;
+
+      // Then calculate new mean
+      mean += (raw[samp+_post_samps] - raw[samp-_pre_samps])/window_size;
+
+      // Calculte new variance
+      variance += ((raw[samp+_post_samps]*raw[samp+_post_samps] -
+                    raw[samp-_pre_samps]*raw[samp-_pre_samps])/window_size
+                   - mean*mean);
     }// end loop over waveform
 
 
@@ -213,8 +221,17 @@ void BaselineFinder::moving_baseline(EventData* event)
     }
     
     channel->saturated = ch_saturated;
-    channel->baseline_mean = 1;
-    channel->baseline_sigma = 1;
+    //channel->baseline_mean = 1;
+    //channel->baseline_sigma = 1;
+    channel->baseline_mean = 0;
+    // For moving baseline, baseline mean and sigma aren't very meaningful. So fill with fixed window calculation
+    for (int samp = 0; samp < event->TimeToSample(_baseline_fixed_window); ++samp) {
+      channel->baseline_mean += raw[samp];
+      channel->baseline_sigma += raw[samp]*raw[samp];
+    }
+    channel->baseline_mean /= event->TimeToSample(_baseline_fixed_window);
+    channel->baseline_sigma = std::sqrt(channel->baseline_sigma/_baseline_fixed_window -
+                                        channel->baseline_mean*channel->baseline_mean);
     channel->baseline_valid = true;
     //event->baseline_subtracted_waveforms.push_back(bswfm);
 
