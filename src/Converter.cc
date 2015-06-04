@@ -60,6 +60,7 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
   // _trigger_index_offset is top channels with respect to bottom channel.
   // If >0, trim start of top channels, and end of bottom channel.
   // If <0, trim start of bottom channel, and end of top channels.
+  /* 2015-06-03: This section is buggy!
   for (int ch=0; ch<event->nchans; ch++) {
     std::vector<double> & waveform = event->GetChannel(ch)->raw_waveform;
     if (ch==BOT_CHANNEL_ID) {
@@ -76,6 +77,6 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
     }
   } // end loop over channels
   event->nsamps -= std::fabs(_trigger_index_offset);
-  
+  */
   return 1;
 }

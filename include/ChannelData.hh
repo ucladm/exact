@@ -21,6 +21,7 @@ class ChannelData
 {
 public:
   ChannelData();
+  void Clear();
 
   // metadata
   int daq_channel_num;

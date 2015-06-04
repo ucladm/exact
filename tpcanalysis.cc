@@ -183,13 +183,13 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       // Run processing modules on event. ORDER MATTERS!
       converter.Process(event, daq_header); 
       baselineFinder.Process(event);
-      //zeroSuppressor.Process(event);
-      //sumChannel.Process(event);
-      //integrator.Process(event);
-      //pulseFinder.Process(event);
-      //roi.Process(event);
+      zeroSuppressor.Process(event);
+      sumChannel.Process(event);
+      integrator.Process(event);
+      pulseFinder.Process(event);
+      roi.Process(event);
       //avgwfms.Process(event);
-      //eventDataWriter.Process(event);
+      eventDataWriter.Process(event);
       
       /////////////////////////////////////////////////////////////
 

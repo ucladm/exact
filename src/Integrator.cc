@@ -29,8 +29,8 @@ int Integrator::Process(EventData* event)
   } // end loop over channels
 
   //Now integrate the sum channel
-  vector<double> const& sum_wfm = event->sumchannel->raw_waveform;
-  vector<double> & sum_integral = event->sumchannel->integral_waveform;
+  vector<double> const& sum_wfm = event->sumchannel.raw_waveform;
+  vector<double> & sum_integral = event->sumchannel.integral_waveform;
 
   integrate(sum_wfm, sum_integral);
          

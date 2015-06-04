@@ -27,7 +27,7 @@ EventData::EventData() :
   adc_bits(-1),
 
   channels(),
-  sumchannel(NULL),
+  sumchannel(),
   npulses(-1),
   pulses(),
   roi(0)
@@ -44,8 +44,10 @@ void EventData::Clear()
   trigger_index = -1;
   trigger_index_offset = -1;
   adc_bits = -1;
-  channels.clear();
-  //sumchannel = NULL;
+  //channels.clear();
+  std::vector<ChannelData>::iterator it = channels.begin();
+  for (; it != channels.end(); it++) it->Clear();
+  sumchannel.Clear();
   npulses = 0;
   pulses.clear();
   roi = -1;
@@ -172,9 +174,9 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
   sprintf(name, "r%ie%ichSUM", run_id, event_id);
   TMultiGraph* mg = new TMultiGraph(name, name);
   
-  if (sumchannel->raw_waveform.empty())
+  if (sumchannel.raw_waveform.empty())
     return mg;
-  int nsamps = sumchannel->raw_waveform.size();
+  int nsamps = sumchannel.raw_waveform.size();
   std::vector<double> x(nsamps);
 
 
@@ -182,7 +184,7 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
   for(int i=0; i<nsamps; i++)
     x[i] = (i - trigger_index) * us_per_samp;
 
-  TGraph* gr_raw = new TGraph(nsamps, &x[0], &sumchannel->raw_waveform[0]);
+  TGraph* gr_raw = new TGraph(nsamps, &x[0], &sumchannel.raw_waveform[0]);
   gr_raw->SetTitle(name);
   gr_raw->SetName(name);
   mg->Add(gr_raw);
@@ -194,16 +196,16 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
   
   
   
-  std::vector<double> baseline = sumchannel->raw_waveform;
+  std::vector<double> baseline = sumchannel.raw_waveform;
   for (size_t i=0; i<baseline.size(); i++)
-    baseline[i] = sumchannel->raw_waveform[i] - baseline[i];
+    baseline[i] = sumchannel.raw_waveform[i] - baseline[i];
   TGraph* gr_baseline = new TGraph(nsamps, &x[0], &baseline[0]);
   gr_baseline->SetMarkerColor(kRed);
   gr_baseline->SetLineColor(kRed);
   mg->Add(gr_baseline);
 
 
-  if (sumchannel->integral_waveform.empty())
+  if (sumchannel.integral_waveform.empty())
     return mg;
   
   // need to adjust size of integral so it fits
@@ -213,8 +215,8 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
   gPad->Update();
   gPad->GetRangeAxis(x1,y1,x2,y2);
   double raw_ratio = (y2 - integral_offset) / (integral_offset - y1);
-  double integral_max = *std::max_element(sumchannel->integral_waveform.begin(), sumchannel->integral_waveform.end());
-  double integral_min = *std::min_element(sumchannel->integral_waveform.begin(), sumchannel->integral_waveform.end());
+  double integral_max = *std::max_element(sumchannel.integral_waveform.begin(), sumchannel.integral_waveform.end());
+  double integral_min = *std::min_element(sumchannel.integral_waveform.begin(), sumchannel.integral_waveform.end());
   double integral_ratio = std::abs(integral_max) / std::abs(integral_min);
   double integral_scale;
   if (raw_ratio < integral_ratio)
@@ -224,7 +226,7 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
   
   
   for(int i = 0; i<nsamps; i++)
-    adjusted_integral[i] = integral_scale*sumchannel->integral_waveform[i] + integral_offset;
+    adjusted_integral[i] = integral_scale*sumchannel.integral_waveform[i] + integral_offset;
   
   int integral_color = kBlue;
   
@@ -236,9 +238,9 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
 
   for (int i=0; i<npulses; i++) {
     double base = 0;
-    double peak_y = base + pulses[i]->peak_amp;
-    TBox* pbox = new TBox( pulses[i]->start_time, base,
-                           pulses[i]->end_time, peak_y );
+    double peak_y = base + pulses[i].peak_amp;
+    TBox* pbox = new TBox( pulses[i].start_time, base,
+                           pulses[i].end_time, peak_y );
     pbox->SetBit(TObject::kCanDelete,true);
     pbox->SetLineColor(kGreen);
     pbox->SetFillStyle(0);

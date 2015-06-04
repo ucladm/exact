@@ -19,6 +19,25 @@ ChannelData::ChannelData():
   npulses(0)
 { }
 
+void ChannelData::Clear()
+{
+  daq_channel_num = -1;
+  channel_id = -1;
+  adc_gain = -1;
+  adc_offset = -1;
+  adc_range = -1;
+  spe_mean = -1;
+  saturated = false;
+  raw_waveform.clear();
+  baseline_subtracted_waveform.clear();
+  zero_suppressed_waveform.clear();
+  integral_waveform.clear();
+  baseline_mean = -1;
+  baseline_sigma = -1;
+  baseline_valid = false;
+  npulses = 0;
+    
+}
 
 double ChannelData::integrate(int start_samp, int end_samp) const
 {

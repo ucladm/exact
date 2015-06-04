@@ -13,25 +13,29 @@ int SumChannel::Process(EventData* event)
   if (!_enabled)
     return 0;
 
-  event->sumchannel = new ChannelData();
-  std::vector<double> & sum = event->sumchannel->raw_waveform;
+  ChannelData sum_ch;
+  std::vector<double> & sum = sum_ch.raw_waveform;
   
   //Loop over the channels
-  for (int idx = 0; idx<event->nchans; ++idx) {
+  for (int ch = 0; ch<event->nchans; ++ch) {
 
-    ChannelData* channel = event->GetChannel(idx);
+    ChannelData* channel = event->GetChannel(ch);
     
     vector<double> const& wfm = channel->zero_suppressed_waveform;
-
+    if (wfm.size() == 0) {
+      sum.clear();
+      break;
+    }
+    
     // size the sum channel appropriately
-    if (idx == 0) {
+    if (ch == 0) {
       sum.resize(wfm.size());
     }
 
     if (!channel->baseline_valid) {
       sum.clear();
       sum.resize(wfm.size());
-      return 0;
+      break;
     }
 
     // add waveform to sum channel
@@ -41,6 +45,7 @@ int SumChannel::Process(EventData* event)
     
   }// end loop over channels
 
+  event->sumchannel = sum_ch;
   
   return 1;
 }

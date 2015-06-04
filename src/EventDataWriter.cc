@@ -143,17 +143,17 @@ int EventDataWriter::Process(EventData* event)
 
   // loop over pulses
   for (int i=0; i<npulses; ++i) {
-    PulseData* p = event->pulses[i];
-    pulse_id[i]    = p->pulse_id;
-    start_time[i]  = p->start_time;
-    end_time[i]    = p->end_time;
-    peak_time[i]   = p->peak_time;
-    peak_amp[i]    = p->peak_amp;
-    p_saturated[i] = p->saturated;
-    integral[i]    = p->integral;
-    fixed_int1[i]  = p->fixed_int1;
-    fixed_int2[i]  = p->fixed_int2;
-    f90[i]         = p->f90;
+    PulseData & p = event->pulses[i];
+    pulse_id[i]    = p.pulse_id;
+    start_time[i]  = p.start_time;
+    end_time[i]    = p.end_time;
+    peak_time[i]   = p.peak_time;
+    peak_amp[i]    = p.peak_amp;
+    p_saturated[i] = p.saturated;
+    integral[i]    = p.integral;
+    fixed_int1[i]  = p.fixed_int1;
+    fixed_int2[i]  = p.fixed_int2;
+    f90[i]         = p.f90;
   } //loop over pulses
 
   _tree->SetBranchAddress("npulses",     &(ptr->npulses));

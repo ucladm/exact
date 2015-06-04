@@ -42,9 +42,9 @@ public:
   int adc_bits; //number of ADC bits
 
   vector<ChannelData> channels;
-  ChannelData* sumchannel;
+  ChannelData sumchannel;
   int npulses;
-  vector<PulseData*> pulses;
+  vector<PulseData> pulses;
 
 
   double roi;
