@@ -12,7 +12,7 @@ Converter::Converter(CfgReader const& cfg):
 { }
 
 
-int Converter::Process(EventData* event, DAQheader & DAQ_header)
+int Converter::Process(EventData* event, LVDAQHeader & daq_header)
 {
   if (!_enabled)
     return 0;
@@ -25,67 +25,34 @@ int Converter::Process(EventData* event, DAQheader & DAQ_header)
   
 
   // Fill event-level info
-  event->nchans = DAQ_header.getNchans();
-  event->nsamps = DAQ_header.getTotSampleNbr();
-  event->us_per_samp = DAQ_header.getTimeInterval_us();
-  event->trigger_index = DAQ_header.getTriggerIndex();
+  event->nchans = daq_header.nchannels;
+  event->nsamps = daq_header.nsamps;
+  event->us_per_samp = daq_header.sample_interval*1.e-3;
+  event->trigger_index = daq_header.trigger_sample;
   event->trigger_index_offset = _trigger_index_offset;
 
-  // hard code these for now. should (will?) be added to DAQ header later.
-  event->adc_bits = 8;
 
-    
-    //----------------------------
-    
-    const double BOT_PMT_ConvertFactor = 10/1.602177/25; //--- convert mV*ns to 1E6 e-, with 25 ohm impadence ------
-    const double TOP_PMT_ConvertFactor = 10/1.602177/50; //--- convert mV*ns to 1E6 e-, with 25 ohm impadence ------
 
-    const double btm_PMT_Gain = 4.064; //--- unit: 1E6 ---
-    
-    /*
-    --- channel order ----
-     Channel#0 3" PMT   Channel#1 LV1556
-     Channel#2 LV1549   Channel#3 LV1548
-     Channel#4 LV1550   Channel#5 LV1557
-     Channel#6 LV1551   Channel#7 LV1552
-     
-    */
-    
-    const double top_PMT_Gain[7] = {4.12, 4.359, 4.211, 4.099, 4.105, 3.718, 4.325}; //--- unit: 1E6, follows the cable order ---
-
-    //----------------------------
-    
   // Fill channel-level info
-  // DAQ channel numbers are 1-indexed. Want global channel IDs to be 0-indexed. Presumably, DAQ
-  // channel numbers are in order. Check anyway.
-  for (int i=0; i<DAQ_header.getNchans(); ++i) {
+  if ((int)event->channels.size() != daq_header.nchannels)
+    event->channels.resize(daq_header.nchannels);
+  for (int i=0; i<daq_header.nchannels; ++i) {
 
-    ChannelData* channel = new ChannelData();
+    // Make a new ChannelData object and fill it.
+    ChannelData channel;
+
+    channel.daq_channel_num = i;
+    channel.channel_id = i;
+    channel.spe_mean = 1;
+    daq_header.read_event_channel(event->event_id, i, channel.raw_waveform);
+    channel.adc_gain = 1;
+    channel.adc_offset = 1;
+    channel.adc_range = daq_header.vertical_full_scale[i];
 
 
-    channel->daq_channel_num = DAQ_header.WorkingChannelNbr.at(i);
-    channel->channel_id = channel->daq_channel_num-1; // These are separate in case I want to renumber things.
-
-      if (DAQ_header.WorkingChannelNbr.at(i) != i+1) {
-          std::cerr << "Event "<<event->event_id<<": Unexpected channel order!"<<std::endl;
-          abort();
-      }
-      
-    
-    if(i==0)//--- assuming top PMT is always the channel#0 ---
-      channel->spe_mean = btm_PMT_Gain/2/BOT_PMT_ConvertFactor;
-    else
-      channel->spe_mean = top_PMT_Gain[i-1]/2/TOP_PMT_ConvertFactor;
-      
-
-    double gain, offset;
-    channel->raw_waveform = DAQ_header.ReadSingleChannel(event->event_id,
-                                                        DAQ_header.WorkingChannelNbr.at(i),
-                                                         gain,offset);
-    channel->adc_gain = gain;
-    channel->adc_offset = offset;
-    channel->adc_range = DAQ_header.WorkingChannelFullScale.at(i);
+    // Put the completed ChannelData object into the EventData channels array.
     event->channels.push_back(channel);
+
   }
   
   

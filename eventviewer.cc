@@ -43,7 +43,7 @@
 #include "TGLabel.h"
 #include "TGLayout.h"
 
-#include "DAQheader.hh"
+#include "LVDAQHeader.hh"
 #include "CfgReader.hh"
 #include "EventData.hh"
 #include "Converter.hh"
@@ -168,7 +168,7 @@ int main(int args, char* argv[]) {
 
   
   string datafile = argv[2];
-
+  
   gEventProcessor = new EventProcessor(cfg, datafile);
 
   gEventProcessor->Initialize();

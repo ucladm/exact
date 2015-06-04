@@ -2,7 +2,7 @@
 #ifndef EventProcessor_hh
 #define EventProcessor_hh
 
-#include "DAQheader.hh"
+#include "LVDAQHeader.hh"
 #include "CfgReader.hh"
 #include "EventData.hh"
 #include "Converter.hh"
@@ -28,7 +28,7 @@ public:
   
 private:
   
-  DAQheader daqHeader;
+  LVDAQHeader daqHeader;
   Converter converter;
   BaselineFinder baselineFinder;
   ZeroSuppressor zeroSuppressor;

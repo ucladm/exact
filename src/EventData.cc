@@ -27,11 +27,29 @@ EventData::EventData() :
   adc_bits(-1),
 
   channels(),
-  sumchannel(new ChannelData()),
+  sumchannel(NULL),
   npulses(-1),
-  pulses()
+  pulses(),
+  roi(0)
 
 {}
+
+void EventData::Clear()
+{
+  run_id = -1;
+  event_id = -1;
+  nchans = -1;
+  nsamps = -1;
+  us_per_samp = -1;
+  trigger_index = -1;
+  trigger_index_offset = -1;
+  adc_bits = -1;
+  channels.clear();
+  //sumchannel = NULL;
+  npulses = 0;
+  pulses.clear();
+  roi = -1;
+}
 
 
 double EventData::SampleToTime(int samp) const
@@ -53,9 +71,12 @@ int EventData::TimeToSample(double time, bool checkrange) const
 
 ChannelData* EventData::GetChannel(int const channel_id)
 {
-  if (channels[channel_id]->channel_id != channel_id)
-    std::cout << "Requesting non-existent channel!" << std::endl;
-  return channels[channel_id];
+  //if (channels[channel_id]->channel_id != channel_id)
+  //  std::cout << "Requesting non-existent channel!" << std::endl;
+  //return channels[channel_id];
+  std::vector<ChannelData>::iterator it = channels.begin();
+  while (it != channels.end() && it->channel_id != channel_id) it++;
+  return (it == channels.end() ? 0 : &(*it));
 }
 
 TMultiGraph* EventData::GetTMultiGraph(int ch)

@@ -18,19 +18,18 @@ EventProcessor::EventProcessor(CfgReader const& cfg, string datafile)
 {
 
   // Load the raw data file
-  if (daqHeader.FormatTest()==false)
+  if (!daqHeader.format_test())
     std::cout << "ALARM! Variable size doesn't match!" << std::endl;
 
   // open raw data file
   //string datafile = argv[2];
-  daqHeader.LoadFileName(datafile.c_str());
+  daqHeader.load_file(datafile.c_str());
   if (!daqHeader.binary_file.is_open()) {
     std::cout << std::endl << "Can't open datafile: "
               << datafile.c_str() << std::endl;
   }
-  daqHeader.ReadHeaderContent();
-
-  nevents = daqHeader.TotEventNbr;
+  daqHeader.read_header_content();
+  nevents = daqHeader.ntriggers;
 
 
   // Will repopulate this object for each event
@@ -50,8 +49,7 @@ void EventProcessor::Initialize()
 void EventProcessor::ProcessEvent(int event_id)
 {
 
-  //event->Clear();
-  event = new EventData();
+  event->Clear();
   event->run_id = 0;
   event->event_id = event_id;
 

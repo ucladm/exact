@@ -37,7 +37,7 @@
 #include "TChain.h"
 #include "TBranch.h"
 
-#include "DAQheader.hh"
+#include "LVDAQHeader.hh"
 #include "CfgReader.hh"
 #include "EventData.hh"
 #include "Converter.hh"
@@ -46,6 +46,7 @@
 #include "Integrator.hh"
 #include "SumChannel.hh"
 #include "PulseFinder.hh"
+#include "ROI.hh"
 #include "AverageWaveforms.hh"
 #include "EventDataWriter.hh"
 
@@ -57,8 +58,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
 {
 
   // Instantiate DAQheader
-  DAQheader DAQ_header;
-  if (DAQ_header.FormatTest()==false)
+  LVDAQHeader daq_header;
+  if (!daq_header.format_test())
     std::cout << "ALARM! Variable size doesn't match!" << std::endl;
     
   // Instantiate CfgReader
@@ -96,12 +97,13 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   SumChannel sumChannel(cfg);
   Integrator integrator(cfg);
   PulseFinder pulseFinder(cfg);
-  AverageWaveforms avgwfms(cfg);
+  ROI roi(cfg);
+  //AverageWaveforms avgwfms(cfg);
   EventDataWriter eventDataWriter(cfg);
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
-  avgwfms.Initialize();
+  //avgwfms.Initialize();
   eventDataWriter.Initialize();
 
 
@@ -114,14 +116,14 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   int total_events=0;
   
   while (infile >> datafile) {
-    DAQ_header.LoadFileName(datafile.c_str());
-    if (!DAQ_header.binary_file.is_open()) {
+    daq_header.load_file(datafile.c_str());
+    if (!daq_header.binary_file.is_open()) {
       std::cout << "\nCan't open datafile: "<< datafile.c_str() << std::endl;
       return 1;
     }
-    DAQ_header.ReadHeaderContent();
-    total_events+= DAQ_header.TotEventNbr;
-    DAQ_header.binary_file.close();
+    daq_header.read_header_content();
+    total_events+=daq_header.ntriggers;
+    daq_header.binary_file.close();
   }
   infile.close();
 
@@ -145,15 +147,15 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
 
     // Open new data file. We've already looped through the files
     // once, so we know we can open them.
-    DAQ_header.LoadFileName(datafile.c_str());
+    daq_header.load_file(datafile.c_str());
     std::cout << "Opening file "<<datafile<<std::endl;
     ++subfile;
-    DAQ_header.ReadHeaderContent();
+    daq_header.read_header_content();
 
   
     // -------------------- LOOP OVER EVENTS ------------------------
 
-    for (int n=1; n<DAQ_header.TotEventNbr; n++) {
+    for (int n=1; n<daq_header.ntriggers; ++n) {
       evt++;
       if (evt<min_evt)
         continue;
@@ -173,30 +175,33 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       
       if (!use_eventlist && evt%10000 == 0)
         std::cout << "Processing event " << n << std::endl;
-      event = new EventData();
+      event->Clear();
       event->run_id = subfile;
       event->event_id = n; //evt;
 
       /////////////////////////////////////////////////////////////
       // Run processing modules on event. ORDER MATTERS!
-      converter.Process(event, DAQ_header); 
+      converter.Process(event, daq_header); 
       baselineFinder.Process(event);
-      zeroSuppressor.Process(event);
-      sumChannel.Process(event);
-      integrator.Process(event);
-      pulseFinder.Process(event);
-      avgwfms.Process(event);
-      eventDataWriter.Process(event);
+      //zeroSuppressor.Process(event);
+      //sumChannel.Process(event);
+      //integrator.Process(event);
+      //pulseFinder.Process(event);
+      //roi.Process(event);
+      //avgwfms.Process(event);
+      //eventDataWriter.Process(event);
+      
       /////////////////////////////////////////////////////////////
 
     
       nevents++;
+
     }// end loop over events
 
   }// end loop over files
   
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
-  avgwfms.Finalize(rootfile);
+  //avgwfms.Finalize(rootfile);
   eventDataWriter.Finalize(rootfile);
 
   

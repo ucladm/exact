@@ -24,7 +24,7 @@ void EventDataWriter::Initialize()
   _tree->Branch("us_per_samp",           &(ptr->us_per_samp),              "us_per_samp/D");
   _tree->Branch("trigger_index",         &(ptr->trigger_index),            "trigger_index/I");
   _tree->Branch("trigger_index_offset",  &(ptr->trigger_index_offset),     "trigger_index_offset/I");
-
+  
 
   // channel arrays
 
@@ -35,6 +35,7 @@ void EventDataWriter::Initialize()
   double   baseline_mean  [max_nchans];
   double   baseline_sigma [max_nchans];
   bool     baseline_valid [max_nchans];
+  double   ch_roi         [max_nchans];
   
   _tree->Branch("channel_id",      channel_id,       "channel_id[nchans]/I");
   _tree->Branch("spe_mean",        spe_mean,         "spe_mean[nchans]/D");
@@ -42,6 +43,7 @@ void EventDataWriter::Initialize()
   _tree->Branch("baseline_mean",   baseline_mean,    "baseline_mean[nchans]/D");
   _tree->Branch("baseline_sigma",  baseline_sigma,   "baseline_sigma[nchans]/D");
   _tree->Branch("baseline_valid",  baseline_valid,   "baseline_valid[nchans]/O");
+  _tree->Branch("ch_roi",          ch_roi,           "ch_roi[nchans]/D");
   
 
   // pulse arrays
@@ -57,7 +59,7 @@ void EventDataWriter::Initialize()
   double   fixed_int2      [max_npulses];
   double   f90             [max_npulses];
   
-  _tree->Branch("npulses",         &(ptr->npulses),  "npulses/I");
+  _tree->Branch("npulses",     &(ptr->npulses),  "npulses/I");
   _tree->Branch("pulse_id",      pulse_id,       "pulse_id[npulses]/I");
   _tree->Branch("start_time",    start_time,     "start_time[npulses]/D");
   _tree->Branch("end_time",      end_time,       "end_time[npulses]/D");
@@ -68,6 +70,8 @@ void EventDataWriter::Initialize()
   _tree->Branch("fixed_int1",    fixed_int1,     "fixed_int1[npulses]/D");
   _tree->Branch("fixed_int2",    fixed_int2,     "fixed_int2[npulses]/D");
   _tree->Branch("f90",           f90,            "f90[npulses]/D");
+
+  _tree->Branch("roi",           &(ptr->roi),    "roi/D");
 }
 
 int EventDataWriter::Process(EventData* event)
@@ -93,11 +97,12 @@ int EventDataWriter::Process(EventData* event)
   double  baseline_mean  [nchans];
   double  baseline_sigma [nchans];
   bool    baseline_valid [nchans];
+  double  ch_roi         [nchans];
   
   // loop over channels
   for (int chID = 0; chID<nchans; ++chID) {
 
-    if (chID != event->channels[chID]->channel_id) {
+    if (chID != event->GetChannel(chID)->channel_id) {
       std::cout << "[" << module_name << "] "
                 << "unexpected channel ID!"<<std::endl;
       return 0;
@@ -111,6 +116,8 @@ int EventDataWriter::Process(EventData* event)
     baseline_mean[chID]   = ch->baseline_mean;
     baseline_sigma[chID]  = ch->baseline_sigma;
     baseline_valid[chID]  = ch->baseline_valid;
+    ch_roi[chID]          = ch->roi;
+    
   } // loop over channels
   
   _tree->SetBranchAddress("channel_id",      channel_id);
@@ -119,7 +126,7 @@ int EventDataWriter::Process(EventData* event)
   _tree->SetBranchAddress("baseline_mean",   baseline_mean);
   _tree->SetBranchAddress("baseline_sigma",  baseline_sigma);
   _tree->SetBranchAddress("baseline_valid",  baseline_valid);
-
+  _tree->SetBranchAddress("ch_roi",          ch_roi);
 
   // Fill some branches by looping over PulseData objects
   const int npulses = ptr->npulses;
@@ -160,8 +167,8 @@ int EventDataWriter::Process(EventData* event)
   _tree->SetBranchAddress("fixed_int1",  fixed_int1);
   _tree->SetBranchAddress("fixed_int2",  fixed_int2);
   _tree->SetBranchAddress("f90",         f90);
-  
 
+  _tree->SetBranchAddress("roi",         &(ptr->roi));
 
   _tree->Fill();
   

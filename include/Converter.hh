@@ -13,7 +13,7 @@
 
 #include "EventData.hh"
 #include "CfgReader.hh"
-#include "DAQheader.hh"
+#include "LVDAQHeader.hh"
 #include <string>
 
 class Converter
@@ -21,7 +21,7 @@ class Converter
 public:
   Converter(CfgReader const& cfg);
   //void Initialize(); // Add the Initialize function only if necessary.
-  int Process(EventData* event, DAQheader & DAQ_header);
+  int Process(EventData* event, LVDAQHeader & daq_header);
 
 
   std::string module_name;

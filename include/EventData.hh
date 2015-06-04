@@ -29,6 +29,7 @@ class EventData
 public:
   
   EventData();
+  void Clear();
   
   // event-level metadata
   int run_id;
@@ -40,13 +41,13 @@ public:
   int trigger_index_offset; //for top-channels only
   int adc_bits; //number of ADC bits
 
-  vector<ChannelData*> channels;
+  vector<ChannelData> channels;
   ChannelData* sumchannel;
   int npulses;
   vector<PulseData*> pulses;
 
 
-
+  double roi;
   
   double SampleToTime(int samp) const;
   int TimeToSample(double time, bool checkrange=true) const;

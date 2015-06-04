@@ -13,6 +13,7 @@ int SumChannel::Process(EventData* event)
   if (!_enabled)
     return 0;
 
+  event->sumchannel = new ChannelData();
   std::vector<double> & sum = event->sumchannel->raw_waveform;
   
   //Loop over the channels
