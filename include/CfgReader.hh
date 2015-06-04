@@ -37,15 +37,13 @@ public:
   // get value of string parameter in a module
   string getParam(string moduleName,
                   string paramName,
-                  string defValue,
-                  bool useDefValue) const;
+                  string defValue) const;
   
   // get value of parameter in a module
   template <typename Type>
   Type getParam(string moduleName,
                 string paramName,
-                Type defValue,
-                bool useDefValue) const;
+                Type defValue) const;
 
   
 private:
@@ -72,8 +70,7 @@ ValueType CfgReader::string_to_Type(string name) const
 
 inline string CfgReader::getParam(string moduleName,
                                   string paramName,
-                                  string defValue,
-                                  bool useDefValue) const
+                                  string defValue) const
 {
   if (!cfgIsInit) {
     cout << "ERROR: CfgReader not initialized!!!" << endl;
@@ -86,9 +83,9 @@ inline string CfgReader::getParam(string moduleName,
     return defValue;
   }
   
-  else if (useDefValue) {
-    return defValue;
-  }
+  //else if (useDefValue) {
+  //  return defValue;
+  //}
   
   else if (contents.at(moduleName).find(paramName) ==
            contents.at(moduleName).end()) {
@@ -110,8 +107,7 @@ inline string CfgReader::getParam(string moduleName,
 template <typename Type> inline
 Type CfgReader::getParam(string moduleName,
                          string paramName,
-                         Type defValue,
-                         bool useDefValue=false) const
+                         Type defValue) const
 {
   if (!cfgIsInit) {
     cout << "ERROR: CfgReader not initialized!!!" << endl;
@@ -124,9 +120,9 @@ Type CfgReader::getParam(string moduleName,
     return defValue;
   }
   
-  else if (useDefValue) {
-    return defValue;
-  }
+  //else if (useDefValue) {
+  //  return defValue;
+  //}
   
   else if (contents.at(moduleName).find(paramName) ==
            contents.at(moduleName).end()) {
