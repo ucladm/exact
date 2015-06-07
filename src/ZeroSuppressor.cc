@@ -59,6 +59,8 @@ int ZeroSuppressor::Process(EventData* event)
           ++tmp_samp;
           end_samp = tmp_samp;
         }
+
+        if (end_samp >= event->nsamps) end_samp = event->nsamps;
         
         // now copy the non-zero-suppressed region to the waveform
         for (tmp_samp=start_samp; tmp_samp<=end_samp; tmp_samp++)

@@ -19,6 +19,8 @@ EventData::EventData() :
   // event level metadata
   run_id(-1),
   event_id(-1),
+  timestamp_sec(-1),
+  timestamp_usec(-1),
   nchans(-1),
   nsamps(-1),
   us_per_samp(-1),

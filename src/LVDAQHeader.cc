@@ -38,7 +38,16 @@ bool LVDAQHeader::format_test()
 
 void LVDAQHeader::read_header_content()
 {
-  header_size = 153;
+  header_size = 152;
+
+  bool print_header = true;
+  string header(156,' ');
+  if (print_header) {
+    binary_file.read(&header[0],header.size());
+  }
+  cout << header << endl;
+
+  binary_file.seekg(0,std::ios::beg);
   
   // Extract all the header data as strings first, since that's how they're written into the raw data.
   string s_UCLA(4,' ');       binary_file.read(&s_UCLA[0],s_UCLA.size()); 
@@ -111,7 +120,9 @@ void LVDAQHeader::read_header_content()
   istringstream(s_trigger_coupling) >> trigger_coupling;
   istringstream(s_trigger_slope) >> trigger_slope;
   istringstream(s_nbits) >> nbits;
-  
+
+  // hard code for now because DAQ is broken
+  nchannels=8;
 }
 
 void LVDAQHeader::read_event(int event_id, vector< vector<double> > & data_array)
@@ -167,11 +178,10 @@ void LVDAQHeader::read_event_channel(int event_id, int channel_id, vector<double
   }
 
   // Determine which point of file to navigate to:
-  // must be careful of first event, which does not have a timestamp associated to it
   // header size + event_id * waveform data size + (event_id-1) * timestamp size;
   const int channel_data_length = nsamps*uint8_type_size;
   const long int start_point = (header_size +
-                                (event_id>0?event_id-1:0)*2*uint16_type_size + // factor 2 is for two timestamps
+                                event_id*2*uint16_type_size + 
                                 event_id*channel_data_length*nchannels +
                                 channel_id*nsamps);
                                 
@@ -180,14 +190,8 @@ void LVDAQHeader::read_event_channel(int event_id, int channel_id, vector<double
   binary_file.seekg(start_point, std::ios::beg);
   
   // First event has no timestamp associated to it.
-  if (event_id == 0) {
-    event_sec = 0;
-    event_millisec = 0;
-  }
-  else { //event_id > 0
-    binary_file.read((char*)&event_sec, sizeof(event_sec));
-    binary_file.read((char*)&event_millisec, sizeof(event_millisec));
-  }
+  binary_file.read((char*)&event_sec, sizeof(event_sec));
+  binary_file.read((char*)&event_millisec, sizeof(event_millisec));
 
   // Load waveform
   for (int i=0; i<nsamps; ++i) {

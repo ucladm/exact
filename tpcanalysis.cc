@@ -155,7 +155,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   
     // -------------------- LOOP OVER EVENTS ------------------------
 
-    for (int n=1; n<daq_header.ntriggers; ++n) {
+    for (int n=0; n<daq_header.ntriggers; ++n) {
       evt++;
       if (evt<min_evt)
         continue;
@@ -181,7 +181,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
 
       /////////////////////////////////////////////////////////////
       // Run processing modules on event. ORDER MATTERS!
-      converter.Process(event, daq_header); 
+      converter.Process(event, daq_header);
       baselineFinder.Process(event);
       zeroSuppressor.Process(event);
       sumChannel.Process(event);

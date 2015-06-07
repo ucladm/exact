@@ -206,7 +206,8 @@ void BaselineFinder::moving_baseline(EventData* event)
         while (interpolate) {
           ++end;
           if (end >= nsamps) {
-            std::cout << "AHHH interpolating the end!"<<std::endl;
+            //std::cout << "Event "<<event->event_id<<" ch "<<channel->channel_id<<": "
+            //          << "AHHH interpolating the end!"<<std::endl;
             break;
           }
           if (baseline[end] != BASELINE_INIT) {

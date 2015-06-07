@@ -24,7 +24,8 @@ void EventDataWriter::Initialize()
   _tree->Branch("us_per_samp",           &(ptr->us_per_samp),              "us_per_samp/D");
   _tree->Branch("trigger_index",         &(ptr->trigger_index),            "trigger_index/I");
   _tree->Branch("trigger_index_offset",  &(ptr->trigger_index_offset),     "trigger_index_offset/I");
-  
+  _tree->Branch("timestamp_sec",         &(ptr->timestamp_sec),            "timestamp_sec/I");
+  _tree->Branch("timestamp_usec",        &(ptr->timestamp_usec),           "timestamp_usec/I");
 
   // channel arrays
 
@@ -86,6 +87,9 @@ int EventDataWriter::Process(EventData* event)
   _tree->SetBranchAddress("us_per_samp",         &(ptr->us_per_samp));
   _tree->SetBranchAddress("trigger_index",       &(ptr->trigger_index));
   _tree->SetBranchAddress("trigger_index_offset",&(ptr->trigger_index_offset));
+  _tree->SetBranchAddress("timestamp_sec",       &(ptr->timestamp_sec));
+  _tree->SetBranchAddress("timestamp_usec",      &(ptr->timestamp_usec));
+
 
   // Fill some branches by looping over ChannelData objects
 

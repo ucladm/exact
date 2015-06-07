@@ -30,7 +30,8 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
   event->us_per_samp = daq_header.sample_interval*1.e-3;
   event->trigger_index = daq_header.trigger_sample;
   event->trigger_index_offset = _trigger_index_offset;
-
+  event->timestamp_sec = (int) daq_header.event_sec;
+  event->timestamp_usec = (int) daq_header.event_millisec;
 
 
   // Fill channel-level info
@@ -81,8 +82,10 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
 
   bool PRINT = false;
   if (PRINT) {
+    cout << "event "<<event->event_id<<" "<<event->timestamp_sec<<" "<<event->timestamp_usec<<endl;
     for (int ch=0; ch<event->nchans; ++ch) {
       cout << "event "<<event->event_id<<" ch "<<event->GetChannel(ch)->channel_id<<endl;
+      
       for (int i=0; i<event->nsamps; ++i) {
         cout << event->GetChannel(ch)->raw_waveform[i]<<" ";
       }
