@@ -114,7 +114,6 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   std::ifstream infile(fileList.c_str());
   std::string datafile;
   int total_events=0;
-  
   while (infile >> datafile) {
     daq_header.load_file(datafile.c_str());
     if (!daq_header.binary_file.is_open()) {

@@ -173,7 +173,7 @@ int main(int args, char* argv[]) {
 
   gEventProcessor->Initialize();
   
-  gEventProcessor->ProcessEvent(1);
+  gEventProcessor->ProcessEvent(0);
   
   theApp->Run();
   

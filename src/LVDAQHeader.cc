@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <cstdlib>
+#include <iostream>
 
 using namespace std;
 
@@ -41,11 +42,13 @@ void LVDAQHeader::read_header_content()
   header_size = 152;
 
   bool print_header = true;
-  string header(156,' ');
+  string header(152,' ');
   if (print_header) {
+    cout << "\nHEADER"<<endl;
     binary_file.read(&header[0],header.size());
+    cout << header << endl;
   }
-  cout << header << endl;
+  
 
   binary_file.seekg(0,std::ios::beg);
   
@@ -62,12 +65,13 @@ void LVDAQHeader::read_header_content()
   string s_run_id(6,' ');     binary_file.read(&s_run_id[0], s_run_id.size());
   string s_ntriggers(6, ' '); binary_file.read(&s_ntriggers[0], s_ntriggers.size());
   vector<string> s_vertical_offset;
-  for (int i=0; i<8; ++i) {
+  int tmp_nchans; istringstream(s_nchannels) >> tmp_nchans;
+  for (int i=0; i<tmp_nchans; ++i) {
     string chOffset(6,' '); binary_file.read(&chOffset[0], chOffset.size());
     s_vertical_offset.push_back(chOffset);
   }
   vector<string> s_full_scale;
-  for (int i=0; i<8; ++i) {
+  for (int i=0; i<tmp_nchans; ++i) {
     string chFullScale(4,' '); binary_file.read(&chFullScale[0], chFullScale.size());
     s_full_scale.push_back(chFullScale);
   }
@@ -75,7 +79,7 @@ void LVDAQHeader::read_header_content()
   string s_sample_interval(3,' ');    binary_file.read(&s_sample_interval[0], s_sample_interval.size());
   string s_nsamps(7,' ');             binary_file.read(&s_nsamps[0], s_nsamps.size());
   string s_trigger_level(6,' ');      binary_file.read(&s_trigger_level[0], s_trigger_level.size());
-  string s_trigger_source(2,' ');     binary_file.read(&s_trigger_source[0], s_trigger_source.size());
+  string s_trigger_source(1,' ');     binary_file.read(&s_trigger_source[0], s_trigger_source.size());
   string s_trigger_channel(2,' ');    binary_file.read(&s_trigger_channel[0], s_trigger_channel.size());
   string s_trigger_coupling(1,' ');   binary_file.read(&s_trigger_coupling[0], s_trigger_coupling.size());
   string s_trigger_slope(1,' ');      binary_file.read(&s_trigger_slope[0], s_trigger_slope.size());
@@ -95,15 +99,17 @@ void LVDAQHeader::read_header_content()
   istringstream(s_nchannels) >> nchannels;
   istringstream(s_run_id) >> run_id;
   istringstream(s_ntriggers) >> ntriggers;
+  vertical_offset.clear();
   for (int i=0; i<(int)s_vertical_offset.size(); ++i) {
     // first character is sign
     int sign = 1;
-    if (s_vertical_offset[i].compare(0,1,"+")) sign = 1;
-    else if (s_vertical_offset[i].compare(0,1,"-")) sign = -1;
+    if (s_vertical_offset[i].compare(0,1,"+")==0) sign = 1;
+    else if (s_vertical_offset[i].compare(0,1,"-")==0) sign = -1;
     int offset;
     istringstream(s_vertical_offset[i].substr(1)) >> offset;
     vertical_offset.push_back(sign*offset);
   }
+  vertical_full_scale.clear();
   for (int i=0; i<(int)s_full_scale.size(); ++i) {
     int scale; istringstream(s_full_scale[i]) >> scale;
     vertical_full_scale.push_back(scale);
@@ -112,8 +118,8 @@ void LVDAQHeader::read_header_content()
   istringstream(s_sample_interval) >> sample_interval;
   istringstream(s_nsamps) >> nsamps;
   int sign = 1;
-  if (s_trigger_level.compare(0,1,"+")) sign = 1;
-  else if (s_trigger_level.compare(0,1,"-")) sign = -1;
+  if (s_trigger_level.compare(0,1,"+")==0) sign = 1;
+  else if (s_trigger_level.compare(0,1,"-")==0) sign = -1;
   int temp; istringstream(s_trigger_level.substr(1)) >> temp; trigger_level = temp*sign;
   istringstream(s_trigger_source) >> trigger_source;
   istringstream(s_trigger_channel) >> trigger_channel;
@@ -122,7 +128,28 @@ void LVDAQHeader::read_header_content()
   istringstream(s_nbits) >> nbits;
 
   // hard code for now because DAQ is broken
-  nchannels=8;
+  //nchannels=8;
+  if (print_header) {
+    cout << "\nPARSED HEADER"<<endl;
+    cout << "UCLA: "<<UCLA<<endl;
+    cout << "version: "<<version<<endl;
+    cout << "date: "<<year<<"-"<<month<<"-"<<day<<endl;
+    cout << "time: "<<hour<<":"<<minute<<":"<<sec<<endl;
+    cout << "nchannels: "<<nchannels<<endl;
+    cout << "run ID: "<<run_id<<endl;
+    cout << "n triggers: "<<ntriggers<<endl;
+    cout << "v. offsets: "; for (int i=0; i<(int)vertical_offset.size(); ++i) cout << vertical_offset[i]<<" "; cout << endl;
+    cout << "full scales: "; for (int i=0; i<(int)vertical_full_scale.size(); ++i) cout << vertical_full_scale[i]<<" "; cout << endl;
+    cout << "trigger sample: "<<trigger_sample<<endl;
+    cout << "sample interval: "<<sample_interval<<endl;
+    cout << "nsamps: "<<nsamps<<endl;
+    cout << "trigger level: "<<trigger_level<<endl;
+    cout << "trigger source: "<<trigger_source<<endl;
+    cout << "trigger channel: "<<trigger_channel<<endl;
+    cout << "trigger coupling: "<<trigger_coupling<<endl;
+    cout << "trigger slope: "<<trigger_slope<<endl;
+    cout << "nbits: "<<nbits<<endl;
+  }
 }
 
 void LVDAQHeader::read_event(int event_id, vector< vector<double> > & data_array)
