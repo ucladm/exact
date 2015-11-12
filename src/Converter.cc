@@ -8,7 +8,7 @@
 Converter::Converter(CfgReader const& cfg):
   module_name("Converter"),
   _enabled(cfg.getParam<bool>(module_name, "enabled", true)),
-  _trigger_index_offset(cfg.getParam<int>(module_name, "trigger_index_offset", 0))
+  _trigger_offset(cfg.getParam<double>(module_name, "trigger_offset", 0))
 { }
 
 
@@ -27,9 +27,9 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
   // Fill event-level info
   event->nchans = daq_header.nchannels;
   event->nsamps = daq_header.nsamps;
-  event->us_per_samp = daq_header.sample_interval*1.e-3;
+  event->us_per_samp = daq_header.sample_interval*1.e-3; // ns -> us
   event->trigger_index = daq_header.trigger_sample;
-  event->trigger_index_offset = _trigger_index_offset;
+  event->trigger_offset = _trigger_offset;
   event->timestamp_sec = (int) daq_header.event_sec;
   event->timestamp_usec = (int) daq_header.event_millisec;
 
@@ -58,27 +58,26 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
   
   
   // Trim the waveforms so that they are aligned.
-  // _trigger_index_offset is top channels with respect to bottom channel.
-  // If >0, trim start of top channels, and end of bottom channel.
-  // If <0, trim start of bottom channel, and end of top channels.
-  /* 2015-06-03: This section is buggy!
+  // _trigger_offset is top channels with respect to bottom channel.
+  // If <0, expect that TOP channels are ahead of BOT channels: trim start of TOP channels and end of BOT channel.
+  // If >0, expect that BOT channel is ahead of TOP channels: trim start of BOT channel and end of TOP channels.
+  const int trigger_index_offset = _trigger_offset / event->us_per_samp;
   for (int ch=0; ch<event->nchans; ch++) {
     std::vector<double> & waveform = event->GetChannel(ch)->raw_waveform;
-    if (ch==BOT_CHANNEL_ID) {
-      if (_trigger_index_offset < 0)
-        waveform.erase(waveform.begin(), waveform.begin() - _trigger_index_offset);
+    if (_trigger_offset < 0) { // expect that TOP channels are ahead of BOT channel
+      if (ch==BOT_CHANNEL_ID)
+        waveform.resize(event->nsamps + trigger_index_offset);
       else
-        waveform.resize(event->nsamps - _trigger_index_offset);
+        waveform.erase(waveform.begin(), waveform.begin() - trigger_index_offset);
     }
-    else {
-      if (_trigger_index_offset < 0)
-        waveform.resize(event->nsamps + _trigger_index_offset);
+    else { //expect that BOT channel is ahead of TOP channels
+      if (ch==BOT_CHANNEL_ID)
+        waveform.erase(waveform.begin(), waveform.begin() + trigger_index_offset);
       else
-        waveform.erase(waveform.begin(), waveform.begin()+_trigger_index_offset);
+        waveform.resize(event->nsamps - trigger_index_offset);
     }
   } // end loop over channels
-  event->nsamps -= std::fabs(_trigger_index_offset);
-  */
+  event->nsamps -= std::fabs(trigger_index_offset);
 
   bool PRINT = false;
   if (PRINT) {

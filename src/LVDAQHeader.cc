@@ -41,8 +41,8 @@ void LVDAQHeader::read_header_content()
 {
   header_size = 152;
 
-  bool print_header = true;
-  string header(152,' ');
+  bool print_header = false;
+  string header(header_size,' ');
   if (print_header) {
     cout << "\nHEADER"<<endl;
     binary_file.read(&header[0],header.size());

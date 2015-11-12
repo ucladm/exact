@@ -29,7 +29,7 @@ public:
 private:
   bool _enabled;
 
-  int _trigger_index_offset; //offset for top channels to align all channels in time
+  double _trigger_offset; //offset for top channels to align all channels in time
   
 };
 

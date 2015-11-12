@@ -21,7 +21,7 @@
 
 using namespace std;
 
-#define BOT_CHANNEL_ID 0
+#define BOT_CHANNEL_ID 7
 
 class TMultiGraph;
 
@@ -42,7 +42,7 @@ public:
   int nsamps;
   double us_per_samp;
   int trigger_index;
-  int trigger_index_offset; //for top-channels only
+  double trigger_offset; //for top-channels only
   int adc_bits; //number of ADC bits
 
   bool saturated;

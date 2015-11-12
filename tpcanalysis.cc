@@ -155,9 +155,10 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
     // -------------------- LOOP OVER EVENTS ------------------------
 
     for (int n=0; n<daq_header.ntriggers; ++n) {
-      evt++;
-      if (evt<min_evt)
+      if (evt<min_evt) {
+        evt++;
         continue;
+      }
       if (evt>max_evt)
         break;
 
@@ -192,7 +193,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       
       /////////////////////////////////////////////////////////////
 
-    
+      evt++;
       nevents++;
 
     }// end loop over events

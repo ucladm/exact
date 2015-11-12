@@ -25,7 +25,7 @@ EventData::EventData() :
   nsamps(-1),
   us_per_samp(-1),
   trigger_index(-1),
-  trigger_index_offset(-1),
+  trigger_offset(-1),
   adc_bits(-1),
 
   channels(),
@@ -44,7 +44,7 @@ void EventData::Clear()
   nsamps = -1;
   us_per_samp = -1;
   trigger_index = -1;
-  trigger_index_offset = -1;
+  trigger_offset = -1;
   adc_bits = -1;
   //channels.clear();
   std::vector<ChannelData>::iterator it = channels.begin();
