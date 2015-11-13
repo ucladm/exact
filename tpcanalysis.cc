@@ -127,7 +127,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   infile.close();
 
   // Determine start and end of event loop.
-  int min_evt = cfg.getParam<int>("tpcanalysis", "min", 1);
+  int min_evt = cfg.getParam<int>("tpcanalysis", "min", 0);
   int max_evt = cfg.getParam<int>("tpcanalysis", "max", total_events);
   int evt = 0;
   int subfile = -1;
