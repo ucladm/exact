@@ -50,6 +50,9 @@
 #include "AverageWaveforms.hh"
 #include "EventDataWriter.hh"
 
+// new modules for revamp
+#include "Converter2.hh"
+
 
 using namespace std;
 
@@ -100,12 +103,16 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   ROI roi(cfg);
   //AverageWaveforms avgwfms(cfg);
   EventDataWriter eventDataWriter(cfg);
+
+
+  Converter2 converter2("converter");
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
   //avgwfms.Initialize();
   eventDataWriter.Initialize();
 
+  converter2.Initialize();
 
   // -------------------- LOOP OVER FILES -------------------------
 
@@ -190,6 +197,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       roi.Process(event);
       //avgwfms.Process(event);
       eventDataWriter.Process(event);
+
+      converter2.Process(event);
       
       /////////////////////////////////////////////////////////////
 
@@ -203,6 +212,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
   //avgwfms.Finalize(rootfile);
   eventDataWriter.Finalize(rootfile);
+
+  converter2.Finalize(converter2.GetTree());
 
   
   rootfile->Close();

@@ -8,11 +8,11 @@ COPTS =	-fPIC -DLINUX -Wall \
 
 LIBS = $(shell root-config --glibs) -lEve -lRGL
 
-CFLAGS = -c -g -Wall -I$(IDIR)
+CFLAGS = -c -g -Wall -I$(IDIR) -I.
 VPATH = src
 LDFLAGS= -g
 
-DEPS = $(wildcard $(IDIR)/*.hh)
+DEPS = $(wildcard $(IDIR)/*.hh) 
 #_OBJS = $(DEPS:.hh=.o)
 _SRCS = $(wildcard $(ODIR)/*.cc)
 _OBJS = $(_SRCS:.cc=.o)
@@ -32,7 +32,7 @@ EXEC2 = eventviewer
 all: $(OBJS) $(DICTSRC) $(EXEC1) $(EXEC2)
 
 # compile each class individually; recompile only those with changes
-$(ODIR)/%.o: %.cc $(DEPS)
+$(ODIR)/%.o: %.cc cfg.h
 	@echo [${CC}] Compiling class $<
 	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
 
@@ -47,24 +47,26 @@ $(DICTSRC): $(DEPS) $(OBJS)
 	@$(CC) -shared  -o $(DICT).so  $(OBJS) $(DICT).o $(LIBS)
 
 # compile executable
-$(EXEC1).o : $(EXEC1).cc
-	@echo [${CC}] Compiling $(EXEC1).cc
+$(EXEC1).o: $(EXEC1).cc $(DICTSRC)
+	@echo [${CC}] Compiling $<
 	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
 
-$(EXEC2).o : $(EXEC2).cc
-	@echo [${CC}] Compiling $(EXEC2).cc
+$(EXEC2).o: $(EXEC2).cc $(DICTSRC)
+	@echo [${CC}] Compiling $<
 	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
+
 
 # link everything
-$(EXEC1): $(OBJS) $(EXEC1).o
-	@echo [${CC}] Linking $(EXEC1)
-	@$(CC) $(EXEC1).o $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS)
+$(EXEC1): $(EXEC1).o $(OBJS) 
+	@echo [${CC}] Linking $@
+	@$(CC) $< $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS)
 	@echo [DONE]
 
-$(EXEC2): $(OBJS) $(EXEC2).o
-	@echo [${CC}] Linking $(EXEC2)
-	@$(CC) $(EXEC2).o $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS) 
+$(EXEC2): $(EXEC2).o $(OBJS) 
+	@echo [${CC}] Linking $@
+	@$(CC) $< $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS)
 	@echo [DONE]
+
 
 
 .PHONY: clean
