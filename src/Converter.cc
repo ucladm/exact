@@ -25,6 +25,7 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
   
 
   // Fill event-level info
+  event->run_id = daq_header.run_id;
   event->nchans = daq_header.nchannels;
   event->nsamps = daq_header.nsamps;
   event->us_per_samp = daq_header.sample_interval*1.e-3; // ns -> us

@@ -176,7 +176,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       if (!use_eventlist && evt%10000 == 0)
         std::cout << "Processing event " << n << std::endl;
       event->Clear();
-      event->run_id = subfile;
+      //event->run_id = subfile;
       event->event_id = n; //evt;
 
       /////////////////////////////////////////////////////////////
