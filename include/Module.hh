@@ -14,8 +14,9 @@
 #include "TTree.h"
 #include "TString.h"
 
-using namespace libconfig;
+#define NCHANS 8
 
+using namespace libconfig;
 
 class Module
 {
@@ -33,8 +34,6 @@ public:
 
 protected:
   TTree* tree;
-  
-  
 };
 
 

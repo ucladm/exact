@@ -11,41 +11,54 @@
 using namespace std;
 
 
-BaselineFinder::BaselineFinder(CfgReader const& cfg):
-  module_name("BaselineFinder"),
-  _enabled(cfg.getParam<bool>(module_name, "enabled", true)),
-  _mode(cfg.getParam<string>(module_name, "mode", "FIXED")),
-  _start_time(cfg.getParam<double>(module_name, "start_time", -0.1)),
-  _end_time(cfg.getParam<double>(module_name, "end_time", 0.0)),
-  _threshold(cfg.getParam<double>(module_name, "threshold", 1.0)),
-  _pre_samps(cfg.getParam<int>(module_name, "pre_samps", 10)),
-  _post_samps(cfg.getParam<int>(module_name, "post_samps", 10)),
-  _max_sigma(cfg.getParam<double>(module_name, "max_sigma", 1)),
-  _max_amplitude(cfg.getParam<double>(module_name, "max_amplitude", 1)),
-  _baseline_fixed_window(cfg.getParam<double>(module_name, "baseline_fixed_window", -0.07))
-{ }
-
-
-int BaselineFinder::Process(EventData* event)
+BaselineFinder::BaselineFinder(const Setting & cfg) : Module(cfg)
 {
-  if (!_enabled)
-    return 0;
+  cfg.lookupValue("mode", mode);
 
-  //event->baseline_subtracted_waveforms.resize(event->nchans);
-  
-  if (_mode == "FIXED")
+  // fixed baseline params
+  cfg.lookupValue("start_time", start_time);
+  cfg.lookupValue("end_time", end_time);
+  cfg.lookupValue("threshold", threshold);
+
+  // moving baseline parameters
+  cfg.lookupValue("pre_samps", pre_samps);
+  cfg.lookupValue("post_samps", post_samps);
+  cfg.lookupValue("max_sigma", max_sigma);
+  cfg.lookupValue("max_amplitude", max_amplitude);
+  cfg.lookupValue("baseline_fixed_window", baseline_fixed_window);
+
+  baseline_mean = new Float_t[NCHANS];
+  baseline_sigma = new Float_t[NCHANS];
+}
+
+void BaselineFinder::Initialize()
+{
+  Module::Initialize();
+  TString suffix = TString::Format("[%d]/F", NCHANS);
+  tree->Branch("baseline_mean", baseline_mean, "baseline_mean"+suffix);
+  tree->Branch("baseline_sigma",baseline_sigma,"baseline_sigma"+suffix);
+}
+
+void BaselineFinder::Process(EventData* event)
+{
+  if (mode == "FIXED")
     fixed_baseline(event);
-  else if (_mode == "MOVING")
+  else if (mode == "MOVING")
     moving_baseline(event);
   else {
     std::cout << "BaselineFinder mode not recognized. Using FIXED."<<std::endl;
     fixed_baseline(event);
   }
-
   
-  return 1;
+  // This must be the last call within this function.
+  Module::Process();
 }
 
+void BaselineFinder::Finalize(TTree* master)
+{
+  // This must be the last call within this function.
+  Module::Finalize(master);
+}
 
 
 void BaselineFinder::fixed_baseline(EventData* event)
@@ -58,8 +71,8 @@ void BaselineFinder::fixed_baseline(EventData* event)
     vector<double> const& raw = channel->raw_waveform;
     double sum = 0;
     double var = 0;
-    int start_samp = event->TimeToSample(_start_time);
-    int end_samp = event->TimeToSample(_end_time);
+    int start_samp = event->TimeToSample(start_time);
+    int end_samp = event->TimeToSample(end_time);
     for (int i = start_samp; i<end_samp; ++i) {
       sum += raw[i];
       var += raw[i]*raw[i];
@@ -85,7 +98,7 @@ void BaselineFinder::fixed_baseline(EventData* event)
     
     vector<double> & bs_wfm = channel->baseline_subtracted_waveform;
     bs_wfm.resize(raw.size());
-    if (channel->baseline_sigma < _threshold) {
+    if (channel->baseline_sigma < threshold) {
       channel->baseline_valid = true;
 
       // compute the baseline-subtracted and inverted waveform
@@ -124,7 +137,7 @@ void BaselineFinder::moving_baseline(EventData* event)
     double mean = 0;
     double variance = 0;
     bool baseline_valid = false;
-    int window_size = _pre_samps+_post_samps+1;
+    int window_size = pre_samps+post_samps+1;
     double last_baseline_samp = 0;
 
     if(raw[idx]<=saturating_count)
@@ -132,17 +145,17 @@ void BaselineFinder::moving_baseline(EventData* event)
 
     // start the mean off with the very beginning of the waveform
 
-    for (int i=0; i<_pre_samps+_post_samps+1; i++) {
+    for (int i=0; i<pre_samps+post_samps+1; i++) {
       mean += raw[i]/window_size;
       variance += raw[i]*raw[i]/window_size;
     }
     variance -= mean*mean;
     // now traverse through the waveform
-    for (int samp = _pre_samps; samp<nsamps-_post_samps-1; samp++) {
+    for (int samp = pre_samps; samp<nsamps-post_samps-1; samp++) {
       if (!in_baseline) { // previously not in baseline
 
         // determine if now in baseline
-        if (variance < _max_sigma*_max_sigma) {
+        if (variance < max_sigma*max_sigma) {
           //now in baseline
           in_baseline = true;
           if (!baseline_valid)
@@ -157,7 +170,7 @@ void BaselineFinder::moving_baseline(EventData* event)
       else { // previously in baseline
 
         // determine if still in baseline
-        if (std::abs(raw[samp+_post_samps]-baseline[samp-1]) > _max_amplitude) {
+        if (std::abs(raw[samp+post_samps]-baseline[samp-1]) > max_amplitude) {
           //no longer in baseline
           in_baseline = false;
         }
@@ -174,11 +187,11 @@ void BaselineFinder::moving_baseline(EventData* event)
       variance += mean*mean;
 
       // Then calculate new mean
-      mean += (raw[samp+_post_samps] - raw[samp-_pre_samps])/window_size;
+      mean += (raw[samp+post_samps] - raw[samp-pre_samps])/window_size;
 
       // Calculte new variance
-      variance += ((raw[samp+_post_samps]*raw[samp+_post_samps] -
-                    raw[samp-_pre_samps]*raw[samp-_pre_samps])/window_size
+      variance += ((raw[samp+post_samps]*raw[samp+post_samps] -
+                    raw[samp-pre_samps]*raw[samp-pre_samps])/window_size
                    - mean*mean);
     }// end loop over waveform
 
@@ -226,16 +239,18 @@ void BaselineFinder::moving_baseline(EventData* event)
     //channel->baseline_sigma = 1;
     channel->baseline_mean = 0;
     // For moving baseline, baseline mean and sigma aren't very meaningful. So fill with fixed window calculation
-    for (int samp = 0; samp < event->TimeToSample(_baseline_fixed_window); ++samp) {
+    for (int samp = 0; samp < event->TimeToSample(baseline_fixed_window); ++samp) {
       channel->baseline_mean += raw[samp];
       channel->baseline_sigma += raw[samp]*raw[samp];
     }
-    channel->baseline_mean /= event->TimeToSample(_baseline_fixed_window);
-    channel->baseline_sigma = std::sqrt(channel->baseline_sigma/_baseline_fixed_window -
+    channel->baseline_mean /= event->TimeToSample(baseline_fixed_window);
+    channel->baseline_sigma = std::sqrt(channel->baseline_sigma/baseline_fixed_window -
                                         channel->baseline_mean*channel->baseline_mean);
     channel->baseline_valid = true;
     //event->baseline_subtracted_waveforms.push_back(bswfm);
 
+    baseline_mean[channel->channel_id] = channel->baseline_mean;
+    baseline_sigma[channel->channel_id] = channel->baseline_sigma;
     
   }// end loop over channels
 }

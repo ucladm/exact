@@ -16,13 +16,13 @@ Converter::Converter(const Setting & cfg) : Module(cfg)
 void Converter::Initialize()
 {
   Module::Initialize();
-  Module::tree->Branch("run_id",    &run_id,    "run_id/I");
-  Module::tree->Branch("subrun_id", &subrun_id, "subrun_id/I");
-  Module::tree->Branch("event_id",  &event_id,  "event_id/I");
-  Module::tree->Branch("nchans",    &nchans,    "nchans/I");
-  Module::tree->Branch("nsamps",    &nsamps,    "nsamps/I");
-  Module::tree->Branch("timestamp_sec", &timestamp_sec, "timestamp_sec/I");
-  Module::tree->Branch("timestamp_usec", &timestamp_usec, "timestamp_usec/I");
+  tree->Branch("run_id",    &run_id,    "run_id/I");
+  tree->Branch("subrun_id", &subrun_id, "subrun_id/I");
+  tree->Branch("event_id",  &event_id,  "event_id/I");
+  tree->Branch("nchans",    &nchans,    "nchans/I");
+  tree->Branch("nsamps",    &nsamps,    "nsamps/I");
+  tree->Branch("timestamp_sec", &timestamp_sec, "timestamp_sec/I");
+  tree->Branch("timestamp_usec", &timestamp_usec, "timestamp_usec/I");
   
   
 }
@@ -118,7 +118,8 @@ void Converter::Process(EventData* event, LVDAQHeader & daq_header)
   Module::Process();
 }
 
-void Converter::Finalize(TTree* master)
-{
-  Module::Finalize(master);
-}
+//void Converter::Finalize(TTree* master)
+//{
+//  // This must be the last call within this function.
+//  Module::Finalize(master);
+//}

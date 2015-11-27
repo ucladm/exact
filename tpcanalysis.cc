@@ -40,8 +40,8 @@
 #include "LVDAQHeader.hh"
 //#include "CfgReader.hh"
 #include "EventData.hh"
-//#include "Converter.hh"
-//#include "BaselineFinder.hh"
+#include "Converter.hh"
+#include "BaselineFinder.hh"
 //#include "ZeroSuppressor.hh"
 //#include "Integrator.hh"
 //#include "SumChannel.hh"
@@ -51,7 +51,6 @@
 //#include "EventDataWriter.hh"
 
 // new modules for revamp
-#include "Converter.hh"
 #include <iomanip>
 #include <cstdlib>
 #include <libconfig.h++>
@@ -87,6 +86,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   
   // ------------------ INSTANTIATE ALL MODULES -------------------
   Converter converter(cfg.lookup("Converter"));
+  BaselineFinder baselineFinder(cfg.lookup("BaselineFinder"));
+  
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
@@ -94,6 +95,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   //eventDataWriter.Initialize();
 
   converter.Initialize();
+  baselineFinder.Initialize();
 
   // -------------------- LOOP OVER FILES -------------------------
 
@@ -181,7 +183,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       //avgwfms.Process(event);
       //eventDataWriter.Process(event);
 
-      if (converter.enabled) converter.Process(event, daq_header);
+      if (converter.enabled)      converter.Process(event, daq_header);
+      if (baselineFinder.enabled) baselineFinder.Process(event);
       
       /////////////////////////////////////////////////////////////
 
@@ -193,8 +196,10 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   }// end loop over files
   
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
-  converter.Finalize(converter.GetTree());
+  TTree* master = converter.GetTree();
+  baselineFinder.Finalize(master);
 
+  master->Write();
   
   rootfile->Close();
 

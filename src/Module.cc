@@ -30,8 +30,10 @@ void Module::Finalize(TTree* master)
   // This function is to be overridden by each module.
   // Within override, call Module::Finalize().
   if (enabled) {
-    if (tree->GetEntries() == master->GetEntries())
+    if (tree->GetEntries() == master->GetEntries()) {
+      master->AddFriend(tree);
       tree->Write();
+    }
     else
       std::cout << "ERROR: tree for "<<module_name<<" has mis-matching number "
                 << "of entries! This is a serious error."<<std::endl;
