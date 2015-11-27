@@ -8,7 +8,7 @@ COPTS =	-fPIC -DLINUX -Wall \
 
 LIBS = $(shell root-config --glibs) -lEve -lRGL  -lconfig++
 
-CFLAGS = -c -g -Wall -I$(IDIR) -I.
+CFLAGS = -c -g -Wall -I$(IDIR)
 VPATH = src
 LDFLAGS= -g
 
@@ -32,7 +32,7 @@ EXEC1 = tpcanalysis
 all: $(OBJS) $(DICTSRC) $(EXEC1) #$(EXEC2)
 
 # compile each class individually; recompile only those with changes
-$(ODIR)/%.o: %.cc cfg.h
+$(ODIR)/%.o: %.cc
 	@echo [${CC}] Compiling class $<
 	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
 

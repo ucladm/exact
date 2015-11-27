@@ -4,6 +4,7 @@
   Searches through the sum channel waveform to find pulses.
 
   v0.1 AFan 2014-02-03
+  v0.2 AFan 2015-11-25
 
  */
 
@@ -11,23 +12,20 @@
 #ifndef PulseFinder_hh
 #define PulseFinder_hh
 
+#include "Module.hh"
 #include "EventData.hh"
-#include "CfgReader.hh"
 #include <string>
 #include <vector>
 
-class PulseFinder
+class PulseFinder : public Module
 {
 public:
-  PulseFinder(CfgReader const& cfg);
-  //void Initialize(); //Add an Initialize function only if necessary.
-  int Process(EventData* event);
-
-  std::string module_name;
+  PulseFinder(const Setting & cfg);
+  void Initialize();
+  void Process(EventData* event);
+  void Finalize(TTree* master);
 
 private:
-  bool _enabled;
-
   std::string _mode;
 
   int _down_sample_factor;
@@ -35,6 +33,11 @@ private:
   double _pulse_start_amp;
   double _pulse_end_threshold;
 
+  // variables to save to output
+  Int_t npulses;
+  Float_t* pulse_start;
+  Float_t* pulse_end;
+  
   void EvaluatePulses(EventData* event);
 
   int ThresholdSearch(EventData* event);

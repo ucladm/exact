@@ -38,14 +38,13 @@
 #include "TBranch.h"
 
 #include "LVDAQHeader.hh"
-//#include "CfgReader.hh"
 #include "EventData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
 #include "ZeroSuppressor.hh"
 #include "Integrator.hh"
 #include "SumChannel.hh"
-//#include "PulseFinder.hh"
+#include "PulseFinder.hh"
 //#include "ROI.hh"
 //#include "AverageWaveforms.hh"
 //#include "EventDataWriter.hh"
@@ -90,6 +89,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   ZeroSuppressor zeroSuppressor(cfg.lookup("ZeroSuppressor"));
   SumChannel sumChannel(cfg.lookup("SumChannel"));
   Integrator integrator(cfg.lookup("Integrator"));
+  PulseFinder pulseFinder(cfg.lookup("PulseFinder"));
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
   //avgwfms.Initialize();
@@ -100,7 +100,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   if (zeroSuppressor.enabled) zeroSuppressor.Initialize();
   if (sumChannel.enabled) sumChannel.Initialize();
   if (integrator.enabled) integrator.Initialize();
-
+  if (pulseFinder.enabled) pulseFinder.Initialize();
+  
   // -------------------- LOOP OVER FILES -------------------------
 
 
@@ -192,6 +193,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       if (zeroSuppressor.enabled) zeroSuppressor.Process(event);
       if (sumChannel.enabled)     sumChannel.Process(event);
       if (integrator.enabled)     integrator.Process(event);
+      if (pulseFinder.enabled)    pulseFinder.Process(event);
       
       /////////////////////////////////////////////////////////////
 
@@ -208,7 +210,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   if (zeroSuppressor.enabled) zeroSuppressor.Finalize(master);
   if (sumChannel.enabled)     sumChannel.Finalize(master);
   if (integrator.enabled)     integrator.Finalize(master);
-
+  if (pulseFinder.enabled)    pulseFinder.Finalize(master);
+  
   master->Write();
   
   rootfile->Close();

@@ -3,24 +3,33 @@
 #include <numeric>   //accumulate
 #include <cmath>
 
+#define MAXNPULSES 100
+
 using namespace std;
 
-PulseFinder::PulseFinder(CfgReader const& cfg):
-  module_name("PulseFinder"),
-  _enabled(cfg.getParam<bool>(module_name, "enabled", true)),
-  _mode(cfg.getParam<std::string>(module_name, "mode", "THRESHOLD")),
-  _down_sample_factor(cfg.getParam<int>(module_name, "down_sample_factor", 10)),
-  _pulse_start_threshold(cfg.getParam<double>(module_name, "pulse_start_threshold", 0)),
-  _pulse_start_amp(cfg.getParam<double>(module_name, "pulse_start_amp", 0)),
-  _pulse_end_threshold(cfg.getParam<double>(module_name, "pulse_end_threshold", 0))
-{ }
-
-int PulseFinder::Process(EventData* event)
+PulseFinder::PulseFinder(const Setting & cfg) : Module(cfg)
 {
-  if (!_enabled)
-    return 0;
+  cfg.lookupValue("mode", _mode);
+  cfg.lookupValue("down_sample_factor", _down_sample_factor);
+  cfg.lookupValue("pulse_start_threshold", _pulse_start_threshold);
+  cfg.lookupValue("pulse_start_amp", _pulse_start_amp);
+  cfg.lookupValue("pulse_end_threshold", _pulse_end_threshold);
 
-  int npulses = 0;
+  pulse_start = new Float_t[MAXNPULSES];
+  pulse_end = new Float_t[MAXNPULSES];
+}
+
+void PulseFinder::Initialize()
+{
+  Module::Initialize();
+  tree->Branch("npulses", &npulses, "npulses/I");
+  tree->Branch("pulse_start", pulse_start, "pulse_start[npulses]/F");
+  tree->Branch("pulse_end", pulse_end, "pulse_end[npulses]/F");
+}
+
+void PulseFinder::Process(EventData* event)
+{
+  npulses = 0;
   if (_mode=="THRESHOLD")
     npulses = ThresholdSearch(event);
   else if (_mode=="INTEGRAL")
@@ -33,11 +42,25 @@ int PulseFinder::Process(EventData* event)
   if (npulses>0)
     EvaluatePulses(event);
 
-  
-  return 1;
 
+  // Set variables
+  for (int i=0; i<npulses; i++) {
+    pulse_start[i] = event->pulses[i].start_time;
+    pulse_end[i] = event->pulses[i].end_time;
+  }
+
+
+
+
+  
+  
+  Module::Process();  
 }
 
+void PulseFinder::Finalize(TTree* master)
+{
+  Module::Finalize(master);
+}
 
 void PulseFinder::EvaluatePulses(EventData* event)
 {
