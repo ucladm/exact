@@ -89,6 +89,5 @@ void ProcessedPlotter::Process(EventData* event)
 
 }
 
-void ProcessedPlotter::Finalize(TTree* master)
-{
-}
+//void ProcessedPlotter::Finalize(TTree* master)
+//{}

@@ -8,11 +8,12 @@ TGNumberEntryField* gEventNumberEntry = 0;
 
 void EventNavigator::Fwd()
 {
-  if (gEventID >= gEventProcessor->nevents)
+  if (gEventID >= gEventProcessor->GetDAQHeader().ntriggers)
     std::cout << "At end of file" << std::endl;
   
   else {
     ++gEventID;
+    cout << "Processing event "<<gEventID<<endl;
     gEventProcessor->ProcessEvent(gEventID);
   }
 
@@ -24,6 +25,7 @@ void EventNavigator::Bck()
     std::cout << "At beginning of file" << std::endl;
   else {
     --gEventID;
+    cout << "Processing event "<<gEventID<<endl;
     gEventProcessor->ProcessEvent(gEventID);
   }
 }
@@ -34,10 +36,11 @@ void EventNavigator::GotoEvent() {
     std::cout << "Event ID too low! Going to first event." << std::endl;
     gEventID = 1;
   }
-  else if (gEventID > gEventProcessor->nevents) {
+  else if (gEventID > gEventProcessor->GetDAQHeader().ntriggers) {
     std::cout << "Event ID beyond file! Going to last event." << std::endl;
-    gEventID = gEventProcessor->nevents;
+    gEventID = gEventProcessor->GetDAQHeader().ntriggers;
   }
+  cout << "Processing event "<<gEventID<<endl;
   gEventProcessor->ProcessEvent(gEventID);
 }
 

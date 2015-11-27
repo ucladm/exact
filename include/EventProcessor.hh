@@ -12,7 +12,8 @@
 #include "SumChannel.hh"
 #include "PulseFinder.hh"
 #include "ProcessedPlotter.hh"
-//#include "RootGraphix.hh"
+//#include "ROI.hh"
+//#include "AverageWaveforms.hh"
 
 #include <string>
 #include <libconfig.h++>
@@ -20,14 +21,19 @@
 class EventProcessor
 {
 public:
-  EventProcessor(const Config & cfg, std::string datafile);
+  EventProcessor(const Config & cfg);
   
   void Initialize();
   void ProcessEvent(int event_id);
+  void Finalize();
 
-  int nevents;
+  void SetDataFile(std::string datafile);
+
+  LVDAQHeader const& GetDAQHeader() { return daqHeader; }
   
 private:
+
+  EventData* event;
   
   LVDAQHeader daqHeader;
   Converter converter;
@@ -38,7 +44,7 @@ private:
   PulseFinder pulseFinder;
   ProcessedPlotter plotter;
 
-  EventData* event;
+  
 
 };
 

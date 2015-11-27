@@ -141,7 +141,7 @@ void BaselineFinder::moving_baseline(EventData* event)
     bool baseline_valid = false;
     int window_size = _pre_samps+_post_samps+1;
     double last_baseline_samp = 0;
-
+    
     if(raw[idx]<=saturating_count)
       ch_saturated = true;
 
@@ -153,6 +153,7 @@ void BaselineFinder::moving_baseline(EventData* event)
     }
     variance -= mean*mean;
     // now traverse through the waveform
+    
     for (int samp = _pre_samps; samp<nsamps-_post_samps-1; samp++) {
       if (!in_baseline) { // previously not in baseline
 
@@ -197,7 +198,6 @@ void BaselineFinder::moving_baseline(EventData* event)
                    - mean*mean);
     }// end loop over waveform
 
-
     // fill in the beginning of the baseline
     for (int samp=0; samp<baseline_start; samp++)
       baseline[samp] = baseline[baseline_start];
@@ -205,8 +205,7 @@ void BaselineFinder::moving_baseline(EventData* event)
     // fill in the end of the baseline
     for (int samp=last_baseline_samp+1; samp<nsamps; samp++)
       baseline[samp] = baseline[last_baseline_samp];
-
-
+    
     // subtract off the baseline
     vector<double> & bswfm = channel->baseline_subtracted_waveform;
     bswfm.resize(nsamps);
@@ -235,7 +234,7 @@ void BaselineFinder::moving_baseline(EventData* event)
       bswfm[samp] = raw[samp] - baseline[samp];
      
     }
-    
+
     channel->saturated = ch_saturated;
     //channel->baseline_mean = 1;
     //channel->baseline_sigma = 1;

@@ -14,7 +14,6 @@
 
 #include "Module.hh"
 #include "EventData.hh"
-//#include "RootGraphix.hh"
 #include <string>
 #include <iostream>
 
@@ -26,11 +25,9 @@ class ProcessedPlotter : public Module
 {
 public:
   ProcessedPlotter(const Setting & cfg);
-  //void Initialize(TCanvas* canvas, RootGraphix* graphix);
-  //void Initialize(TCanvas* canvas);
   void Initialize();
   void Process(EventData* event);
-  void Finalize(TTree* master);
+  //void Finalize(TTree* master);
   
   //const TCanvas* GetCanvas() { return _canvas; }
 

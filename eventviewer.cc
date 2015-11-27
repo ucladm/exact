@@ -44,7 +44,6 @@
 #include "TGLayout.h"
 
 #include "LVDAQHeader.hh"
-//#include "CfgReader.hh"
 #include "EventData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
@@ -53,7 +52,6 @@
 #include "SumChannel.hh"
 #include "PulseFinder.hh"
 #include "ProcessedPlotter.hh"
-//#include "RootGraphix.hh"
 #include "EventProcessor.hh"
 #include "EventNavigator.hh"
 
@@ -157,13 +155,6 @@ int main(int args, char* argv[]) {
   make_gui();
   
   string cfgFile = argv[1];
-  
-  // Instantiate CfgReader
-  //CfgReader cfg;
-  //if (!cfg.readCfgFile(cfgFile)) {
-  //  std::cout << "ERROR reading cfg file" << std::endl;
-  //  return 0;
-  //}
 
   Config cfg;
   cfg.readFile(cfgFile.c_str());
@@ -171,10 +162,14 @@ int main(int args, char* argv[]) {
   
   string datafile = argv[2];
   
-  gEventProcessor = new EventProcessor(cfg, datafile);
+  gEventProcessor = new EventProcessor(cfg);
 
-  gEventProcessor->Initialize();
+  gEventProcessor->SetDataFile(datafile);
   
+  gEventProcessor->Initialize();
+
+
+  cout << "Processing event 0"<<endl;
   gEventProcessor->ProcessEvent(0);
   
   theApp->Run();

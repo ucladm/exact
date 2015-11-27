@@ -1,4 +1,5 @@
 #include "EventProcessor.hh"
+#include "TTree.h"
 
 using namespace std;
 
@@ -6,7 +7,7 @@ using namespace std;
 
 
 
-EventProcessor::EventProcessor(const Config & cfg, string datafile)
+EventProcessor::EventProcessor(const Config & cfg)
   : daqHeader()
   , converter(cfg.lookup("Converter"))
   , baselineFinder(cfg.lookup("BaselineFinder"))
@@ -16,27 +17,25 @@ EventProcessor::EventProcessor(const Config & cfg, string datafile)
   , pulseFinder(cfg.lookup("PulseFinder"))
   , plotter(cfg.lookup("Plotter"))
 {
+  // Will repopulate this object for each event
+  event = new EventData();  
+}
 
+
+void EventProcessor::SetDataFile(string datafile)
+{
   // Load the raw data file
   if (!daqHeader.format_test())
     std::cout << "ALARM! Variable size doesn't match!" << std::endl;
 
   // open raw data file
-  //string datafile = argv[2];
   daqHeader.load_file(datafile.c_str());
   if (!daqHeader.binary_file.is_open()) {
     std::cout << std::endl << "Can't open datafile: "
               << datafile.c_str() << std::endl;
   }
   daqHeader.read_header_content();
-  nevents = daqHeader.ntriggers;
-
-
-  // Will repopulate this object for each event
-  event = new EventData();  
 }
-
-
 
 
 
@@ -59,8 +58,6 @@ void EventProcessor::ProcessEvent(int event_id)
   event->run_id = 0;
   event->event_id = event_id;
 
-  std::cout << "Processing event "<< event->event_id << std::endl;
-  
   // Run all the modules. ORDER MATTERS!
   if (converter.enabled)      converter.Process(event, daqHeader);
   if (baselineFinder.enabled) baselineFinder.Process(event);
@@ -68,14 +65,17 @@ void EventProcessor::ProcessEvent(int event_id)
   if (sumChannel.enabled)     sumChannel.Process(event);
   if (integrator.enabled)     integrator.Process(event);
   if (pulseFinder.enabled)    pulseFinder.Process(event);
-  //converter.Process(event, daqHeader);
-  //baselineFinder.Process(event);
-  //zeroSuppressor.Process(event);
-  //sumChannel.Process(event);
-  //integrator.Process(event);
-  //pulseFinder.Process(event);
-
-  
-  
   if (plotter.enabled) plotter.Process(event);
+}
+
+
+void EventProcessor::Finalize()
+{
+  TTree* master = converter.GetTree();
+  if (baselineFinder.enabled) baselineFinder.Finalize(master);
+  if (zeroSuppressor.enabled) zeroSuppressor.Finalize(master);
+  if (sumChannel.enabled)     sumChannel.Finalize(master);
+  if (integrator.enabled)     integrator.Finalize(master);
+  if (pulseFinder.enabled)    pulseFinder.Finalize(master);
+  master->Write();
 }

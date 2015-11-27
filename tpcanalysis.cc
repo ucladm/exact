@@ -17,6 +17,11 @@
   v0.3 AFan 2015-01-10
   - Write outputs to better tree format
 
+  v0.4 AFan 2015-11-27
+  - Port framework to use base Module class
+  - use libconfig for cfg files
+  - move module execution to EventProcessor
+
 */
 
 
@@ -37,17 +42,7 @@
 #include "TChain.h"
 #include "TBranch.h"
 
-#include "LVDAQHeader.hh"
-#include "EventData.hh"
-#include "Converter.hh"
-#include "BaselineFinder.hh"
-#include "ZeroSuppressor.hh"
-#include "Integrator.hh"
-#include "SumChannel.hh"
-#include "PulseFinder.hh"
-//#include "ROI.hh"
-//#include "AverageWaveforms.hh"
-//#include "EventDataWriter.hh"
+#include "EventProcessor.hh"
 
 // new modules for revamp
 #include <iomanip>
@@ -73,38 +68,15 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   if (use_eventlist)
     ifs.open(eventlist.c_str());
 
-
+  // Output file
   TFile* rootfile = new TFile(outputfile.c_str(), "recreate");
-  
-  // Instantiate EventData; will repopulate this object for each
-  // event. Create a branch for each variable we want to save.
-  EventData* event = new EventData();
-  
 
-  
-  
-  // ------------------ INSTANTIATE ALL MODULES -------------------
-  Converter converter(cfg.lookup("Converter"));
-  BaselineFinder baselineFinder(cfg.lookup("BaselineFinder"));
-  ZeroSuppressor zeroSuppressor(cfg.lookup("ZeroSuppressor"));
-  SumChannel sumChannel(cfg.lookup("SumChannel"));
-  Integrator integrator(cfg.lookup("Integrator"));
-  PulseFinder pulseFinder(cfg.lookup("PulseFinder"));
 
-  //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
-  //avgwfms.Initialize();
-  //eventDataWriter.Initialize();
-
-  if (converter.enabled) converter.Initialize();
-  if (baselineFinder.enabled) baselineFinder.Initialize();
-  if (zeroSuppressor.enabled) zeroSuppressor.Initialize();
-  if (sumChannel.enabled) sumChannel.Initialize();
-  if (integrator.enabled) integrator.Initialize();
-  if (pulseFinder.enabled) pulseFinder.Initialize();
+  // Object that handles processing of all modules.
+  EventProcessor processor(cfg);
+  processor.Initialize();
   
   // -------------------- LOOP OVER FILES -------------------------
-
-
   // Do a quick loop through the files to find the total number of events.
   std::ifstream infile(fileList.c_str());
   std::string datafile;
@@ -122,10 +94,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   infile.close();
 
   // Determine start and end of event loop.
-  //int min_evt = cfg.getParam<int>("tpcanalysis", "min", 0);
-  //int max_evt = cfg.getParam<int>("tpcanalysis", "max", total_events);
-  int min_evt = 0;
-  int max_evt = 100;
+  int min_evt = 0;     //will eventually move this to read from cfg.
+  int max_evt = 10000;
   int evt = 0;
   int subfile = -1;
   int nevents = 0;
@@ -141,13 +111,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
     if (evt>max_evt)
       break;
 
-    // Open new data file. We've already looped through the files
-    // once, so we know we can open them.
-    daq_header.load_file(datafile.c_str());
-    std::cout << "Opening file "<<datafile<<std::endl;
+    processor.SetDataFile(datafile);
     ++subfile;
-    daq_header.read_header_content();
-
   
     // -------------------- LOOP OVER EVENTS ------------------------
 
@@ -156,63 +121,31 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
         evt++;
         continue;
       }
-      if (evt>max_evt)
+      if (evt>=max_evt)
         break;
 
       // If using event list, step the event loop forward until find matching event
       if (use_eventlist) {
-        if (n != current_event)
-          continue;
+        if (n != current_event) continue;
         else {
-          std::cout << "Processing event " << n << std::endl;
+          cout << "Processing event " << n << endl;
           ifs >> current_event;
         }
       }
-                
+      if (!use_eventlist && evt%10000 == 0) cout << "Processing event " << evt << endl;
+
+      processor.ProcessEvent(n);
       
-      if (!use_eventlist && evt%10000 == 0)
-        std::cout << "Processing event " << n << std::endl;
-      event->Clear();
-      //event->run_id = subfile;
-      event->event_id = n; //evt;
-
-      /////////////////////////////////////////////////////////////
-      // Run processing modules on event. ORDER MATTERS!
-      //converter.Process(event, daq_header);
-      //baselineFinder.Process(event);
-      //zeroSuppressor.Process(event);
-      //sumChannel.Process(event);
-      //integrator.Process(event);
-      //pulseFinder.Process(event);
-      //roi.Process(event);
-      //avgwfms.Process(event);
-      //eventDataWriter.Process(event);
-
-      if (converter.enabled)      converter.Process(event, daq_header);
-      if (baselineFinder.enabled) baselineFinder.Process(event);
-      if (zeroSuppressor.enabled) zeroSuppressor.Process(event);
-      if (sumChannel.enabled)     sumChannel.Process(event);
-      if (integrator.enabled)     integrator.Process(event);
-      if (pulseFinder.enabled)    pulseFinder.Process(event);
-      
-      /////////////////////////////////////////////////////////////
-
       evt++;
       nevents++;
 
     }// end loop over events
 
   }// end loop over files
+
+  rootfile->cd();
   
-  //----------------- FINALIZE MODULES (AS NEEDED) ---------------
-  TTree* master = converter.GetTree();
-  if (baselineFinder.enabled) baselineFinder.Finalize(master);
-  if (zeroSuppressor.enabled) zeroSuppressor.Finalize(master);
-  if (sumChannel.enabled)     sumChannel.Finalize(master);
-  if (integrator.enabled)     integrator.Finalize(master);
-  if (pulseFinder.enabled)    pulseFinder.Finalize(master);
-  
-  master->Write();
+  processor.Finalize();
   
   rootfile->Close();
 
