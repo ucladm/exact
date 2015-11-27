@@ -24,12 +24,12 @@ DICTSUF = cxx
 DICTSRC = $(DICT).$(DICTSUF)
 
 EXEC1 = tpcanalysis
-#EXEC2 = eventviewer
+EXEC2 = eventviewer
 
 
 #############################################################
 
-all: $(OBJS) $(DICTSRC) $(EXEC1) #$(EXEC2)
+all: $(OBJS) $(DICTSRC) $(EXEC1) $(EXEC2)
 
 # compile each class individually; recompile only those with changes
 $(ODIR)/%.o: %.cc
@@ -51,9 +51,9 @@ $(EXEC1).o: $(EXEC1).cc $(DICTSRC)
 	@echo [${CC}] Compiling $<
 	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
 
-#$(EXEC2).o: $(EXEC2).cc $(DICTSRC)
-#	@echo [${CC}] Compiling $<
-#	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
+$(EXEC2).o: $(EXEC2).cc $(DICTSRC)
+	@echo [${CC}] Compiling $<
+	@$(CC) $(CFLAGS) $(COPTS) $< -o $@
 
 
 # link everything
@@ -62,14 +62,14 @@ $(EXEC1): $(EXEC1).o $(OBJS)
 	@$(CC) $< $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS)
 	@echo [DONE]
 
-#$(EXEC2): $(EXEC2).o $(OBJS) 
-#	@echo [${CC}] Linking $@
-#	@$(CC) $< $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS)
-#	@echo [DONE]
+$(EXEC2): $(EXEC2).o $(OBJS) 
+	@echo [${CC}] Linking $@
+	@$(CC) $< $(OBJS) $(DICT).o -o $@ $(LDFLAGS) $(LIBS)
+	@echo [DONE]
 
 
 
 .PHONY: clean
 
 clean:
-	rm -rf $(ODIR)/*.o $(DICT).* *.o $(EXEC1) #$(EXEC2)
+	rm -rf $(ODIR)/*.o $(DICT).* *.o $(EXEC1) $(EXEC2)

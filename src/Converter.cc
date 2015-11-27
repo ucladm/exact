@@ -74,7 +74,7 @@ void Converter::Process(EventData* event, LVDAQHeader & daq_header)
 
 
     // Put the completed ChannelData object into the EventData channels array.
-    event->channels.push_back(channel);
+    event->channels[i] = channel;
 
   }
   

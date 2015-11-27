@@ -2,8 +2,8 @@
 #ifndef EventProcessor_hh
 #define EventProcessor_hh
 
+//#include "Module.hh"
 #include "LVDAQHeader.hh"
-#include "CfgReader.hh"
 #include "EventData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
@@ -12,14 +12,15 @@
 #include "SumChannel.hh"
 #include "PulseFinder.hh"
 #include "ProcessedPlotter.hh"
-#include "RootGraphix.hh"
+//#include "RootGraphix.hh"
 
 #include <string>
+#include <libconfig.h++>
 
 class EventProcessor
 {
 public:
-  EventProcessor(CfgReader const& cfg, std::string datafile);
+  EventProcessor(const Config & cfg, std::string datafile);
   
   void Initialize();
   void ProcessEvent(int event_id);

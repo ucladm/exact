@@ -125,7 +125,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   //int min_evt = cfg.getParam<int>("tpcanalysis", "min", 0);
   //int max_evt = cfg.getParam<int>("tpcanalysis", "max", total_events);
   int min_evt = 0;
-  int max_evt = 2;
+  int max_evt = 100;
   int evt = 0;
   int subfile = -1;
   int nevents = 0;

@@ -20,11 +20,10 @@ TCanvas* gCanvas = 0;
 
 
 
-ProcessedPlotter::ProcessedPlotter(CfgReader const& cfg):
-  module_name("ProcessedPlotter"),
-  _enabled(cfg.getParam<bool>(module_name, "enabled", 0)),
-  _chans_per_pad(cfg.getParam<int>(module_name, "chans_per_pad", 1))
-{ }
+ProcessedPlotter::ProcessedPlotter(const Setting & cfg) : Module (cfg)
+{
+  cfg.lookupValue("chans_per_pad", _chans_per_pad);
+}
 
 void ProcessedPlotter::Initialize()
 {
@@ -32,14 +31,12 @@ void ProcessedPlotter::Initialize()
   gEve->GetBrowser()->StartEmbedding(1);
   gCanvas = new TCanvas;
   gEve->GetBrowser()->StopEmbedding("EventViewer");
-  
+
 }
 
 
-int ProcessedPlotter::Process(EventData* event)
+void ProcessedPlotter::Process(EventData* event)
 {
-  if (!_enabled)
-    return 1;
   gCanvas->Clear();
   char title[30];
   sprintf(title, "Run %d - Event %d", event->run_id, event->event_id);
@@ -53,7 +50,7 @@ int ProcessedPlotter::Process(EventData* event)
   int total_pads = (nchans+cpp-1)/cpp+1; //extra pad for sum channel
       
   if(total_pads == 0)
-    return 0;
+    return;
   else if(total_pads == 1) {}
   else if(total_pads == 2)
     gCanvas->Divide(2,1);
@@ -85,11 +82,13 @@ int ProcessedPlotter::Process(EventData* event)
       }
     }
       
-    
-  }
-
+  }//loop over pads
+  
   gCanvas->cd(0);
   gCanvas->Update();
 
-  return 1;
+}
+
+void ProcessedPlotter::Finalize(TTree* master)
+{
 }

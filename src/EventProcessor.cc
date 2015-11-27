@@ -6,15 +6,15 @@ using namespace std;
 
 
 
-EventProcessor::EventProcessor(CfgReader const& cfg, string datafile)
+EventProcessor::EventProcessor(const Config & cfg, string datafile)
   : daqHeader()
-  , converter(cfg)
-  , baselineFinder(cfg)
-  , zeroSuppressor(cfg)
-  , sumChannel(cfg)
-  , integrator(cfg)
-  , pulseFinder(cfg)
-  , plotter(cfg)
+  , converter(cfg.lookup("Converter"))
+  , baselineFinder(cfg.lookup("BaselineFinder"))
+  , zeroSuppressor(cfg.lookup("ZeroSuppressor"))
+  , sumChannel(cfg.lookup("SumChannel"))
+  , integrator(cfg.lookup("Integrator"))
+  , pulseFinder(cfg.lookup("PulseFinder"))
+  , plotter(cfg.lookup("Plotter"))
 {
 
   // Load the raw data file
@@ -43,7 +43,13 @@ EventProcessor::EventProcessor(CfgReader const& cfg, string datafile)
 void EventProcessor::Initialize()
 {
   // Initialize modules as necessary
-  plotter.Initialize();
+  if (converter.enabled) converter.Initialize();
+  if (baselineFinder.enabled) baselineFinder.Initialize();
+  if (zeroSuppressor.enabled) zeroSuppressor.Initialize();
+  if (sumChannel.enabled) sumChannel.Initialize();
+  if (integrator.enabled) integrator.Initialize();
+  if (pulseFinder.enabled) pulseFinder.Initialize();
+  if (plotter.enabled) plotter.Initialize();
 }
 
 void EventProcessor::ProcessEvent(int event_id)
@@ -56,11 +62,20 @@ void EventProcessor::ProcessEvent(int event_id)
   std::cout << "Processing event "<< event->event_id << std::endl;
   
   // Run all the modules. ORDER MATTERS!
-  converter.Process(event, daqHeader);
-  baselineFinder.Process(event);
-  zeroSuppressor.Process(event);
-  sumChannel.Process(event);
-  integrator.Process(event);
-  pulseFinder.Process(event);
-  plotter.Process(event);
+  if (converter.enabled)      converter.Process(event, daqHeader);
+  if (baselineFinder.enabled) baselineFinder.Process(event);
+  if (zeroSuppressor.enabled) zeroSuppressor.Process(event);
+  if (sumChannel.enabled)     sumChannel.Process(event);
+  if (integrator.enabled)     integrator.Process(event);
+  if (pulseFinder.enabled)    pulseFinder.Process(event);
+  //converter.Process(event, daqHeader);
+  //baselineFinder.Process(event);
+  //zeroSuppressor.Process(event);
+  //sumChannel.Process(event);
+  //integrator.Process(event);
+  //pulseFinder.Process(event);
+
+  
+  
+  if (plotter.enabled) plotter.Process(event);
 }

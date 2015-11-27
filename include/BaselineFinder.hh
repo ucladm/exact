@@ -29,19 +29,19 @@ public:
   void moving_baseline(EventData* event);
   
 private:
-  std::string mode;
+  std::string _mode;
 
   // fixed baseline parameters
-  float start_time;
-  float end_time;
-  float threshold;
+  double _start_time;
+  double _end_time;
+  double _threshold;
 
   // moving baseline parameters
-  int pre_samps;
-  int post_samps;
-  float max_sigma;
-  float max_amplitude;
-  float baseline_fixed_window;
+  int _pre_samps;
+  int _post_samps;
+  double _max_sigma;
+  double _max_amplitude;
+  double _baseline_fixed_window;
 
   // variables to be saved
   Float_t* baseline_mean;

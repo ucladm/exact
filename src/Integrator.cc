@@ -33,6 +33,7 @@ void Integrator::Process(EventData* event)
 
   integrate(sum_wfm, sum_integral);
 
+  
   // This must be the last call within this function.
   Module::Process();
 }

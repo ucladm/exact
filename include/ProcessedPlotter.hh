@@ -12,8 +12,8 @@
 #ifndef ProcessedPlotter_hh
 #define ProcessedPlotter_hh
 
+#include "Module.hh"
 #include "EventData.hh"
-#include "CfgReader.hh"
 //#include "RootGraphix.hh"
 #include <string>
 #include <iostream>
@@ -22,23 +22,20 @@
 class TCanvas;
 class TLegend;
 
-class ProcessedPlotter
+class ProcessedPlotter : public Module
 {
 public:
-  ProcessedPlotter(CfgReader const& cfg);
+  ProcessedPlotter(const Setting & cfg);
   //void Initialize(TCanvas* canvas, RootGraphix* graphix);
   //void Initialize(TCanvas* canvas);
   void Initialize();
-  int Process(EventData* event);
-  void Finalize();
+  void Process(EventData* event);
+  void Finalize(TTree* master);
   
   //const TCanvas* GetCanvas() { return _canvas; }
 
-  std::string module_name;  
-
 private:
 
-  bool _enabled;
   int _chans_per_pad;
   std::vector<TLegend*> _legends;
 

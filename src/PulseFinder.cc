@@ -74,9 +74,6 @@ void PulseFinder::EvaluatePulses(EventData* event)
     event->pulses[i].peak_amp = waveform[peak_index];
     event->pulses[i].integral = event->sumchannel.integral_waveform[start_index-1] - event->sumchannel.integral_waveform[end_index-1];
     
-    //event->pulse_peak_times.push_back(event->SampleToTime(peak_index));
-    //event->pulse_peak_amps.push_back(waveform[peak_index]);
-    //event->pulse_integrals.push_back(event->sum_integral[start_index-1] - event->sum_integral[end_index-1]);
   }
   
    
@@ -121,7 +118,7 @@ int PulseFinder::IntegralSearch(EventData* event)
     
   for (int i=0; i<ds_wfm_nsamps; i++) {
     ds_integral[i] = integral[i*_down_sample_factor];
-    
+
     // If two consecuative pulses in the down-sampled integral are vertically separated by
     // more than _pulse_start_threshold, then there's a pulse somewhere nearby
       

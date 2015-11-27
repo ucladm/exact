@@ -18,9 +18,12 @@ void ZeroSuppressor::Initialize()
 
 void ZeroSuppressor::Process(EventData* event)
 {
+
+
+  
   // Loop over the channels
   for (int idx = 0; idx<event->nchans; ++idx) {
-
+    
     ChannelData* channel = event->GetChannel(idx);
     
     vector<double> const& bs_wfm = channel->baseline_subtracted_waveform;
@@ -72,9 +75,15 @@ void ZeroSuppressor::Process(EventData* event)
       
     }// end loop over samps
 
+    
   }// end loop over channels
 
 
+
+
+  
+
+  
   // This must be the last call within this function.
   Module::Process();
 }

@@ -20,7 +20,7 @@
 #include <string>
 #include <fstream>
 
-
+#include <libconfig.h++>
 
 #include "TApplication.h"
 #include "TRint.h"
@@ -44,7 +44,7 @@
 #include "TGLayout.h"
 
 #include "LVDAQHeader.hh"
-#include "CfgReader.hh"
+//#include "CfgReader.hh"
 #include "EventData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
@@ -53,7 +53,7 @@
 #include "SumChannel.hh"
 #include "PulseFinder.hh"
 #include "ProcessedPlotter.hh"
-#include "RootGraphix.hh"
+//#include "RootGraphix.hh"
 #include "EventProcessor.hh"
 #include "EventNavigator.hh"
 
@@ -159,12 +159,14 @@ int main(int args, char* argv[]) {
   string cfgFile = argv[1];
   
   // Instantiate CfgReader
-  CfgReader cfg;
-  if (!cfg.readCfgFile(cfgFile)) {
-    std::cout << "ERROR reading cfg file" << std::endl;
-    return 0;
-  }
+  //CfgReader cfg;
+  //if (!cfg.readCfgFile(cfgFile)) {
+  //  std::cout << "ERROR reading cfg file" << std::endl;
+  //  return 0;
+  //}
 
+  Config cfg;
+  cfg.readFile(cfgFile.c_str());
 
   
   string datafile = argv[2];
