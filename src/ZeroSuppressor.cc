@@ -74,7 +74,9 @@ void ZeroSuppressor::Process(EventData* event)
 
   }// end loop over channels
 
-  
+
+  // This must be the last call within this function.
+  Module::Process();
 }
 
 

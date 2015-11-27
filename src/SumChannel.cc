@@ -2,17 +2,17 @@
 #include "ChannelData.hh"
 #include <vector>
 
-SumChannel::SumChannel(CfgReader const& cfg):
-  module_name("SumChannel"),
-  _enabled(cfg.getParam<bool>(module_name, "enabled", true))
+SumChannel::SumChannel(const Setting & cfg) : Module(cfg)
 { }
 
 
-int SumChannel::Process(EventData* event)
+void SumChannel::Initialize()
 {
-  if (!_enabled)
-    return 0;
+  Module::Initialize();
+}
 
+void SumChannel::Process(EventData* event)
+{
   ChannelData sum_ch;
   std::vector<double> & sum = sum_ch.raw_waveform;
   
@@ -46,6 +46,13 @@ int SumChannel::Process(EventData* event)
   }// end loop over channels
 
   event->sumchannel = sum_ch;
-  
-  return 1;
+
+  // This must be the last call within this function.
+  Module::Process();
+}
+
+
+void SumChannel::Finalize(TTree* master)
+{
+  Module::Finalize(master);
 }
