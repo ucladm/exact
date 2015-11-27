@@ -49,8 +49,8 @@
 using namespace std;
 using namespace libconfig;
 
-int ProcessEvents(string fileList, string cfgFile, string outputfile,
-                  bool use_eventlist, string eventlist)
+
+int ProcessEvents(string fileList, string cfgFile, string outputfile)
 {
 
   // Instantiate DAQheader
@@ -61,13 +61,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   Config cfg;
   cfg.readFile(cfgFile.c_str());
 
-  ifstream ifs;
-  if (use_eventlist)
-    ifs.open(eventlist.c_str());
-
   // Output file
   TFile* rootfile = new TFile(outputfile.c_str(), "recreate");
-
 
   // Object that handles processing of all modules.
   EventProcessor processor(cfg);
@@ -96,14 +91,11 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   tpcCfg.lookupValue("min", min_evt);
   tpcCfg.lookupValue("max", max_evt);
   if (max_evt == -1) max_evt = total_events;
-  int evt = 0;
   int subfile = -1;
+  int evt = 0;
   int nevents = 0;
   std::cout << "\nBeginning loop over events.\n" << std::endl;
 
-  int current_event;
-  ifs >> current_event;
-  
   // Now loop through files...for real this time.
   infile.open(fileList.c_str());
   while (infile >> datafile) {
@@ -123,16 +115,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       }
       if (evt>=max_evt)
         break;
-
-      // If using event list, step the event loop forward until find matching event
-      if (use_eventlist) {
-        if (n != current_event) continue;
-        else {
-          cout << "Processing event " << n << endl;
-          ifs >> current_event;
-        }
-      }
-      if (!use_eventlist && evt%10000 == 0) cout << "Processing event " << evt << endl;
+      
+      if (evt%10000 == 0) cout << "Processing event " << evt << endl;
 
       processor.ProcessEvent(n);
       
@@ -203,7 +187,7 @@ int main(int argc, char* argv[]) {
   
   clock_t t = clock();
   
-  int nevents = ProcessEvents(inputlist, cfgfile, outputfile, use_eventlist, eventlist);
+  int nevents = ProcessEvents(inputlist, cfgfile, outputfile);
 
   t = clock() - t;
   std::cout << "Processed "<<nevents<<" events in "<<((float)t)/CLOCKS_PER_SEC<<" s." << std::endl;
