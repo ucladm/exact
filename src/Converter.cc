@@ -1,41 +1,62 @@
 #include "Converter.hh"
 #include "ChannelData.hh"
+
 #include <iostream>
 #include <map>
 #include <algorithm> //sort
 #include <cmath> //fabs
 
-Converter::Converter(CfgReader const& cfg):
-  module_name("Converter"),
-  _enabled(cfg.getParam<bool>(module_name, "enabled", true)),
-  _trigger_offset(cfg.getParam<double>(module_name, "trigger_offset", 0))
-{ }
+using namespace std;
 
-
-int Converter::Process(EventData* event, LVDAQHeader & daq_header)
+Converter::Converter(const Setting & cfg) : Module(cfg)
 {
-  if (!_enabled)
-    return 0;
+  cfg.lookupValue("trigger_offset", trigger_offset);
+}
+
+void Converter::Initialize()
+{
+  Module::Initialize();
+  Module::tree->Branch("run_id",    &run_id,    "run_id/I");
+  Module::tree->Branch("subrun_id", &subrun_id, "subrun_id/I");
+  Module::tree->Branch("event_id",  &event_id,  "event_id/I");
+  Module::tree->Branch("nchans",    &nchans,    "nchans/I");
+  Module::tree->Branch("nsamps",    &nsamps,    "nsamps/I");
+  Module::tree->Branch("timestamp_sec", &timestamp_sec, "timestamp_sec/I");
+  Module::tree->Branch("timestamp_usec", &timestamp_usec, "timestamp_usec/I");
+  
+  
+}
+
+void Converter::Process(EventData* event, LVDAQHeader & daq_header)
+{
   
   // Event ID should already be set
   if (event->event_id == -1) {
     std::cerr << "Converter: event_id not set yet!" << std::endl;
-    return 0;
+    return;
   }
-  
 
-  // Fill event-level info
-  event->run_id = daq_header.run_id;
-  event->nchans = daq_header.nchannels;
-  event->nsamps = daq_header.nsamps;
+  run_id = daq_header.run_id;
+  subrun_id = 1; //to be implemented later.
+  event_id = event->event_id;
+  nchans = daq_header.nchannels;
+  nsamps = daq_header.nsamps;
+  timestamp_sec = (int) daq_header.event_sec;
+  timestamp_usec = (int) daq_header.event_millisec;
+
+
+  // Fill EventData
+  event->run_id = run_id;
+  event->nchans = nchans;
+  event->nsamps = nsamps;
   event->us_per_samp = daq_header.sample_interval*1.e-3; // ns -> us
   event->trigger_index = daq_header.trigger_sample;
-  event->trigger_offset = _trigger_offset;
-  event->timestamp_sec = (int) daq_header.event_sec;
-  event->timestamp_usec = (int) daq_header.event_millisec;
+  event->trigger_offset = trigger_offset;
+  event->timestamp_sec = timestamp_sec;
+  event->timestamp_usec = timestamp_usec;
 
 
-  // Fill channel-level info
+    // Fill channel-level info
   if ((int)event->channels.size() != daq_header.nchannels)
     event->channels.resize(daq_header.nchannels);
   for (int i=0; i<daq_header.nchannels; ++i) {
@@ -57,15 +78,14 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
 
   }
   
-  
   // Trim the waveforms so that they are aligned.
-  // _trigger_offset is top channels with respect to bottom channel.
+  // trigger_offset is top channels with respect to bottom channel.
   // If <0, expect that TOP channels are ahead of BOT channels: trim start of TOP channels and end of BOT channel.
   // If >0, expect that BOT channel is ahead of TOP channels: trim start of BOT channel and end of TOP channels.
-  const int trigger_index_offset = _trigger_offset / event->us_per_samp;
+  const int trigger_index_offset = trigger_offset / event->us_per_samp;
   for (int ch=0; ch<event->nchans; ch++) {
     std::vector<double> & waveform = event->GetChannel(ch)->raw_waveform;
-    if (_trigger_offset < 0) { // expect that TOP channels are ahead of BOT channel
+    if (trigger_offset < 0) { // expect that TOP channels are ahead of BOT channel
       if (ch==BOT_CHANNEL_ID)
         waveform.resize(event->nsamps + trigger_index_offset);
       else
@@ -93,6 +113,12 @@ int Converter::Process(EventData* event, LVDAQHeader & daq_header)
     }
   }
 
-  
-  return 1;
+
+  // This must be the last call within this function.
+  Module::Process();
+}
+
+void Converter::Finalize(TTree* master)
+{
+  Module::Finalize(master);
 }

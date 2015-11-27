@@ -38,20 +38,20 @@
 #include "TBranch.h"
 
 #include "LVDAQHeader.hh"
-#include "CfgReader.hh"
+//#include "CfgReader.hh"
 #include "EventData.hh"
-#include "Converter.hh"
-#include "BaselineFinder.hh"
-#include "ZeroSuppressor.hh"
-#include "Integrator.hh"
-#include "SumChannel.hh"
-#include "PulseFinder.hh"
-#include "ROI.hh"
-#include "AverageWaveforms.hh"
-#include "EventDataWriter.hh"
+//#include "Converter.hh"
+//#include "BaselineFinder.hh"
+//#include "ZeroSuppressor.hh"
+//#include "Integrator.hh"
+//#include "SumChannel.hh"
+//#include "PulseFinder.hh"
+//#include "ROI.hh"
+//#include "AverageWaveforms.hh"
+//#include "EventDataWriter.hh"
 
 // new modules for revamp
-#include "Converter2.hh"
+#include "Converter.hh"
 #include <iomanip>
 #include <cstdlib>
 #include <libconfig.h++>
@@ -68,37 +68,16 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   if (!daq_header.format_test())
     std::cout << "ALARM! Variable size doesn't match!" << std::endl;
     
-  // Instantiate CfgReader
-  CfgReader cfg;
-  if (!cfg.readCfgFile(cfgFile)) {
-    std::cout << "ERROR reading cfg file " << cfgFile<<std::endl;
-    return 0;
-  }
-  else
-    std::cout << "Using cfg file "<<cfgFile<<std::endl;
-
-
-  Config cfg2;
-  cfg2.readFile("test.cfg");
-  string testname;
-  cfg2.lookupValue("name",testname);
-  cout << testname << endl;
-
-  //const Setting& root = cfg2.getRoot();
-  
+  Config cfg;
+  cfg.readFile(cfgFile.c_str());
 
   ifstream ifs;
   if (use_eventlist)
     ifs.open(eventlist.c_str());
 
 
+  TFile* rootfile = new TFile(outputfile.c_str(), "recreate");
   
-  // Create TTree to hold all processd info and open a file
-  // to hold the TTree.
-  TFile* rootfile = new TFile(outputfile.c_str(), "RECREATE");
-  std::cout << "Saving output to "<<outputfile<<std::endl;
-
-
   // Instantiate EventData; will repopulate this object for each
   // event. Create a branch for each variable we want to save.
   EventData* event = new EventData();
@@ -107,25 +86,14 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   
   
   // ------------------ INSTANTIATE ALL MODULES -------------------
-  Converter converter(cfg);
-  BaselineFinder baselineFinder(cfg);
-  ZeroSuppressor zeroSuppressor(cfg);
-  SumChannel sumChannel(cfg);
-  Integrator integrator(cfg);
-  PulseFinder pulseFinder(cfg);
-  ROI roi(cfg);
-  //AverageWaveforms avgwfms(cfg);
-  EventDataWriter eventDataWriter(cfg);
-
-
-  Converter2 converter2(cfg2.lookup("Converter"));
+  Converter converter(cfg.lookup("Converter"));
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
   //avgwfms.Initialize();
-  eventDataWriter.Initialize();
+  //eventDataWriter.Initialize();
 
-  converter2.Initialize();
+  converter.Initialize();
 
   // -------------------- LOOP OVER FILES -------------------------
 
@@ -147,8 +115,10 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   infile.close();
 
   // Determine start and end of event loop.
-  int min_evt = cfg.getParam<int>("tpcanalysis", "min", 0);
-  int max_evt = cfg.getParam<int>("tpcanalysis", "max", total_events);
+  //int min_evt = cfg.getParam<int>("tpcanalysis", "min", 0);
+  //int max_evt = cfg.getParam<int>("tpcanalysis", "max", total_events);
+  int min_evt = 0;
+  int max_evt = 2;
   int evt = 0;
   int subfile = -1;
   int nevents = 0;
@@ -201,17 +171,17 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
 
       /////////////////////////////////////////////////////////////
       // Run processing modules on event. ORDER MATTERS!
-      converter.Process(event, daq_header);
-      baselineFinder.Process(event);
-      zeroSuppressor.Process(event);
-      sumChannel.Process(event);
-      integrator.Process(event);
-      pulseFinder.Process(event);
-      roi.Process(event);
+      //converter.Process(event, daq_header);
+      //baselineFinder.Process(event);
+      //zeroSuppressor.Process(event);
+      //sumChannel.Process(event);
+      //integrator.Process(event);
+      //pulseFinder.Process(event);
+      //roi.Process(event);
       //avgwfms.Process(event);
-      eventDataWriter.Process(event);
+      //eventDataWriter.Process(event);
 
-      if (converter2.enabled) converter2.Process(event);
+      if (converter.enabled) converter.Process(event, daq_header);
       
       /////////////////////////////////////////////////////////////
 
@@ -223,10 +193,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   }// end loop over files
   
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
-  //avgwfms.Finalize(rootfile);
-  eventDataWriter.Finalize(rootfile);
-
-  converter2.Finalize(converter2.GetTree());
+  converter.Finalize(converter.GetTree());
 
   
   rootfile->Close();

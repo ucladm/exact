@@ -1,36 +1,40 @@
 /*
-
-  Defines the Converter class module.
-  Read a raw DAQ file, fill identifier info in EventData object
-
-  v0.1 AFan  2013-08-17
-  
-
+  2015-11-25 AFan
  */
 
-#ifndef Converter_hh
-#define Converter_hh
+#ifndef CONVERTER_H
+#define CONVERTER_H
 
+
+#include "Module.hh"
 #include "EventData.hh"
-#include "CfgReader.hh"
 #include "LVDAQHeader.hh"
-#include <string>
 
-class Converter
+
+class Converter : public Module
 {
 public:
-  Converter(CfgReader const& cfg);
-  //void Initialize(); // Add the Initialize function only if necessary.
-  int Process(EventData* event, LVDAQHeader & daq_header);
+  Converter(const Setting & cfg);
+  void Initialize();
+  void Process(EventData* event, LVDAQHeader & daq_header);
+  void Finalize(TTree* master);
 
-
-  std::string module_name;
 
 private:
-  bool _enabled;
 
-  double _trigger_offset; //offset for top channels to align all channels in time
+  Float_t trigger_offset;
+
+  Int_t run_id;
+  Int_t subrun_id;
+  Int_t event_id;
+  Int_t nchans;
+  Int_t nsamps;
+  Int_t timestamp_sec;
+  Int_t timestamp_usec;
+  
   
 };
+
+
 
 #endif

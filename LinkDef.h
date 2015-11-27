@@ -27,7 +27,7 @@ using namespace std;
 #pragma link C++ class PulseData+;
 #pragma link C++ class ChannelData+;
 #pragma link C++ class EventData+;
-#pragma link C++ class EventNavigator+;
+//#pragma link C++ class EventNavigator+;
 #endif
 
 
