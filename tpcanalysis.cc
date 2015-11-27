@@ -43,7 +43,7 @@
 #include "Converter.hh"
 #include "BaselineFinder.hh"
 #include "ZeroSuppressor.hh"
-//#include "Integrator.hh"
+#include "Integrator.hh"
 #include "SumChannel.hh"
 //#include "PulseFinder.hh"
 //#include "ROI.hh"
@@ -89,6 +89,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   BaselineFinder baselineFinder(cfg.lookup("BaselineFinder"));
   ZeroSuppressor zeroSuppressor(cfg.lookup("ZeroSuppressor"));
   SumChannel sumChannel(cfg.lookup("SumChannel"));
+  Integrator integrator(cfg.lookup("Integrator"));
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
   //avgwfms.Initialize();
@@ -98,6 +99,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   if (baselineFinder.enabled) baselineFinder.Initialize();
   if (zeroSuppressor.enabled) zeroSuppressor.Initialize();
   if (sumChannel.enabled) sumChannel.Initialize();
+  if (integrator.enabled) integrator.Initialize();
 
   // -------------------- LOOP OVER FILES -------------------------
 
@@ -189,6 +191,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       if (baselineFinder.enabled) baselineFinder.Process(event);
       if (zeroSuppressor.enabled) zeroSuppressor.Process(event);
       if (sumChannel.enabled)     sumChannel.Process(event);
+      if (integrator.enabled)     integrator.Process(event);
       
       /////////////////////////////////////////////////////////////
 
@@ -204,6 +207,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   if (baselineFinder.enabled) baselineFinder.Finalize(master);
   if (zeroSuppressor.enabled) zeroSuppressor.Finalize(master);
   if (sumChannel.enabled)     sumChannel.Finalize(master);
+  if (integrator.enabled)     integrator.Finalize(master);
 
   master->Write();
   

@@ -1,17 +1,16 @@
 #include "Integrator.hh"
 #include "ChannelData.hh"
 
-Integrator::Integrator(CfgReader const& cfg):
-  module_name("Integrator"),
-  _enabled(cfg.getParam<bool>(module_name, "enabled", true))
+Integrator::Integrator(const Setting & cfg) : Module(cfg)
 { }
 
-
-int Integrator::Process(EventData* event)
+void Integrator::Initialize()
 {
-  if (!_enabled)
-    return 0;
+  Module::Initialize();
+}
 
+void Integrator::Process(EventData* event)
+{
   //event->integrals.resize(event->nchans);
   
   // Loop over channels
@@ -33,8 +32,9 @@ int Integrator::Process(EventData* event)
   vector<double> & sum_integral = event->sumchannel.integral_waveform;
 
   integrate(sum_wfm, sum_integral);
-         
-  return 1;
+
+  // This must be the last call within this function.
+  Module::Process();
 }
 
 void Integrator::integrate(std::vector<double> const&  wfm, std::vector<double> & result)
@@ -46,4 +46,10 @@ void Integrator::integrate(std::vector<double> const&  wfm, std::vector<double> 
     sum += wfm[i];
   }
 
+}
+
+
+void Integrator::Finalize(TTree* master)
+{
+  Module::Finalize(master);
 }
