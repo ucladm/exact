@@ -1,17 +1,16 @@
 #include "Converter2.hh"
 
 #include "cfg.h"
-#include <libconfig.h++>
 
 #include <iostream>
 
 using namespace std;
+//using namespace libconfig;
 
-Converter2::Converter2(TString name)
-: Module(name)
-  , trigger_offset(cfg::trigger_offset)
-  , var(-1)
-{ }
+Converter2::Converter2(const Setting & cfg) : Module(cfg)
+{
+  cfg.lookupValue("trigger_offset", trigger_offset);
+}
 
 void Converter2::Initialize()
 {

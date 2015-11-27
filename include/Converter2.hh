@@ -12,7 +12,7 @@
 class Converter2 : public Module
 {
 public:
-  Converter2(TString name);
+  Converter2(const Setting & cfg);
   void Initialize();
   void Process(EventData* event);
   void Finalize(TTree* master);

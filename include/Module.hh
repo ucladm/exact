@@ -10,25 +10,30 @@
 #define MODULE_HH
 
 #include <iostream>
+#include <libconfig.h++>
 #include "TTree.h"
 #include "TString.h"
+
+using namespace libconfig;
 
 
 class Module
 {
 public:
-  Module(TString name);
+  Module(const Setting & cfg);
   ~Module();
-  void Process();
   void Initialize();
+  void Process();
   void Finalize(TTree* master);
 
-  TString module_name;
+  std::string module_name;
+  bool enabled;
 
   TTree* GetTree();
 
 protected:
   TTree* tree;
+  
   
 };
 

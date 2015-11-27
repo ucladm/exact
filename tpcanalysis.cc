@@ -52,9 +52,12 @@
 
 // new modules for revamp
 #include "Converter2.hh"
-
+#include <iomanip>
+#include <cstdlib>
+#include <libconfig.h++>
 
 using namespace std;
+using namespace libconfig;
 
 int ProcessEvents(string fileList, string cfgFile, string outputfile,
                   bool use_eventlist, string eventlist)
@@ -73,6 +76,16 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   }
   else
     std::cout << "Using cfg file "<<cfgFile<<std::endl;
+
+
+  Config cfg2;
+  cfg2.readFile("test.cfg");
+  string testname;
+  cfg2.lookupValue("name",testname);
+  cout << testname << endl;
+
+  //const Setting& root = cfg2.getRoot();
+  
 
   ifstream ifs;
   if (use_eventlist)
@@ -105,7 +118,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   EventDataWriter eventDataWriter(cfg);
 
 
-  Converter2 converter2("converter");
+  Converter2 converter2(cfg2.lookup("Converter"));
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
@@ -198,7 +211,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
       //avgwfms.Process(event);
       eventDataWriter.Process(event);
 
-      converter2.Process(event);
+      if (converter2.enabled) converter2.Process(event);
       
       /////////////////////////////////////////////////////////////
 

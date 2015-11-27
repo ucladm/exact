@@ -6,7 +6,7 @@ ODIR = src
 COPTS =	-fPIC -DLINUX -Wall \
         $(shell root-config --cflags) 
 
-LIBS = $(shell root-config --glibs) -lEve -lRGL
+LIBS = $(shell root-config --glibs) -lEve -lRGL  -lconfig++
 
 CFLAGS = -c -g -Wall -I$(IDIR) -I.
 VPATH = src
@@ -40,7 +40,7 @@ $(ODIR)/%.o: %.cc cfg.h
 # that gets loaded into interactive ROOT
 $(DICTSRC): $(DEPS) $(OBJS)
 	@echo [ROOTCINT] Generating dictionary $(DICTSRC)
-	@rootcint -l -f $(DICTSRC) -c $(DEPS) LinkDef.h
+	@rootcint -l -f $(DICTSRC) -c -p $(DEPS) LinkDef.h
 	@echo [${CC}] Compiling dictionary $(DICTSRC)
 	@$(CC) $(CFLAGS) $(COPTS) -c $(DICTSRC) -o $(DICT).o
 	@echo [${CC}] Generating shared library $(DICT).so
