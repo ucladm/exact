@@ -42,7 +42,7 @@
 #include "EventData.hh"
 #include "Converter.hh"
 #include "BaselineFinder.hh"
-//#include "ZeroSuppressor.hh"
+#include "ZeroSuppressor.hh"
 //#include "Integrator.hh"
 //#include "SumChannel.hh"
 //#include "PulseFinder.hh"
@@ -87,15 +87,16 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   // ------------------ INSTANTIATE ALL MODULES -------------------
   Converter converter(cfg.lookup("Converter"));
   BaselineFinder baselineFinder(cfg.lookup("BaselineFinder"));
-  
+  ZeroSuppressor zeroSuppressor(cfg.lookup("ZeroSuppressor"));
   
 
   //---------------- INITIALIZE MODULES (AS NEEDED) ---------------
   //avgwfms.Initialize();
   //eventDataWriter.Initialize();
 
-  converter.Initialize();
-  baselineFinder.Initialize();
+  if (converter.enabled) converter.Initialize();
+  if (baselineFinder.enabled) baselineFinder.Initialize();
+  if (zeroSuppressor.enabled) zeroSuppressor.Initialize();
 
   // -------------------- LOOP OVER FILES -------------------------
 
@@ -185,6 +186,7 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
 
       if (converter.enabled)      converter.Process(event, daq_header);
       if (baselineFinder.enabled) baselineFinder.Process(event);
+      if (zeroSuppressor.enabled) zeroSuppressor.Process(event);
       
       /////////////////////////////////////////////////////////////
 
@@ -197,7 +199,8 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   
   //----------------- FINALIZE MODULES (AS NEEDED) ---------------
   TTree* master = converter.GetTree();
-  baselineFinder.Finalize(master);
+  if (baselineFinder.enabled) baselineFinder.Finalize(master);
+  if (zeroSuppressor.enabled) zeroSuppressor.Finalize(master);
 
   master->Write();
   

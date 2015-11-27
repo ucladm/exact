@@ -5,21 +5,19 @@
 #include <vector>
 
 
-ZeroSuppressor::ZeroSuppressor(CfgReader const& cfg):
-  module_name("ZeroSuppressor"),
-  _enabled(cfg.getParam<bool>(module_name, "enabled", true)),
-  _threshold(cfg.getParam<double>(module_name, "threshold", 0)),
-  _edge_threshold(cfg.getParam<double>(module_name, "edge_threshold", 0))
-{ }
-
-
-int ZeroSuppressor::Process(EventData* event)
+ZeroSuppressor::ZeroSuppressor(const Setting & cfg) : Module(cfg)
 {
-  if (!_enabled)
-    return 0;
+  cfg.lookupValue("threshold", threshold);
+  cfg.lookupValue("edge_threshold", edge_threshold);
+}
 
-  //event->zero_suppressed_waveforms.resize(event->nchans);
+void ZeroSuppressor::Initialize()
+{
+  Module::Initialize();
+}
 
+void ZeroSuppressor::Process(EventData* event)
+{
   // Loop over the channels
   for (int idx = 0; idx<event->nchans; ++idx) {
 
@@ -35,27 +33,27 @@ int ZeroSuppressor::Process(EventData* event)
     if (!channel->baseline_valid)
       continue;
 
-    // Look for regions that are past _threshold. If in such a region,
-    // (1) search back to the last sample that is within _edge_threshold, and
-    // (2) search forward to the first sample that is within _edge_threshold.
+    // Look for regions that are past threshold. If in such a region,
+    // (1) search back to the last sample that is within edge_threshold, and
+    // (2) search forward to the first sample that is within edge_threshold.
     // These define endpoints for un-zero-suppressed regions; everything
     // else is zero-suppressed.
     int start_samp=0, end_samp=0;
     int samp=0;
     while (samp < event->nsamps) {
-      if (std::fabs(bs_wfm[samp]) > _threshold) {
+      if (std::fabs(bs_wfm[samp]) > threshold) {
 
 
         // now search back to last sample that is within _edge_threshold
         int tmp_samp = samp;
-        while ( tmp_samp >= 0 && std::fabs(bs_wfm[tmp_samp]) > _edge_threshold ) {
+        while ( tmp_samp >= 0 && std::fabs(bs_wfm[tmp_samp]) > edge_threshold ) {
           --tmp_samp;
           start_samp = tmp_samp;
         }
         
         // and search forward to first sample that is within _edge_threshold
         tmp_samp = samp;
-        while ( tmp_samp < event->nsamps && std::fabs(bs_wfm[tmp_samp]) > _edge_threshold ) {
+        while ( tmp_samp < event->nsamps && std::fabs(bs_wfm[tmp_samp]) > edge_threshold ) {
           ++tmp_samp;
           end_samp = tmp_samp;
         }
@@ -75,6 +73,12 @@ int ZeroSuppressor::Process(EventData* event)
     }// end loop over samps
 
   }// end loop over channels
+
   
-  return 1;
+}
+
+
+void ZeroSuppressor::Finalize(TTree* master)
+{
+  Module::Finalize(master);
 }

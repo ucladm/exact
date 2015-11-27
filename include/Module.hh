@@ -34,6 +34,7 @@ public:
 
 protected:
   TTree* tree;
+  bool suppress_tree;
 };
 
 

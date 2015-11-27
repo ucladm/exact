@@ -5,37 +5,36 @@
   to be zero-suppressed.
 
   v0.1 AFan 2014-02-03
+  v0.2 AFan 2015-11-25
 
  */
 
 #ifndef ZeroSuppressor_hh
 #define ZeroSuppressor_hh
 
+#include "Module.hh"
 #include "EventData.hh"
-#include "CfgReader.hh"
 #include <string>
 
 
-class ZeroSuppressor
+class ZeroSuppressor : public Module
 {
 public:
-  ZeroSuppressor(CfgReader const& cfg);
-  // void Initialize(); //Add an Initialize function only if necessary
-  int Process(EventData* event);
-
-  std::string module_name;
+  ZeroSuppressor(const Setting & cfg);
+  void Initialize(); 
+  void Process(EventData* event);
+  void Finalize(TTree* master);
 
 private:
-  bool _enabled;
 
   // main threshold to decide if a portion of the waveform should
   // be zero-suppressed
-  double _threshold;
+  float threshold;
 
   // once a portion of the waveform is determined to be zero-suppressed,
   // suppress those samples up to the first sample and past the last sample
   // that are beyond this threshold
-  double _edge_threshold;
+  float edge_threshold;
 
 };
 

@@ -4,6 +4,7 @@ Module::Module(const Setting & cfg)
 {
   cfg.lookupValue("name", module_name);
   enabled = cfg.lookupValue("enabled", enabled) ? enabled : true;
+  suppress_tree = cfg.lookupValue("suppress_tree", suppress_tree) ? suppress_tree : false;
 }
 
 Module::~Module()
@@ -21,7 +22,7 @@ void Module::Process()
 {
   // This function is to be overridden by each module.
   // Within override, call Module::Process() as FINAL step;
-  if (enabled) tree->Fill();
+  if (!suppress_tree) tree->Fill();
 }
 
 
@@ -29,7 +30,7 @@ void Module::Finalize(TTree* master)
 {
   // This function is to be overridden by each module.
   // Within override, call Module::Finalize().
-  if (enabled) {
+  if (!suppress_tree) {
     if (tree->GetEntries() == master->GetEntries()) {
       master->AddFriend(tree);
       tree->Write();
