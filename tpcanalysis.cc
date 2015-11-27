@@ -30,7 +30,9 @@
 #include <fstream>
 #include <time.h>
 #include <unistd.h> //getopt
-
+#include <iomanip>
+#include <cstdlib>
+#include <libconfig.h++>
 
 #include "TROOT.h"
 
@@ -43,11 +45,6 @@
 #include "TBranch.h"
 
 #include "EventProcessor.hh"
-
-// new modules for revamp
-#include <iomanip>
-#include <cstdlib>
-#include <libconfig.h++>
 
 using namespace std;
 using namespace libconfig;
@@ -94,8 +91,11 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile,
   infile.close();
 
   // Determine start and end of event loop.
-  int min_evt = 0;     //will eventually move this to read from cfg.
-  int max_evt = 10000;
+  const Setting & tpcCfg = cfg.lookup("tpcanalysis");
+  int min_evt, max_evt;
+  tpcCfg.lookupValue("min", min_evt);
+  tpcCfg.lookupValue("max", max_evt);
+  if (max_evt == -1) max_evt = total_events;
   int evt = 0;
   int subfile = -1;
   int nevents = 0;
@@ -162,21 +162,24 @@ int main(int argc, char* argv[]) {
 
 
   std::string cfgfile;
+  std::string datafile;
   std::string inputlist;
   std::string eventlist;
   bool use_eventlist = false;
-  std::string outputfile = "output.root";
+  std::string outputfile = "tpcanalysis.root";
 
   int opt;
-  while ((opt=getopt(argc, argv, "hc:i:o:e:")) != -1) {
+  while ((opt=getopt(argc, argv, "hc:i:I:o:e:")) != -1) {
     switch (opt) {
     case 'h':
-      std::cout << "Usage: [-c cfgfile] [-i inputlist] [-o outputfile]" << std::endl;
+      std::cout << "Usage: -c <cfg file> -i <input file> [-o <output file>]" << std::endl;
       exit(EXIT_SUCCESS);
     case 'c':
       cfgfile = optarg;
       break;
     case 'i':
+      datafile = optarg;
+    case 'I':
       inputlist = optarg;
       break;
     case 'o':
@@ -187,7 +190,7 @@ int main(int argc, char* argv[]) {
       eventlist = optarg;
       break;
     default:
-      std::cout << "Usage: [-c cfgfile] [-i inputlist] [-o outputfile]" << std::endl;
+      std::cout << "Usage: -c <cfg file> -i <input file> [-o <output file>]" << std::endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -200,8 +203,7 @@ int main(int argc, char* argv[]) {
   
   clock_t t = clock();
   
-  int nevents = ProcessEvents(inputlist, cfgfile, outputfile,
-                              use_eventlist, eventlist);
+  int nevents = ProcessEvents(inputlist, cfgfile, outputfile, use_eventlist, eventlist);
 
   t = clock() - t;
   std::cout << "Processed "<<nevents<<" events in "<<((float)t)/CLOCKS_PER_SEC<<" s." << std::endl;

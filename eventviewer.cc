@@ -137,13 +137,35 @@ void make_gui()
 //----------------------------------------------------------------
 
 
-int main(int args, char* argv[]) {
+int main(int argc, char* argv[]) {
 
-  if (args!=3) {
-    std::cout << "Use correct command: ./eventviewer <cfg file> <rawdatafile>"
-              << std::endl;
+  if (argc<=1) {
+    std::cout << "Usage: -c <cfg file> -i <input file>" << std::endl;
     return 1;
   }
+
+  std::string cfgfile;
+  std::string datafile;
+  
+  int opt;
+  while ((opt=getopt(argc, argv, "hc:i:")) != -1) {
+    switch (opt) {
+    case 'h':
+      std::cout << "Usage: -c <cfg file> -i <input file>" << std::endl;
+      exit(EXIT_SUCCESS);
+    case 'c':
+      cfgfile = optarg;
+      break;
+    case 'i':
+      datafile = optarg;
+      break;
+    default:
+      std::cout << "Usage: -c <cfg file> -i <input file>" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
+
   
   // initialize ROOT application
   TApplication *theApp = new TApplication("app", 0, 0);
@@ -154,13 +176,13 @@ int main(int args, char* argv[]) {
 
   make_gui();
   
-  string cfgFile = argv[1];
+  //string cfgFile = argv[1];
 
   Config cfg;
-  cfg.readFile(cfgFile.c_str());
+  cfg.readFile(cfgfile.c_str());
 
   
-  string datafile = argv[2];
+  //string datafile = argv[2];
   
   gEventProcessor = new EventProcessor(cfg);
 
