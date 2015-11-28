@@ -31,6 +31,7 @@ class EventData
 public:
   
   EventData();
+  virtual ~EventData(){}
   void Clear();
   
   // event-level metadata

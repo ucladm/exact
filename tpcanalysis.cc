@@ -183,8 +183,8 @@ int main(int argc, char* argv[]) {
   std::string datafile;
   bool process_inputlist = false;
   std::string inputlist;
-  std::string eventlist;
-  bool use_eventlist = false;
+  //std::string eventlist;
+  //bool use_eventlist = false;
   std::string outputfile = "tpcanalysis.root";
 
   int opt;
@@ -208,8 +208,8 @@ int main(int argc, char* argv[]) {
       outputfile = optarg;
       break;
     case 'e':
-      use_eventlist = true;
-      eventlist = optarg;
+      //use_eventlist = true;
+      //eventlist = optarg;
       break;
     default:
       std::cout << "Usage: -c <cfg file> -i <input file> [-o <output file>] [-I <input LIST>]" << std::endl;
