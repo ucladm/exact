@@ -23,8 +23,8 @@ void LVDAQHeader::load_file(std::string file)
 }
 
 void LVDAQHeader::close_file()
-{
-  binary_file.close();
+{  
+  if (binary_file.is_open()) binary_file.close();
 }
 
 bool LVDAQHeader::format_test()

@@ -8,7 +8,8 @@ using namespace std;
 
 
 EventProcessor::EventProcessor(const Config & cfg)
-  : daqHeader()
+  : event(NULL)
+  , daqHeader()
   , converter(cfg.lookup("Converter"))
   , baselineFinder(cfg.lookup("BaselineFinder"))
   , zeroSuppressor(cfg.lookup("ZeroSuppressor"))
@@ -20,6 +21,9 @@ EventProcessor::EventProcessor(const Config & cfg)
   // Will repopulate this object for each event
   event = new EventData();  
 }
+
+EventProcessor::~EventProcessor()
+{ }
 
 
 void EventProcessor::SetDataFile(string datafile)
@@ -75,6 +79,7 @@ void EventProcessor::ProcessEvent(int event_id)
 
 void EventProcessor::Finalize()
 {
+  if (!converter.enabled) return;
   TTree* master = converter.GetTree();
   if (baselineFinder.enabled) baselineFinder.Finalize(master);
   if (zeroSuppressor.enabled) zeroSuppressor.Finalize(master);

@@ -9,11 +9,14 @@ ZeroSuppressor::ZeroSuppressor(const Setting & cfg) : Module(cfg)
 {
   cfg.lookupValue("threshold", threshold);
   cfg.lookupValue("edge_threshold", edge_threshold);
+
+  val = -1;
 }
 
 void ZeroSuppressor::Initialize()
 {
   Module::Initialize();
+  tree->Branch("val", &val, "val/I");
 }
 
 void ZeroSuppressor::Process(EventData* event)

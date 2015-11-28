@@ -27,8 +27,8 @@ BaselineFinder::BaselineFinder(const Setting & cfg) : Module(cfg)
   cfg.lookupValue("max_amplitude", _max_amplitude);
   cfg.lookupValue("baseline_fixed_window", _baseline_fixed_window);
 
-  baseline_mean = new Float_t[NCHANS];
-  baseline_sigma = new Float_t[NCHANS];
+  //baseline_mean = new Float_t[NCHANS];
+  //baseline_sigma = new Float_t[NCHANS];
 
 }
 
@@ -208,7 +208,7 @@ void BaselineFinder::moving_baseline(EventData* event)
     
     // subtract off the baseline
     vector<double> & bswfm = channel->baseline_subtracted_waveform;
-    bswfm.resize(nsamps);
+    //bswfm.resize(nsamps);
     
     for (int samp=0; samp<nsamps; samp++) {
 
@@ -231,7 +231,8 @@ void BaselineFinder::moving_baseline(EventData* event)
         interpolate_baseline(baseline, start, end);
       }
 
-      bswfm[samp] = raw[samp] - baseline[samp];
+      //bswfm[samp] = raw[samp] - baseline[samp];
+      bswfm.push_back(raw[samp] - baseline[samp]);
      
     }
 

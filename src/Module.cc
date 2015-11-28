@@ -1,6 +1,7 @@
 #include "Module.hh"
 
 Module::Module(const Setting & cfg)
+  : tree(NULL)
 {
   cfg.lookupValue("name", module_name);
   enabled = cfg.lookupValue("enabled", enabled) ? enabled : true;
@@ -8,7 +9,7 @@ Module::Module(const Setting & cfg)
 }
 
 Module::~Module()
-{}
+{ }
 
 void Module::Initialize()
 {
@@ -39,6 +40,7 @@ void Module::Finalize(TTree* master)
       std::cout << "ERROR: tree for "<<module_name<<" has mis-matching number "
                 << "of entries! This is a serious error."<<std::endl;
   }
+  
 }
 
 

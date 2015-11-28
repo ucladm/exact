@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+#define MAXNPULSES 100
+
 class PulseFinder : public Module
 {
 public:
@@ -35,8 +37,8 @@ private:
 
   // variables to save to output
   Int_t npulses;
-  Float_t* pulse_start;
-  Float_t* pulse_end;
+  Float_t pulse_start[MAXNPULSES];
+  Float_t pulse_end[MAXNPULSES];
   
   void EvaluatePulses(EventData* event);
 

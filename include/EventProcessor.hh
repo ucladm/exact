@@ -22,6 +22,7 @@ class EventProcessor
 {
 public:
   EventProcessor(const Config & cfg);
+  ~EventProcessor();
   
   void Initialize();
   void ProcessEvent(int event_id);
@@ -44,7 +45,7 @@ private:
   Integrator integrator;
   PulseFinder pulseFinder;
   ProcessedPlotter plotter;
-
+  
   
 
 };

@@ -73,7 +73,7 @@ int ProcessDataFile(string datafile, const Config & cfg, TFile* rootfile, int mi
   for (int n=0; n<total_events; ++n) {
     if (n<min_evt) continue;
     if (n>=max_evt) break;
-    if (n%10000 == 0) cout << "Processing event " << n << "/"<<total_events<<endl;
+    if (n%1000 == 0) cout << "Processing event " << n << "/"<<total_events<<endl;
 
     //////////////////////////
     processor.ProcessEvent(n);
@@ -82,11 +82,11 @@ int ProcessDataFile(string datafile, const Config & cfg, TFile* rootfile, int mi
     nevents++;
 
   }// end loop over events
-  rootfile->cd();
   
-  processor.Finalize();
-
   processor.CloseDataFile();
+  
+  rootfile->cd();
+  processor.Finalize();
 
   return nevents;
 }
@@ -157,9 +157,8 @@ int ProcessFileList(string fileList, const Config & cfg, TFile* rootfile, int mi
   }// end loop over files
 
   rootfile->cd();
-  
-  processor.Finalize();
 
+  processor.Finalize();
   return nevents;
 }
 
@@ -233,7 +232,7 @@ int main(int argc, char* argv[]) {
 
 
   // Output file
-  TFile* rootfile = new TFile(outputfile.c_str(), "recreate");
+  TFile* rootfile(new TFile(outputfile.c_str(), "recreate"));
 
   Config cfg;
   cfg.readFile(cfgfile.c_str());
@@ -249,9 +248,9 @@ int main(int argc, char* argv[]) {
   else if (process_datafile) nevents = ProcessDataFile(datafile, cfg, rootfile, min_evt, max_evt);
 
   rootfile->Close();
-
+  
   t = clock() - t;
   std::cout << "Processed "<<nevents<<" events in "<<((float)t)/CLOCKS_PER_SEC<<" s." << std::endl;
-  
+
   return 1;
 }

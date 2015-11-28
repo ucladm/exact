@@ -44,8 +44,8 @@ private:
   double _baseline_fixed_window;
 
   // variables to be saved
-  Float_t* baseline_mean;
-  Float_t* baseline_sigma;
+  Float_t baseline_mean[NCHANS];
+  Float_t baseline_sigma[NCHANS];
 
   void interpolate_baseline(std::vector<double> & baseline, int start, int end);
 

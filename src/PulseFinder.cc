@@ -3,8 +3,6 @@
 #include <numeric>   //accumulate
 #include <cmath>
 
-#define MAXNPULSES 100
-
 using namespace std;
 
 PulseFinder::PulseFinder(const Setting & cfg) : Module(cfg)
@@ -15,8 +13,8 @@ PulseFinder::PulseFinder(const Setting & cfg) : Module(cfg)
   cfg.lookupValue("pulse_start_amp", _pulse_start_amp);
   cfg.lookupValue("pulse_end_threshold", _pulse_end_threshold);
 
-  pulse_start = new Float_t[MAXNPULSES];
-  pulse_end = new Float_t[MAXNPULSES];
+  //pulse_start = new Float_t[MAXNPULSES];
+  //pulse_end = new Float_t[MAXNPULSES];
 }
 
 void PulseFinder::Initialize()

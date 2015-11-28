@@ -17,7 +17,7 @@ public:
   Converter(const Setting & cfg);
   void Initialize();
   void Process(EventData* event, LVDAQHeader & daq_header);
-  //void Finalize(TTree* master);
+  void Finalize(TTree* master);
 
 
 private:

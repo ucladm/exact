@@ -118,8 +118,8 @@ void Converter::Process(EventData* event, LVDAQHeader & daq_header)
   Module::Process();
 }
 
-//void Converter::Finalize(TTree* master)
-//{
-//  // This must be the last call within this function.
-//  Module::Finalize(master);
-//}
+void Converter::Finalize(TTree* master)
+{
+  // This must be the last call within this function.
+  Module::Finalize(master);
+}
