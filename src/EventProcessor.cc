@@ -37,6 +37,10 @@ void EventProcessor::SetDataFile(string datafile)
   daqHeader.read_header_content();
 }
 
+void EventProcessor::CloseDataFile()
+{
+  daqHeader.close_file();
+}
 
 
 void EventProcessor::Initialize()

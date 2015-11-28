@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -16,9 +17,15 @@ extern const int uint16_type_size = 2;
 void LVDAQHeader::load_file(std::string file)
 {
   sprintf(filename, "%s", file.c_str());
+  try {if (binary_file.is_open()) throw std::runtime_error("ERROR: There is already an open file in LVDAQHeader!");}
+  catch (const std::exception & e) { cerr << e.what()<<endl; throw; }
   binary_file.open(filename, ios::in|ios::binary);
 }
 
+void LVDAQHeader::close_file()
+{
+  binary_file.close();
+}
 
 bool LVDAQHeader::format_test()
 {

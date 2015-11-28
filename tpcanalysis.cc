@@ -49,20 +49,55 @@
 using namespace std;
 using namespace libconfig;
 
+int ProcessDataFile(string datafile, const Config & cfg, TFile* rootfile, int min_evt, int max_evt)
+{
+  // Instantiate DAQheader
+  LVDAQHeader daq_header;
+  if (!daq_header.format_test())
+    std::cout << "ALARM! Variable size doesn't match!" << std::endl;
 
-int ProcessEvents(string fileList, string cfgFile, string outputfile)
+  // Object that handles processing of all modules.
+  EventProcessor processor(cfg);
+  processor.Initialize();
+
+  cout << "Opening data file: "<<datafile<<endl;
+  processor.SetDataFile(datafile);
+
+  if (max_evt == -1) max_evt = processor.GetDAQHeader().ntriggers;
+  const int total_events = max_evt - min_evt;
+  
+  cout << "\nBeginning event loop.\n" << endl;
+
+  // -------------------- LOOP OVER EVENTS ------------------------
+  int nevents = 0;
+  for (int n=0; n<total_events; ++n) {
+    if (n<min_evt) continue;
+    if (n>=max_evt) break;
+    if (n%10000 == 0) cout << "Processing event " << n << "/"<<total_events<<endl;
+
+    //////////////////////////
+    processor.ProcessEvent(n);
+    //////////////////////////
+    
+    nevents++;
+
+  }// end loop over events
+  rootfile->cd();
+  
+  processor.Finalize();
+
+  processor.CloseDataFile();
+
+  return nevents;
+}
+
+int ProcessFileList(string fileList, const Config & cfg, TFile* rootfile, int min_evt, int max_evt)
 {
 
   // Instantiate DAQheader
   LVDAQHeader daq_header;
   if (!daq_header.format_test())
     std::cout << "ALARM! Variable size doesn't match!" << std::endl;
-    
-  Config cfg;
-  cfg.readFile(cfgFile.c_str());
-
-  // Output file
-  TFile* rootfile = new TFile(outputfile.c_str(), "recreate");
 
   // Object that handles processing of all modules.
   EventProcessor processor(cfg);
@@ -74,27 +109,17 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
   std::string datafile;
   int total_events=0;
   while (infile >> datafile) {
-    daq_header.load_file(datafile.c_str());
-    if (!daq_header.binary_file.is_open()) {
-      std::cout << "\nCan't open datafile: "<< datafile.c_str() << std::endl;
-      return 1;
-    }
-    daq_header.read_header_content();
-    total_events+=daq_header.ntriggers;
-    daq_header.binary_file.close();
+    processor.SetDataFile(datafile);
+    total_events+=processor.GetDAQHeader().ntriggers;
+    processor.CloseDataFile();
   }
   infile.close();
-
-  // Determine start and end of event loop.
-  const Setting & tpcCfg = cfg.lookup("tpcanalysis");
-  int min_evt, max_evt;
-  tpcCfg.lookupValue("min", min_evt);
-  tpcCfg.lookupValue("max", max_evt);
+  
   if (max_evt == -1) max_evt = total_events;
   int subfile = -1;
   int evt = 0;
   int nevents = 0;
-  std::cout << "\nBeginning loop over events.\n" << std::endl;
+  std::cout << "\nBeginning event loop.\n" << std::endl;
 
   // Now loop through files...for real this time.
   infile.open(fileList.c_str());
@@ -103,12 +128,12 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
     if (evt>max_evt)
       break;
 
+    cout << "Opening data file: "<<datafile<<endl;
     processor.SetDataFile(datafile);
     ++subfile;
   
     // -------------------- LOOP OVER EVENTS ------------------------
-
-    for (int n=0; n<daq_header.ntriggers; ++n) {
+    for (int n=0; n<processor.GetDAQHeader().ntriggers; ++n) {
       if (evt<min_evt) {
         evt++;
         continue;
@@ -116,22 +141,24 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
       if (evt>=max_evt)
         break;
       
-      if (evt%10000 == 0) cout << "Processing event " << evt << endl;
+      if (evt%10000 == 0) cout << "Processing event " << evt << "/"<<total_events<<endl;
 
+      //////////////////////////
       processor.ProcessEvent(n);
+      //////////////////////////
       
       evt++;
       nevents++;
 
     }// end loop over events
 
+    processor.CloseDataFile();
+    
   }// end loop over files
 
   rootfile->cd();
   
   processor.Finalize();
-  
-  rootfile->Close();
 
   return nevents;
 }
@@ -145,8 +172,16 @@ int ProcessEvents(string fileList, string cfgFile, string outputfile)
 int main(int argc, char* argv[]) {
 
 
+  if (argc<=1) {
+    std::cout << "Usage: -c <cfg file> -i <input file> [-o <output file>] [-I <input LIST>]" << std::endl;
+    return 1;
+  }
+
+
   std::string cfgfile;
+  bool process_datafile = false;
   std::string datafile;
+  bool process_inputlist = false;
   std::string inputlist;
   std::string eventlist;
   bool use_eventlist = false;
@@ -156,14 +191,17 @@ int main(int argc, char* argv[]) {
   while ((opt=getopt(argc, argv, "hc:i:I:o:e:")) != -1) {
     switch (opt) {
     case 'h':
-      std::cout << "Usage: -c <cfg file> -i <input file> [-o <output file>]" << std::endl;
+      std::cout << "Usage: -c <cfg file> -i <input file> [-o <output file>] [-I <input LIST>]" << std::endl;
       exit(EXIT_SUCCESS);
     case 'c':
       cfgfile = optarg;
       break;
     case 'i':
+      process_datafile = true;
       datafile = optarg;
+      break;
     case 'I':
+      process_inputlist = true;
       inputlist = optarg;
       break;
     case 'o':
@@ -174,11 +212,17 @@ int main(int argc, char* argv[]) {
       eventlist = optarg;
       break;
     default:
-      std::cout << "Usage: -c <cfg file> -i <input file> [-o <output file>]" << std::endl;
+      std::cout << "Usage: -c <cfg file> -i <input file> [-o <output file>] [-I <input LIST>]" << std::endl;
       exit(EXIT_FAILURE);
     }
   }
 
+  if (process_datafile && process_inputlist) {
+    std::cout << "Use either -i or -I but not both."<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+  
+  
   // initialize ROOT application
   TApplication *theApp = new TApplication("app", 0, 0);
   theApp->SetReturnFromRun(false);
@@ -186,8 +230,25 @@ int main(int argc, char* argv[]) {
 
   
   clock_t t = clock();
+
+
+  // Output file
+  TFile* rootfile = new TFile(outputfile.c_str(), "recreate");
+
+  Config cfg;
+  cfg.readFile(cfgfile.c_str());
+
+  // Determine start and end of event loop.
+  const Setting & tpcCfg = cfg.lookup("tpcanalysis");
+  int min_evt, max_evt;
+  tpcCfg.lookupValue("min", min_evt);
+  tpcCfg.lookupValue("max", max_evt);
   
-  int nevents = ProcessEvents(inputlist, cfgfile, outputfile);
+  int nevents = 0;
+  if (process_inputlist) nevents = ProcessFileList(inputlist, cfg, rootfile, min_evt, max_evt);
+  else if (process_datafile) nevents = ProcessDataFile(datafile, cfg, rootfile, min_evt, max_evt);
+
+  rootfile->Close();
 
   t = clock() - t;
   std::cout << "Processed "<<nevents<<" events in "<<((float)t)/CLOCKS_PER_SEC<<" s." << std::endl;

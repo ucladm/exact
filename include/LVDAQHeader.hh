@@ -62,6 +62,7 @@ public:
   bool format_test();
   void load_file(std::string file);
   void read_header_content();
+  void close_file();
 
   void read_event(int event_id, vector< vector<double> > & data_array);
   void read_event_channel(int event_id, int channel_id, vector<double> & array);

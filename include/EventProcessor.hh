@@ -28,6 +28,7 @@ public:
   void Finalize();
 
   void SetDataFile(std::string datafile);
+  void CloseDataFile();
 
   LVDAQHeader const& GetDAQHeader() { return daqHeader; }
   
