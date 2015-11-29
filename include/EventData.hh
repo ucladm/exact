@@ -14,7 +14,7 @@
 #include "Rtypes.h" // has the ClassDef macros
 #include <vector>
 #include <map>
-#include <stdint.h>
+//#include <stdint.h>
 #include "ChannelData.hh"
 #include "PulseData.hh"
 
