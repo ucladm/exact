@@ -27,7 +27,14 @@ void PulseFinder::Initialize()
 
 void PulseFinder::Process(EventData* event)
 {
+  // reset tree variables
   npulses = 0;
+  for (int i=0; i<MAXNPULSES; ++i) {
+    pulse_start[i] = 0;
+    pulse_start[i] = 0;
+  }
+
+  
   if (_mode=="THRESHOLD")
     npulses = ThresholdSearch(event);
   else if (_mode=="INTEGRAL")

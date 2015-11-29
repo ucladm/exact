@@ -42,6 +42,12 @@ void BaselineFinder::Initialize()
 
 void BaselineFinder::Process(EventData* event)
 {
+  // reset tree variables
+  for (int i=0; i<event->nchans; ++i) {
+    baseline_mean = 0;
+    baseline_sigma = 0;
+  }
+  
   if (_mode == "FIXED")
     fixed_baseline(event);
   else if (_mode == "MOVING")

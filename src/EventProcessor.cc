@@ -16,6 +16,7 @@ EventProcessor::EventProcessor(const Config & cfg)
   , sumChannel(cfg.lookup("SumChannel"))
   , integrator(cfg.lookup("Integrator"))
   , pulseFinder(cfg.lookup("PulseFinder"))
+  , roi(cfg.lookup("ROI"))
   , plotter(cfg.lookup("Plotter"))
 {
   // Will repopulate this object for each event
@@ -50,13 +51,15 @@ void EventProcessor::CloseDataFile()
 void EventProcessor::Initialize()
 {
   // Initialize modules as necessary
-  if (converter.enabled) converter.Initialize();
+  if (converter.enabled)      converter.Initialize();
   if (baselineFinder.enabled) baselineFinder.Initialize();
   if (zeroSuppressor.enabled) zeroSuppressor.Initialize();
-  if (sumChannel.enabled) sumChannel.Initialize();
-  if (integrator.enabled) integrator.Initialize();
-  if (pulseFinder.enabled) pulseFinder.Initialize();
-  if (plotter.enabled) plotter.Initialize();
+  if (sumChannel.enabled)     sumChannel.Initialize();
+  if (integrator.enabled)     integrator.Initialize();
+  if (pulseFinder.enabled)    pulseFinder.Initialize();
+  if (roi.enabled)            roi.Initialize();
+  if (plotter.enabled)        plotter.Initialize();
+  
 }
 
 void EventProcessor::ProcessEvent(int event_id)
@@ -73,7 +76,8 @@ void EventProcessor::ProcessEvent(int event_id)
   if (sumChannel.enabled)     sumChannel.Process(event);
   if (integrator.enabled)     integrator.Process(event);
   if (pulseFinder.enabled)    pulseFinder.Process(event);
-  if (plotter.enabled) plotter.Process(event);
+  if (roi.enabled)            roi.Process(event);
+  if (plotter.enabled)        plotter.Process(event);
 }
 
 
@@ -85,6 +89,7 @@ void EventProcessor::Finalize()
   if (zeroSuppressor.enabled) zeroSuppressor.Finalize(master);
   if (sumChannel.enabled)     sumChannel.Finalize(master);
   if (integrator.enabled)     integrator.Finalize(master);
+  if (roi.enabled)            roi.Finalize(master);
   if (pulseFinder.enabled)    pulseFinder.Finalize(master);
   master->Write();
 }

@@ -12,7 +12,7 @@
 #include "SumChannel.hh"
 #include "PulseFinder.hh"
 #include "ProcessedPlotter.hh"
-//#include "ROI.hh"
+#include "ROI.hh"
 //#include "AverageWaveforms.hh"
 
 #include <string>
@@ -44,6 +44,7 @@ private:
   SumChannel sumChannel;
   Integrator integrator;
   PulseFinder pulseFinder;
+  ROI roi;
   ProcessedPlotter plotter;
   
   

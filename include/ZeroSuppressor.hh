@@ -36,8 +36,6 @@ private:
   // that are beyond this threshold
   float edge_threshold;
 
-  Int_t val;
-  
 };
 
 
