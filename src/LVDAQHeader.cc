@@ -215,7 +215,7 @@ void LVDAQHeader::read_event_channel(int event_id, int channel_id, vector<double
   // header size + event_id * waveform data size + (event_id-1) * timestamp size;
   const int channel_data_length = nsamps*uint8_type_size;
   const long int start_point = (header_size +
-                                event_id*2*uint16_type_size + 
+                                (event_id+1)*2*uint16_type_size + 
                                 event_id*channel_data_length*nchannels +
                                 channel_id*nsamps);
                                 
