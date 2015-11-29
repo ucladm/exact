@@ -25,8 +25,8 @@ public:
 
 private:
 
-  double _roi_start;
-  double _roi_end;
+  float _roi_start;
+  float _roi_end;
 
   Float_t _roi;
   Float_t _ch_roi[NCHANS];

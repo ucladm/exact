@@ -16,7 +16,7 @@ ROI::ROI(const Setting & cfg)
 void ROI::Initialize()
 {
   Module::Initialize();
-  tree->Branch("roi", _roi, "roi/F");
+  tree->Branch("roi", &_roi, "roi/F");
   TString suffix = TString::Format("[%d]/F", NCHANS);
   tree->Branch("ch_roi", _ch_roi, "ch_roi"+suffix);
 }
