@@ -30,10 +30,10 @@ parameters:
 NOTE: the email MUST be the same one that you used in step 1. As far as 
 github is concerned, your email is your identity. 
 
-4. Checkout the repository. This will create a directory called "exact". 
+4. Checkout the repository. This will create a directory called "parisana". 
 Make sure there isn't already something by that name in the directory 
 where you invoke this step:
-	git clone https://github.com/ucladm/exact.git
+	git clone https://github.com/ucladm/parisana.git
 
 
 All set!
