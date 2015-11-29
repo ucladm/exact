@@ -225,10 +225,10 @@ void LVDAQHeader::read_event_channel(int event_id, int channel_id, vector<double
 
   // Load waveform
   for (int i=0; i<nsamps; ++i) {
-    int8_t value;
-    binary_file.read((char*)&value, sizeof(char));
+    Char_t value;
+    binary_file.read((char*)&value, sizeof(value));
     //single_waveform.push_back(value);
-    array.push_back(value);
+    array.push_back((double)value);
   }
 }
 

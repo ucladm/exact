@@ -15,7 +15,8 @@
 #include <time.h>
 #include <string>
 #include <vector>
-#include <stdint.h>
+//#include <stdint.h>
+#include "Rtypes.h"
 
 
 using namespace std;
@@ -56,8 +57,10 @@ public:
   int trigger_slope;
   int nbits;
 
-  uint16_t event_sec;
-  uint16_t event_millisec;
+  UShort_t event_sec;
+  UShort_t event_millisec;
+  //uint16_t event_sec;
+  //uint16_t event_millisec;
 
   bool format_test();
   void load_file(std::string file);
