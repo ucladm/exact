@@ -222,10 +222,6 @@ void LVDAQHeader::read_event_channel(int event_id, int channel_id, vector<double
 
   // Navigate to target position in file and extract event data
   binary_file.seekg(start_point, std::ios::beg);
-  
-  // First event has no timestamp associated to it.
-  binary_file.read((char*)&event_sec, sizeof(event_sec));
-  binary_file.read((char*)&event_millisec, sizeof(event_millisec));
 
   // Load waveform
   for (int i=0; i<nsamps; ++i) {
@@ -234,5 +230,28 @@ void LVDAQHeader::read_event_channel(int event_id, int channel_id, vector<double
     //single_waveform.push_back(value);
     array.push_back(value);
   }
+}
+
+void LVDAQHeader::read_event_timestamp(int event_id)
+{
+  if (event_id < 0 || event_id >= ntriggers) {
+    cout << "ERROR: LVDAQHeader: event_id outside of expected range."<<endl;
+    abort();
+  }
+
+  // Determine which point of file to navigate to:
+  // header size + event_id * waveform data size + (event_id-1) * timestamp size;
+  const int channel_data_length = nsamps*uint8_type_size;
+  const long int start_point = (header_size +
+                                event_id*2*uint16_type_size + 
+                                event_id*channel_data_length*nchannels);
+
+  // Navigate to target position in file and extract event data
+  binary_file.seekg(start_point, std::ios::beg);
+
+  binary_file.read((char*)&event_sec, sizeof(event_sec));
+  binary_file.read((char*)&event_millisec, sizeof(event_millisec));
+
+
 
 }

@@ -41,6 +41,7 @@ void Converter::Process(EventData* event, LVDAQHeader & daq_header)
   event_id = event->event_id;
   nchans = daq_header.nchannels;
   nsamps = daq_header.nsamps;
+  daq_header.read_event_timestamp(event->event_id);
   timestamp_sec = (int) daq_header.event_sec;
   timestamp_usec = (int) daq_header.event_millisec;
 
@@ -105,10 +106,7 @@ void Converter::Process(EventData* event, LVDAQHeader & daq_header)
     cout << "event "<<event->event_id<<" "<<event->timestamp_sec<<" "<<event->timestamp_usec<<endl;
     for (int ch=0; ch<event->nchans; ++ch) {
       cout << "event "<<event->event_id<<" ch "<<event->GetChannel(ch)->channel_id<<endl;
-      
-      for (int i=0; i<event->nsamps; ++i) {
-        cout << event->GetChannel(ch)->raw_waveform[i]<<" ";
-      }
+      for (int i=0; i<event->nsamps; ++i) cout << event->GetChannel(ch)->raw_waveform[i]<<" ";
       cout << endl << endl;
     }
   }
