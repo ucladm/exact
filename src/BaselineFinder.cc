@@ -57,7 +57,6 @@ void BaselineFinder::Process(EventData* event)
     fixed_baseline(event);
   }
 
-
   // This must be the last call within this function.
   Module::Process();
 }
@@ -103,6 +102,9 @@ void BaselineFinder::fixed_baseline(EventData* event)
     double mean = sum/(end_samp-start_samp);
     channel->baseline_mean = mean;
     channel->baseline_sigma = sqrt(var/(end_samp - start_samp) - mean*mean);
+
+    baseline_mean[idx] = channel->baseline_mean;
+    baseline_sigma[idx] = channel->baseline_sigma;
     
     vector<double> & bs_wfm = channel->baseline_subtracted_waveform;
     bs_wfm.resize(raw.size());

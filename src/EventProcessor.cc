@@ -66,7 +66,7 @@ void EventProcessor::ProcessEvent(int event_id)
 {
 
   event->Clear();
-  event->run_id = 0;
+  //event->run_id = 0;
   event->event_id = event_id;
 
   // Run all the modules. ORDER MATTERS!

@@ -101,7 +101,7 @@ void Converter::Process(EventData* event, LVDAQHeader & daq_header)
   } // end loop over channels
   event->nsamps -= std::fabs(trigger_index_offset);
 
-  bool PRINT = false;
+  bool PRINT = false; 
   if (PRINT) {
     cout << "event "<<event->event_id<<" "<<event->timestamp_sec<<" "<<event->timestamp_usec<<endl;
     for (int ch=0; ch<event->nchans; ++ch) {
