@@ -54,7 +54,7 @@ public:
   vector<PulseData> pulses;
 
 
-  double roi;
+  vector<double> roi;
   
   double SampleToTime(int samp) const;
   int TimeToSample(double time, bool checkrange=true) const;

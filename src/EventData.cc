@@ -32,7 +32,7 @@ EventData::EventData() :
   sumchannel(),
   npulses(-1),
   pulses(),
-  roi(0)
+  roi()
 
 {}
 
@@ -52,7 +52,7 @@ void EventData::Clear()
   sumchannel.Clear();
   npulses = 0;
   pulses.clear();
-  roi = -1;
+  roi.clear();
 }
 
 
