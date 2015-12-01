@@ -44,6 +44,7 @@ private:
   double _baseline_fixed_window;
 
   // variables to be saved
+  Bool_t  baseline_found[NCHANS];
   Float_t baseline_mean[NCHANS];
   Float_t baseline_sigma[NCHANS];
 
