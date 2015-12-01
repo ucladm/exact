@@ -67,7 +67,7 @@ void Converter::Process(EventData* event, LVDAQHeader & daq_header)
 
     channel.daq_channel_num = i;
     channel.channel_id = i;
-    channel.spe_mean = 1;
+    channel.spe_mean = -56.34; //hard-coded for now. warm temperature gain with rough Gaussian fit to 3" PMT
     daq_header.read_event_channel(event->event_id, i, channel.raw_waveform);
     channel.adc_gain = 1;
     channel.adc_offset = 1;

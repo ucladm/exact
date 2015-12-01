@@ -23,6 +23,7 @@ public:
   bool saturated;
 
   double integral;
+  double prompt;
   double fixed_int1;
   double fixed_int2;
 

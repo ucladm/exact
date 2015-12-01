@@ -8,6 +8,7 @@ PulseData::PulseData():
   peak_amp(-1),
   saturated(false),
   integral(-1),
+  prompt(-1),
   fixed_int1(-1),
   fixed_int2(-1),
   f90(-1)
