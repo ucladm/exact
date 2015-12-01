@@ -13,7 +13,7 @@
 #include "PulseFinder.hh"
 #include "ProcessedPlotter.hh"
 #include "ROI.hh"
-//#include "AverageWaveforms.hh"
+#include "AverageWaveforms.hh"
 
 #include <string>
 #include <libconfig.h++>
@@ -45,6 +45,7 @@ private:
   Integrator integrator;
   PulseFinder pulseFinder;
   ROI roi;
+  AverageWaveforms avgwfms;
   ProcessedPlotter plotter;
   
   

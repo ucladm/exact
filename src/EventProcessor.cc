@@ -17,6 +17,7 @@ EventProcessor::EventProcessor(const Config & cfg)
   , integrator(cfg.lookup("Integrator"))
   , pulseFinder(cfg.lookup("PulseFinder"))
   , roi(cfg.lookup("ROI"))
+  , avgwfms(cfg.lookup("AverageWaveforms"))
   , plotter(cfg.lookup("Plotter"))
 {
   // Will repopulate this object for each event
@@ -58,6 +59,7 @@ void EventProcessor::Initialize()
   if (integrator.enabled)     integrator.Initialize();
   if (pulseFinder.enabled)    pulseFinder.Initialize();
   if (roi.enabled)            roi.Initialize();
+  if (avgwfms.enabled)        avgwfms.Initialize();
   if (plotter.enabled)        plotter.Initialize();
   
 }
@@ -77,6 +79,7 @@ void EventProcessor::ProcessEvent(int event_id)
   if (integrator.enabled)     integrator.Process(event);
   if (pulseFinder.enabled)    pulseFinder.Process(event);
   if (roi.enabled)            roi.Process(event);
+  if (avgwfms.enabled)        avgwfms.Process(event);
   if (plotter.enabled)        plotter.Process(event);
 }
 
@@ -90,6 +93,7 @@ void EventProcessor::Finalize()
   if (sumChannel.enabled)     sumChannel.Finalize(master);
   if (integrator.enabled)     integrator.Finalize(master);
   if (roi.enabled)            roi.Finalize(master);
+  if (avgwfms.enabled)        avgwfms.Finalize(master);
   if (pulseFinder.enabled)    pulseFinder.Finalize(master);
   master->Write();
 }
