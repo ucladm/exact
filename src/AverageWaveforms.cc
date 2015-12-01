@@ -66,12 +66,9 @@ void AverageWaveforms::Finalize(TTree* master)
     hwfm->GetXaxis()->SetTitle("time [#mus]");
     hwfm->GetYaxis()->SetTitle("amplitude [arb]");
     hwfm->Write();
-    //h->SetBinContent(ch, _nevents[ch]);
   }
   _nevents->Write();
 
-  for (int i=0; i<(int)_plots.size(); ++i) delete _plots[i];
-  delete _nevents;
-  
+
   Module::Finalize(master);
 }
