@@ -80,7 +80,7 @@ void PulseFinder::EvaluatePulses(EventData* event)
     int start_index = event->TimeToSample(event->pulses[i].start_time);
     int end_index = event->TimeToSample(event->pulses[i].end_time);
     int peak_index = std::max_element(waveform.begin() + start_index, waveform.begin() + end_index)-waveform.begin();
-    int prompt_index = event->TimeToSample(event->pulses[i].start_time+90);
+    int prompt_index = event->TimeToSample(event->pulses[i].start_time+0.090);
     event->pulses[i].peak_time = event->SampleToTime(peak_index);
     event->pulses[i].peak_amp = waveform[peak_index];
     event->pulses[i].integral = event->sumchannel.integral_waveform[end_index-1] - event->sumchannel.integral_waveform[start_index-1];
