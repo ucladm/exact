@@ -29,6 +29,8 @@ public:
 
   std::string module_name;
   bool enabled;
+  std::vector<int> skip_channels;
+  bool skip_channel(int ch);
 
   TTree* GetTree();
 

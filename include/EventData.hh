@@ -43,7 +43,7 @@ public:
   int nsamps;
   double us_per_samp;
   int trigger_index;
-  double trigger_offset; //for top-channels only
+  double trigger_offset;
   int adc_bits; //number of ADC bits
 
   bool saturated;

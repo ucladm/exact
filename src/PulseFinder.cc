@@ -61,7 +61,6 @@ void PulseFinder::Process(EventData* event)
     pulse_integral[i] = event->pulses[i].integral;
     pulse_prompt[i] = event->pulses[i].prompt;
   }
-
   
   
   Module::Process();  
@@ -87,7 +86,6 @@ void PulseFinder::EvaluatePulses(EventData* event)
     event->pulses[i].prompt = event->sumchannel.integral_waveform[prompt_index-1] - event->sumchannel.integral_waveform[start_index-1];
     
   }
-  
    
 }
 
