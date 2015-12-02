@@ -13,6 +13,9 @@
 #include "EventData.hh"
 #include <string>
 #include <vector>
+#include <utility> //pair
+
+#define MAXNROI 10
 
 class ROI : public Module
 {
@@ -25,11 +28,11 @@ public:
 
 private:
 
-  float _roi_start;
-  float _roi_end;
+  int _nroi;
+  std::vector< std::vector<float> > _roi_times;
 
-  Float_t _roi;
-  Float_t _ch_roi[NCHANS];
+  Float_t _roi[MAXNROI];
+  Float_t _ch_roi[NCHANS*MAXNROI];
 };
 
 #endif

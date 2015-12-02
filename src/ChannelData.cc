@@ -16,7 +16,8 @@ ChannelData::ChannelData():
   baseline_mean(-1),
   baseline_sigma(-1),
   baseline_valid(false),
-  npulses(0)
+  npulses(0),
+  roi()
 { }
 
 void ChannelData::Clear()
@@ -36,6 +37,7 @@ void ChannelData::Clear()
   baseline_sigma = -1;
   baseline_valid = false;
   npulses = 0;
+  roi.clear();
     
 }
 

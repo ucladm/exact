@@ -43,7 +43,7 @@ public:
   int nsamps;
   double us_per_samp;
   int trigger_index;
-  double trigger_offset; //for top-channels only
+  double trigger_offset;
   int adc_bits; //number of ADC bits
 
   bool saturated;
@@ -54,16 +54,13 @@ public:
   vector<PulseData> pulses;
 
 
-  double roi;
+  vector<double> roi;
   
   double SampleToTime(int samp) const;
   int TimeToSample(double time, bool checkrange=true) const;
 
   ChannelData* GetChannel(int channel_id);
   
-  TMultiGraph* GetTMultiGraph(int ch);
-  TMultiGraph* GetTMultiGraph_sumch();
-
 private:
 
   

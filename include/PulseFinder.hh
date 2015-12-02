@@ -37,8 +37,11 @@ private:
 
   // variables to save to output
   Int_t npulses;
-  Float_t pulse_start[MAXNPULSES];
-  Float_t pulse_end[MAXNPULSES];
+  Double_t pulse_start[MAXNPULSES];
+  Double_t pulse_end[MAXNPULSES];
+  Double_t pulse_integral[MAXNPULSES];
+  Double_t pulse_prompt[MAXNPULSES];
+  Bool_t  pulse_saturated[MAXNPULSES];
   
   void EvaluatePulses(EventData* event);
 

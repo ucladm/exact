@@ -35,7 +35,9 @@ BaselineFinder::BaselineFinder(const Setting & cfg) : Module(cfg)
 void BaselineFinder::Initialize()
 {
   Module::Initialize();
-  TString suffix = TString::Format("[%d]/F", NCHANS);
+  TString suffix = TString::Format("[%d]/O", NCHANS);
+  tree->Branch("baseline_found", baseline_found, "baseline_found"+suffix);
+  suffix = TString::Format("[%d]/F", NCHANS);
   tree->Branch("baseline_mean", baseline_mean, "baseline_mean"+suffix);
   tree->Branch("baseline_sigma",baseline_sigma,"baseline_sigma"+suffix);
 }
@@ -44,6 +46,7 @@ void BaselineFinder::Process(EventData* event)
 {
   // reset tree variables
   for (int i=0; i<event->nchans; ++i) {
+    baseline_found[i] = false;
     baseline_mean[i] = 0;
     baseline_sigma[i] = 0;
   }
@@ -56,7 +59,6 @@ void BaselineFinder::Process(EventData* event)
     std::cout << "BaselineFinder mode not recognized. Using FIXED."<<std::endl;
     fixed_baseline(event);
   }
-
 
   // This must be the last call within this function.
   Module::Process();
@@ -103,18 +105,23 @@ void BaselineFinder::fixed_baseline(EventData* event)
     double mean = sum/(end_samp-start_samp);
     channel->baseline_mean = mean;
     channel->baseline_sigma = sqrt(var/(end_samp - start_samp) - mean*mean);
+
+    baseline_mean[idx] = channel->baseline_mean;
+    baseline_sigma[idx] = channel->baseline_sigma;
     
     vector<double> & bs_wfm = channel->baseline_subtracted_waveform;
     bs_wfm.resize(raw.size());
     if (channel->baseline_sigma < _threshold) {
       channel->baseline_valid = true;
-
+      baseline_found[idx] = true;
       // compute the baseline-subtracted and inverted waveform
       for (size_t i=0; i<raw.size(); ++i)
         bs_wfm[i] = raw[i] - mean;
     }
-    else
+    else {
       channel->baseline_valid = false;
+      baseline_found[idx] = false;
+    }
   } // end loop over channels
 }
 
@@ -243,8 +250,6 @@ void BaselineFinder::moving_baseline(EventData* event)
     }
 
     channel->saturated = ch_saturated;
-    //channel->baseline_mean = 1;
-    //channel->baseline_sigma = 1;
     channel->baseline_mean = 0;
     channel->baseline_sigma = 0;
     // For moving baseline, baseline mean and sigma aren't very meaningful. So fill with fixed window calculation
@@ -256,8 +261,8 @@ void BaselineFinder::moving_baseline(EventData* event)
     channel->baseline_sigma = std::sqrt(channel->baseline_sigma/event->TimeToSample(_baseline_fixed_window) -
                                         channel->baseline_mean*channel->baseline_mean);
     channel->baseline_valid = true;
-    //event->baseline_subtracted_waveforms.push_back(bswfm);
 
+    baseline_found[channel->channel_id] = channel->baseline_valid;
     baseline_mean[channel->channel_id] = channel->baseline_mean;
     baseline_sigma[channel->channel_id] = channel->baseline_sigma;
 

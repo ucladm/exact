@@ -16,6 +16,7 @@
 #include "EventData.hh"
 #include <string>
 #include <iostream>
+#include <vector>
 
 // Forward declarations
 class TCanvas;
@@ -33,9 +34,14 @@ public:
 
 private:
 
-  int _chans_per_pad;
   std::vector<TLegend*> _legends;
+  bool _draw_sum;
 
+
+  void PlotChannel(EventData* event, int chID);
+  void PlotSumChannel(EventData* event);
+  std::vector<double> DrawIntegral(ChannelData* channel);
+  void DrawPulses(EventData* event, double base);
 
 
 };

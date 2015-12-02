@@ -2,7 +2,7 @@
 #include "TGNumberEntry.h"
 #include <iostream>
 
-int gEventID = 1;
+int gEventID = 0;
 EventProcessor* gEventProcessor = 0;
 TGNumberEntryField* gEventNumberEntry = 0;
 

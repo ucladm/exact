@@ -1,11 +1,21 @@
 #include "Module.hh"
 
+#include <algorithm>
+#include <iterator>
+
 Module::Module(const Setting & cfg)
-  : tree(NULL)
+  : skip_channels()
+  , tree(NULL)
 {
   cfg.lookupValue("name", module_name);
   enabled = cfg.lookupValue("enabled", enabled) ? enabled : true;
   suppress_tree = cfg.lookupValue("suppress_tree", suppress_tree) ? suppress_tree : false;
+
+  int n_skip = 0;
+  if (cfg.exists("skip_channels"))
+    n_skip = cfg["skip_channels"].getLength();
+  for (int i=0; i<n_skip; ++i)
+    skip_channels.push_back(cfg["skip_channels"][i]);
 }
 
 Module::~Module()
@@ -41,6 +51,12 @@ void Module::Finalize(TTree* master)
                 << "of entries! This is a serious error."<<std::endl;
   }
   
+}
+
+
+bool Module::skip_channel(int ch)
+{
+  return (std::find(skip_channels.begin(), skip_channels.end(), ch) != skip_channels.end());
 }
 
 

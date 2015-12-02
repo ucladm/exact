@@ -51,7 +51,7 @@ public:
   vector<PulseData*> pulses;
 
   // ROI
-  double roi;
+  vector<double> roi;
 
   double integrate(int start_samp, int end_samp) const;
   

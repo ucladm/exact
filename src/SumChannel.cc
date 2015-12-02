@@ -31,13 +31,15 @@ void SumChannel::Process(EventData* event)
     if (ch == 0) {
       sum.resize(wfm.size());
     }
-
+    
     if (!channel->baseline_valid) {
       sum.clear();
       sum.resize(wfm.size());
       break;
     }
 
+    if (skip_channel(ch)) continue;
+    
     // add waveform to sum channel
     for (size_t i=0; i<wfm.size(); ++i) {
       sum[i] += wfm[i]*channel->adc_gain*1000.*2./channel->spe_mean; // ADC gain in V, the sum channel is in unit of PE
