@@ -54,30 +54,6 @@ void ProcessedPlotter::Process(EventData* event)
   const int nChansToDraw = chansToDraw.size();
   const int nPadsToDraw = nChansToDraw + _draw_sum;
 
-  //int cpp = _chans_per_pad;
-  //if(cpp < 1)
-  //  cpp = (nchans > 0 ? nchans : 1);
-  //int total_pads = (nchans+cpp-1)/cpp+1; //extra pad for sum channel
-  /*
-  if(total_pads == 0)
-    return;
-  else if(total_pads == 1) {}
-  else if(total_pads == 2)
-    gCanvas->Divide(2,1);
-  else if(total_pads < 5)
-    gCanvas->Divide(2,2);
-  else if(total_pads < 7)
-    gCanvas->Divide(3,2);
-  else if(total_pads < 10)
-    gCanvas->Divide(3,3);
-  else if(total_pads < 13)
-    gCanvas->Divide(4,3);
-  else if(total_pads < 17)
-    gCanvas->Divide(4,4);
-  else
-    gCanvas->Divide(5,4);
-  */
-
   int width = floor(sqrt(nPadsToDraw*1.77));
   int height = ceil(nPadsToDraw/floor(sqrt(nPadsToDraw*1.77)));
   gCanvas->Divide(width,height);

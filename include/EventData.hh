@@ -61,9 +61,6 @@ public:
 
   ChannelData* GetChannel(int channel_id);
   
-  //TMultiGraph* GetTMultiGraph(int ch);
-  //TMultiGraph* GetTMultiGraph_sumch();
-
 private:
 
   
