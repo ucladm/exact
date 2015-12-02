@@ -83,6 +83,10 @@ ChannelData* EventData::GetChannel(int const channel_id)
   return (it == channels.end() ? 0 : &(*it));
 }
 
+
+
+
+/*
 TMultiGraph* EventData::GetTMultiGraph(int ch)
 {
   ChannelData* channel = GetChannel(ch);
@@ -257,4 +261,4 @@ TMultiGraph* EventData::GetTMultiGraph_sumch()
   
   return mg;
 }
-
+*/
