@@ -22,6 +22,12 @@ void AverageWaveforms::Process(EventData* event)
 {
   int nsamps = event->nsamps;
 
+
+  // apply cuts
+  if ( !(event->npulses>0 && event->pulses[0].integral > 50.e3 && event->pulses[0].integral < 100.e3) )
+    return;
+
+  
   // Loop over channels
   for (int ch = 0; ch<event->nchans; ++ch) {
 

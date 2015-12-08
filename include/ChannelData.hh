@@ -48,7 +48,7 @@ public:
 
   // pulse finder
   int npulses;
-  vector<PulseData*> pulses;
+  vector<PulseData> pulses;
 
   // ROI
   vector<double> roi;

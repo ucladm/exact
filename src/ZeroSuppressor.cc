@@ -9,7 +9,6 @@ ZeroSuppressor::ZeroSuppressor(const Setting & cfg) : Module(cfg)
 {
   cfg.lookupValue("threshold", threshold);
   cfg.lookupValue("edge_threshold", edge_threshold);
-
 }
 
 void ZeroSuppressor::Initialize()
@@ -20,8 +19,6 @@ void ZeroSuppressor::Initialize()
 void ZeroSuppressor::Process(EventData* event)
 {
 
-
-  
   // Loop over the channels
   for (int idx = 0; idx<event->nchans; ++idx) {
     
@@ -42,6 +39,7 @@ void ZeroSuppressor::Process(EventData* event)
     // (2) search forward to the first sample that is within edge_threshold.
     // These define endpoints for un-zero-suppressed regions; everything
     // else is zero-suppressed.
+
     int start_samp=0, end_samp=0;
     int samp=0;
     while (samp < event->nsamps) {
@@ -50,7 +48,7 @@ void ZeroSuppressor::Process(EventData* event)
 
         // now search back to last sample that is within _edge_threshold
         int tmp_samp = samp;
-        while ( tmp_samp >= 0 && std::fabs(bs_wfm[tmp_samp]) > edge_threshold ) {
+        while ( tmp_samp > 0 && std::fabs(bs_wfm[tmp_samp]) > edge_threshold ) {
           --tmp_samp;
           start_samp = tmp_samp;
         }
@@ -62,7 +60,7 @@ void ZeroSuppressor::Process(EventData* event)
           end_samp = tmp_samp;
         }
 
-        if (end_samp >= event->nsamps) end_samp = event->nsamps;
+        if (end_samp >= event->nsamps) end_samp = event->nsamps-1;
         
         // now copy the non-zero-suppressed region to the waveform
         for (tmp_samp=start_samp; tmp_samp<=end_samp; tmp_samp++)
@@ -71,12 +69,13 @@ void ZeroSuppressor::Process(EventData* event)
         // continue the algorithm from the last non-zero-suppressed point
         samp = end_samp+1;
       }
-      else //this sample is below threshold -- keep zs_wfm at the initialized zero
+      else {
+        //this sample is below threshold -- keep zs_wfm at the initialized zero
         ++samp;
+      }
       
     }// end loop over samps
 
-    
   }// end loop over channels
 
 
@@ -92,5 +91,5 @@ void ZeroSuppressor::Process(EventData* event)
 
 void ZeroSuppressor::Finalize(TTree* master)
 {
-  Module::Finalize(master);
+  //Module::Finalize(master);
 }
