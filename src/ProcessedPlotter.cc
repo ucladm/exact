@@ -119,7 +119,7 @@ void ProcessedPlotter::PlotChannel(EventData* event, int chID)
   TGraph* gr_baseline = new TGraph(nsamps, &x[0], &baseline[0]);
   gr_baseline->SetMarkerColor(kRed);
   gr_baseline->SetLineColor(kRed);
-  mg->Add(gr_baseline);
+  //mg->Add(gr_baseline);
 
   //-------------------------------
   // draw integral
@@ -129,7 +129,7 @@ void ProcessedPlotter::PlotChannel(EventData* event, int chID)
   int integral_color = kBlue;
   integral_gr->SetLineColor(integral_color);
   integral_gr->SetMarkerColor(integral_color);
-  mg->Add(integral_gr);
+  //mg->Add(integral_gr);
 
   //double base = channel->baseline_mean;
   //DrawPulses(event, base);
