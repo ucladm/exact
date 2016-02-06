@@ -119,7 +119,7 @@ void ProcessedPlotter::PlotChannel(EventData* event, int chID)
   TGraph* gr_baseline = new TGraph(nsamps, &x[0], &baseline[0]);
   gr_baseline->SetMarkerColor(kRed);
   gr_baseline->SetLineColor(kRed);
-  //mg->Add(gr_baseline);
+  mg->Add(gr_baseline);
 
   //-------------------------------
   // draw integral
@@ -129,7 +129,7 @@ void ProcessedPlotter::PlotChannel(EventData* event, int chID)
   int integral_color = kBlue;
   integral_gr->SetLineColor(integral_color);
   integral_gr->SetMarkerColor(integral_color);
-  //mg->Add(integral_gr);
+  mg->Add(integral_gr);
 
   //double base = channel->baseline_mean;
   //DrawPulses(event, base);
@@ -195,21 +195,22 @@ std::vector<double> ProcessedPlotter::DrawIntegral(ChannelData* channel)
 {
   const int nsamps = channel->raw_waveform.size();
   vector<double> adjusted_integral(nsamps);
-  const double integral_offset = channel->baseline_mean; //(draw_baseline_subtracted ? 0 : bs_info.mean);
+  const double baseline_mean = channel->baseline_mean; //(draw_baseline_subtracted ? 0 : bs_info.mean);
   double x1,x2,y1,y2;
   gPad->Update();
   gPad->GetRangeAxis(x1,y1,x2,y2);
-  const double raw_ratio = (y2 - integral_offset) / (integral_offset - y1);
-  const double integral_max = *std::max_element(channel->integral_waveform.begin(), channel->integral_waveform.end());
-  const double integral_min = *std::min_element(channel->integral_waveform.begin(), channel->integral_waveform.end());
+  const double raw_ratio = (y2 - baseline_mean) / (baseline_mean - y1);
+  const double integral_max = *std::max_element(channel->integral_waveform.begin(), channel->integral_waveform.end())+1.E-6;// slight offsets to avoid possible division by zero
+  const double integral_min = *std::min_element(channel->integral_waveform.begin(), channel->integral_waveform.end())-1.E-6; 
   const double integral_ratio = std::abs(integral_max) / std::abs(integral_min);
+
   double integral_scale;
   if (raw_ratio < integral_ratio)
-    integral_scale = (y2 - integral_offset) / std::abs(integral_max) * 0.9;
+    integral_scale = (y2 - baseline_mean) / std::abs(integral_max) * 0.9;
   else
-    integral_scale = (integral_offset - y1) / std::abs(integral_min) * 0.9;
+    integral_scale = (baseline_mean - y1) / std::abs(integral_min) * 0.9;
   
-  
+  const double integral_offset = baseline_mean;
   for(int i = 0; i<nsamps; i++)
     adjusted_integral[i] = integral_scale*channel->integral_waveform[i] + integral_offset;
 
