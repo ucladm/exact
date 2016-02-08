@@ -36,6 +36,8 @@ private:
   // that are beyond this threshold
   float edge_threshold;
 
+  int padding;
+
 };
 
 

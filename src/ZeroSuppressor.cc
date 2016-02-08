@@ -9,6 +9,7 @@ ZeroSuppressor::ZeroSuppressor(const Setting & cfg) : Module(cfg)
 {
   cfg.lookupValue("threshold", threshold);
   cfg.lookupValue("edge_threshold", edge_threshold);
+  cfg.lookupValue("padding", padding);
 }
 
 void ZeroSuppressor::Initialize()
@@ -45,21 +46,30 @@ void ZeroSuppressor::Process(EventData* event)
     while (samp < event->nsamps) {
       if (std::fabs(bs_wfm[samp]) > threshold) {
 
-
+        /*
         // now search back to last sample that is within _edge_threshold
         int tmp_samp = samp;
         while ( tmp_samp > 0 && std::fabs(bs_wfm[tmp_samp]) > edge_threshold ) {
           --tmp_samp;
           start_samp = tmp_samp;
         }
-        
-        // and search forward to first sample that is within _edge_threshold
-        tmp_samp = samp;
-        while ( tmp_samp < event->nsamps && std::fabs(bs_wfm[tmp_samp]) > edge_threshold ) {
+        */
+
+        start_samp = samp;
+
+        // search forward to first sample that is within threshold
+        int tmp_samp = samp;
+        while ( tmp_samp < event->nsamps && std::fabs(bs_wfm[tmp_samp]) > threshold ) {
           ++tmp_samp;
           end_samp = tmp_samp;
         }
 
+        // add padding to front and back of un-zero-suppressed region
+        start_samp -= padding;
+        end_samp += padding;
+
+        // bounds check
+        if (start_samp < 0) start_samp = 0;
         if (end_samp >= event->nsamps) end_samp = event->nsamps-1;
         
         // now copy the non-zero-suppressed region to the waveform
