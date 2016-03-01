@@ -11,6 +11,7 @@ EventProcessor::EventProcessor(const Config & cfg)
   : event(NULL)
   , daqHeader()
   , converter(cfg.lookup("Converter"))
+  , fft(cfg.lookup("FFT"))
   , baselineFinder(cfg.lookup("BaselineFinder"))
   , zeroSuppressor(cfg.lookup("ZeroSuppressor"))
   , sumChannel(cfg.lookup("SumChannel"))
@@ -53,6 +54,7 @@ void EventProcessor::Initialize()
 {
   // Initialize modules as necessary
   if (converter.enabled)      converter.Initialize();
+  if (fft.enabled)            fft.Initialize();
   if (baselineFinder.enabled) baselineFinder.Initialize();
   if (zeroSuppressor.enabled) zeroSuppressor.Initialize();
   if (sumChannel.enabled)     sumChannel.Initialize();
@@ -73,6 +75,7 @@ void EventProcessor::ProcessEvent(int event_id)
 
   // Run all the modules. ORDER MATTERS!
   if (converter.enabled)      converter.Process(event, daqHeader);
+  if (fft.enabled)            fft.Process(event);
   if (baselineFinder.enabled) baselineFinder.Process(event);
   if (zeroSuppressor.enabled) zeroSuppressor.Process(event);
   if (sumChannel.enabled)     sumChannel.Process(event);
@@ -88,6 +91,7 @@ void EventProcessor::Finalize()
 {
   if (!converter.enabled) return;
   TTree* master = converter.GetTree();
+  if (fft.enabled)            fft.Finalize(master);
   if (baselineFinder.enabled) baselineFinder.Finalize(master);
   if (zeroSuppressor.enabled) zeroSuppressor.Finalize(master);
   if (sumChannel.enabled)     sumChannel.Finalize(master);

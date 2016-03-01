@@ -13,6 +13,7 @@
 #include "PulseFinder.hh"
 #include "ProcessedPlotter.hh"
 #include "ROI.hh"
+#include "FFT.hh"
 #include "AverageWaveforms.hh"
 
 #include <string>
@@ -39,6 +40,7 @@ private:
   
   LVDAQHeader daqHeader;
   Converter converter;
+  FFT fft;
   BaselineFinder baselineFinder;
   ZeroSuppressor zeroSuppressor;
   SumChannel sumChannel;
