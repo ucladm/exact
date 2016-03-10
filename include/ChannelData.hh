@@ -37,6 +37,7 @@ public:
   
   // waveforms
   vector<double> raw_waveform;
+  vector<double> filtered_waveform;
   vector<double> baseline_subtracted_waveform;
   vector<double> zero_suppressed_waveform;
   vector<double> integral_waveform;

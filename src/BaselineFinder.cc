@@ -78,7 +78,8 @@ void BaselineFinder::fixed_baseline(EventData* event)
 
     ChannelData* channel = event->GetChannel(idx);
     
-    vector<double> const& raw = channel->raw_waveform;
+    //vector<double> const& raw = channel->raw_waveform;
+    vector<double> const& raw = channel->filtered_waveform;
     double sum = 0;
     double var = 0;
     int start_samp = event->TimeToSample(_start_time);
@@ -144,7 +145,8 @@ void BaselineFinder::moving_baseline(EventData* event)
 
     ChannelData* channel = event->GetChannel(idx);
     
-    vector<double> const& raw = channel->raw_waveform;
+    //vector<double> const& raw = channel->raw_waveform;
+    vector<double> const& raw = channel->filtered_waveform;
     const int nsamps = event->nsamps;
     vector<double> baseline(nsamps, BASELINE_INIT);
     bool in_baseline = false;

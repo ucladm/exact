@@ -8,6 +8,7 @@ using namespace std;
 FFT::FFT(const Setting & cfg)
   : Module(cfg)
   , _fft(NULL)
+  , _fft_back(NULL)
 {
   for (int i=0; i<MAXNCHANS; ++i) _mag[i] = NULL;
 }
@@ -26,6 +27,9 @@ void FFT::Process(EventData * event)
   // reset tree variables
 
   for (int ch=0; ch<event->nchans; ++ch) {
+
+    //ChannelData* channel = event->GetChannel(ch);
+    
     const std::vector<double> & wfm = event->GetChannel(ch)->raw_waveform;
 
     int npoints = wfm.size();
@@ -37,8 +41,7 @@ void FFT::Process(EventData * event)
     if (!_fft) {
       cout << "Constructing first FFT takes a while..."<<endl;
       _fft = TVirtualFFT::FFT(1, &npoints, "R2C EX");
-      if (!_fft) cout << "Uh oh"<<endl;
-      cout << "Done!"<<endl;
+      if (!_fft) cout << "ERROR: FFT: _fft not set."<<endl;
     }
 
     _fft->SetPoints(&wfm[0]);
@@ -77,7 +80,21 @@ void FFT::Process(EventData * event)
     _mag[ch]->Add(hMag);
 
     // Possible step to be implemented: Apply filters and transform back
+    /*
+    if (!_fft_back) {
+      _fft_back = TVirtualFFT::FFT(1, &npoints, "C2R EX");
+      if (!_fft_back) cout << "ERROR: FFT: _fft_back not set."<<endl;
+    }
 
+    _fft_back->SetPointsComplex(re, im);
+    _fft_back->Transform();
+    double* back = _fft_back->GetPointsReal();
+    */
+    std::vector<double> & filtered_wfm = event->GetChannel(ch)->filtered_waveform;
+    filtered_wfm.clear();
+    for (int i=0; i<npoints; ++i) filtered_wfm.push_back(wfm[i]);
+    
+    
     delete hMag;
   }
 

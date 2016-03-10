@@ -35,6 +35,7 @@ public:
 private:
 
   TVirtualFFT* _fft;
+  TVirtualFFT* _fft_back;
 
   TH1F* _mag[MAXNCHANS];
   

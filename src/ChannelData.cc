@@ -10,6 +10,7 @@ ChannelData::ChannelData():
   spe_mean(-1),
   saturated(false),
   raw_waveform(),
+  filtered_waveform(),
   baseline_subtracted_waveform(),
   zero_suppressed_waveform(),
   integral_waveform(),
@@ -30,6 +31,7 @@ void ChannelData::Clear()
   spe_mean = -1;
   saturated = false;
   raw_waveform.clear();
+  filtered_waveform.clear();
   baseline_subtracted_waveform.clear();
   zero_suppressed_waveform.clear();
   integral_waveform.clear();
