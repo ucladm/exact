@@ -2,6 +2,7 @@
 #include "ChannelData.hh"
 
 #include "TDirectory.h"
+#include "TMath.h"
 
 using namespace std;
 
@@ -40,7 +41,7 @@ void FFT::Process(EventData * event)
     // initialize FFT; only need to do once during a job
     if (!_fft) {
       cout << "Constructing first FFT takes a while..."<<endl;
-      _fft = TVirtualFFT::FFT(1, &npoints, "R2C EX");
+      _fft = TVirtualFFT::FFT(1, &npoints, "R2C EX K");
       if (!_fft) cout << "ERROR: FFT: _fft not set."<<endl;
     }
 
@@ -66,7 +67,7 @@ void FFT::Process(EventData * event)
     // create frequency axis
     const int fnpoints = npoints/2+1;
     double* faxis = new double[fnpoints];
-    for (int i=0; i<fnpoints; ++i) faxis[i] = i;
+    for (int i=0; i<fnpoints; ++i) faxis[i] = i/(npoints*event->us_per_samp*1.e-6);
 
     // Instantiate histogram using first event
     if (event->event_id == 0) {
@@ -80,19 +81,28 @@ void FFT::Process(EventData * event)
     _mag[ch]->Add(hMag);
 
     // Possible step to be implemented: Apply filters and transform back
-    /*
+    double* re_filt = new double[npoints];
+    double* im_filt = new double[npoints];
+    for (int i=0; i<npoints; ++i) { re_filt[i] = re[i]; im_filt[i] = im[i]; }
+    //const int fstart = 50;
+    //for (int i=fstart; i<fnpoints; ++i) {
+    //  re_filt[i] *= TMath::Gaus(-(i-fstart), 0, 10) / TMath::Gaus(0, 0, 10);
+    //  im_filt[i] *= TMath::Gaus(-(i-fstart), 0, 10) / TMath::Gaus(0, 0, 10);
+    //}
+
+    
     if (!_fft_back) {
-      _fft_back = TVirtualFFT::FFT(1, &npoints, "C2R EX");
+      _fft_back = TVirtualFFT::FFT(1, &npoints, "C2R EX K");
       if (!_fft_back) cout << "ERROR: FFT: _fft_back not set."<<endl;
     }
 
-    _fft_back->SetPointsComplex(re, im);
+    _fft_back->SetPointsComplex(re_filt, im_filt);
     _fft_back->Transform();
     double* back = _fft_back->GetPointsReal();
-    */
+    
     std::vector<double> & filtered_wfm = event->GetChannel(ch)->filtered_waveform;
     filtered_wfm.clear();
-    for (int i=0; i<npoints; ++i) filtered_wfm.push_back(wfm[i]);
+    for (int i=0; i<npoints; ++i) filtered_wfm.push_back(back[i]);
     
     
     delete hMag;
@@ -115,4 +125,7 @@ void FFT::Finalize(TTree* master)
   gDirectory->cd("/");
 
   Module::Finalize(master);
+
+  delete _fft;
+  delete _fft_back;
 }
