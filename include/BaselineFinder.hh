@@ -41,6 +41,8 @@ private:
   int _post_samps;
   double _max_sigma;
   double _max_amplitude;
+  double _end_max_sigma;
+  double _end_max_amplitude;
   double _baseline_fixed_window;
 
   // variables to be saved

@@ -25,6 +25,8 @@ BaselineFinder::BaselineFinder(const Setting & cfg) : Module(cfg)
   cfg.lookupValue("post_samps", _post_samps);
   cfg.lookupValue("max_sigma", _max_sigma);
   cfg.lookupValue("max_amplitude", _max_amplitude);
+  cfg.lookupValue("end_max_sigma", _end_max_sigma);
+  cfg.lookupValue("end_max_amplitude", _end_max_amplitude);
   cfg.lookupValue("baseline_fixed_window", _baseline_fixed_window);
 
   //baseline_mean = new Float_t[NCHANS];
@@ -170,25 +172,39 @@ void BaselineFinder::moving_baseline(EventData* event)
     // now traverse through the waveform
     
     for (int samp = _pre_samps; samp<nsamps-_post_samps-1; samp++) {
-      if (!in_baseline) { // previously not in baseline
-
+      if (!in_baseline && !baseline_valid) { // at start of waveform
         // determine if now in baseline
         if (variance < _max_sigma*_max_sigma) {
           //now in baseline
           in_baseline = true;
-          if (!baseline_valid)
-            baseline_valid = true;
+          baseline_valid = true;
           if (baseline_start == -1)
             baseline_start = samp;
           baseline[samp] = mean;
           last_baseline_samp = samp;
         }
       }
-    
+      
+      else if (!in_baseline) { // previously not in baseline; assume we were in signal
+
+        // determine if now in baseline
+        if (variance < _end_max_sigma*_end_max_sigma &&
+            std::abs(raw[samp] - baseline[last_baseline_samp]) < _end_max_amplitude) {
+          //now in baseline
+          in_baseline = true;
+          if (baseline_start == -1)
+            baseline_start = samp;
+          baseline[samp] = mean;
+          last_baseline_samp = samp;
+        }
+        // else still in signal
+      }
+
       else { // previously in baseline
 
         // determine if still in baseline
-        if (std::abs(raw[samp+_post_samps]-baseline[samp-1]) > _max_amplitude) {
+        if (variance > _max_sigma*_max_sigma &&
+            std::abs(raw[samp+_post_samps]-baseline[samp-1]) > _max_amplitude) {
           //no longer in baseline
           in_baseline = false;
         }
