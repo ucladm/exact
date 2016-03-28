@@ -37,7 +37,16 @@ private:
   TVirtualFFT* _fft;
   TVirtualFFT* _fft_back;
 
+  TH1F* _re[MAXNCHANS];
+  TH1F* _im[MAXNCHANS];
   TH1F* _mag[MAXNCHANS];
+
+  // Noise spectrum for subtraction
+  //std::string _noise_spectra_filename;
+  //TFile* _noise_spectra_file;
+  //TH1F* _noise_spectra[MAXNCHANS];
+
+  //double _subtractor;
   
 };
 

@@ -111,11 +111,23 @@ void ProcessedPlotter::PlotChannel(EventData* event, int chID)
   mg->GetXaxis()->SetTitle("time [#mus]");
   mg->GetYaxis()->SetTitle("amp [counts]");
 
+  
+  //-------------------------------
+  // draw filtered waveform
+  vector<double> const& filtered = channel->filtered_waveform;
+  TGraph* gr_filtered = new TGraph(nsamps, &x[0], &filtered[0]);
+  gr_filtered->SetMarkerColor(kCyan);
+  gr_filtered->SetLineColor(kCyan);
+  //mg->Add(gr_filtered);
+  
+
+  
   //-------------------------------
   // draw baseline
   vector<double> baseline = channel->baseline_subtracted_waveform;
   for (size_t i=0; i<baseline.size(); i++)
-    baseline[i] = raw[i] - baseline[i];
+    baseline[i] = filtered[i] - baseline[i];
+    //baseline[i] = raw[i] - baseline[i];
   TGraph* gr_baseline = new TGraph(nsamps, &x[0], &baseline[0]);
   gr_baseline->SetMarkerColor(kRed);
   gr_baseline->SetLineColor(kRed);
