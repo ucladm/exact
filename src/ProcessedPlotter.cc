@@ -126,8 +126,8 @@ void ProcessedPlotter::PlotChannel(EventData* event, int chID)
   // draw baseline
   vector<double> baseline = channel->baseline_subtracted_waveform;
   for (size_t i=0; i<baseline.size(); i++)
-    baseline[i] = filtered[i] - baseline[i];
-    //baseline[i] = raw[i] - baseline[i];
+    //baseline[i] = filtered[i] - baseline[i];
+    baseline[i] = raw[i] - baseline[i];
   TGraph* gr_baseline = new TGraph(nsamps, &x[0], &baseline[0]);
   gr_baseline->SetMarkerColor(kRed);
   gr_baseline->SetLineColor(kRed);
@@ -142,6 +142,8 @@ void ProcessedPlotter::PlotChannel(EventData* event, int chID)
   integral_gr->SetLineColor(integral_color);
   integral_gr->SetMarkerColor(integral_color);
   mg->Add(integral_gr);
+
+  mg->GetYaxis()->SetRangeUser(80, 130);
 
   //double base = channel->baseline_mean;
   //DrawPulses(event, base);
@@ -197,7 +199,7 @@ void ProcessedPlotter::PlotSumChannel(EventData* event)
   mg->Add(integral_gr);
 
   double base = 0;
-  DrawPulses(event, base);
+  //DrawPulses(event, base);
 }
 
 
